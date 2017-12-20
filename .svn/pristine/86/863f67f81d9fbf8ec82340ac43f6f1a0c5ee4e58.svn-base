@@ -1,0 +1,124 @@
+//
+//  WZ_ConfigGoooodsInfoVC.m
+//  BusinessManager
+//
+//  Created by KL on 16/9/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WZ_ConfigGoooodsInfoVC.h"
+#import "WZ_ConfigGoodsImageViewCell.h"
+#import "WZ_ConfigGoodsInfoBottomBtnCell.h"
+#import "WZ_ConfigGooodsTopTextInfoCell.h"
+
+@interface WZ_ConfigGoooodsInfoVC ()<UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout>
+
+@property (nonatomic, strong) NSMutableArray *dataArray;
+
+@end
+
+@implementation WZ_ConfigGoooodsInfoVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"配置商品信息";
+    
+    [self.gooodsCollectionView registerNib:[UINib nibWithNibName:@"WZ_ConfigGoodsImageViewCell" bundle:nil] forCellWithReuseIdentifier:@"WZ_ConfigGoodsImageViewCell"];
+    [self.gooodsCollectionView registerNib:[UINib nibWithNibName:@"WZ_ConfigGoodsInfoBottomBtnCell" bundle:nil] forCellWithReuseIdentifier:@"WZ_ConfigGoodsInfoBottomBtnCell"];
+    [self.gooodsCollectionView registerNib:[UINib nibWithNibName:@"WZ_ConfigGooodsTopTextInfoCell" bundle:nil] forCellWithReuseIdentifier:@"WZ_ConfigGooodsTopTextInfoCell"];
+    
+}
+
+static NSString *topCellIdentify = @"WZ_ConfigGooodsTopTextInfoCell";
+static NSString *imageViewCellIdentify = @"WZ_ConfigGoodsImageViewCell";
+static NSString *bottomCellIdentify = @"WZ_ConfigGoodsInfoBottomBtnCell";
+
+#pragma mark - UICollectionViewDelegate / DataSource
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    return 3;
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    if (section == 0) {
+        return 1;
+    }else if (section == 1) {
+//        return self.dataArray.count;
+        return 1;
+    }else if (section == 2) {
+        return 1;
+    }else {
+        return 0;
+    }
+    
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (indexPath.section == 0) {
+        WZ_ConfigGooodsTopTextInfoCell *topCell = [collectionView dequeueReusableCellWithReuseIdentifier:topCellIdentify forIndexPath:indexPath];
+        return topCell;
+    }else if (indexPath.section == 1) {
+        WZ_ConfigGoodsImageViewCell *imageViewCell = [collectionView dequeueReusableCellWithReuseIdentifier:imageViewCellIdentify forIndexPath:indexPath];
+        if (indexPath.item == self.dataArray.count) {
+            [imageViewCell.goodsImgView setImage:[UIImage imageNamed:@"jiahao"]];
+            [imageViewCell.deleteBtn setHeight:YES];
+            
+        }
+        
+        return imageViewCell;
+    }else {
+        WZ_ConfigGoodsInfoBottomBtnCell *bottomCell = [collectionView dequeueReusableCellWithReuseIdentifier:bottomCellIdentify forIndexPath:indexPath];
+        return bottomCell;
+    }
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section {
+    if (section == 1) {
+        return 15.0;
+    }else if (section == 2) {
+        return 40.0;
+    }else {
+        return CGFLOAT_MIN;
+    }
+    
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section {
+    if (section == 1) {
+        return 12.0;
+    }else {
+        return CGFLOAT_MIN;
+    }
+    
+}
+
+//- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section {
+//    
+//}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == 0) {
+        return CGSizeMake(KScreenWidth, 260.0);
+    }else if (indexPath.section == 1) {
+        return CGSizeMake(114.0, 114.0);
+    }else {
+        return CGSizeMake(KScreenWidth, 64.0);
+    }
+    
+}
+
+
+#pragma mark - Getter
+- (NSMutableArray *)dataArray {
+    if (!_dataArray) {
+        _dataArray = [NSMutableArray array];
+    }
+    return _dataArray;
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
+
+@end

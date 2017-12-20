@@ -1,0 +1,20 @@
+//
+//  CustomRegistAlertView.h
+//  BusinessManager
+//
+//  Created by 王启明 on 16/9/23.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+typedef void(^Kblock)(NSInteger index);
+
+@interface CustomRegistAlertView : UIView
+@property (nonatomic,strong)Kblock block;
+@property (nonatomic,strong)UITextField *phoneTf;
+@property (nonatomic,strong)UITextField *YanZTf;
+@property (nonatomic,strong)UIView *loginRegistView;
+@property (nonatomic,strong)UILabel *tipsLab;
+- (instancetype)initWithFrame:(CGRect)frame WithBlock:(Kblock)kBlock;
+@end

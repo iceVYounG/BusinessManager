@@ -1,0 +1,175 @@
+//
+//  NewVipCardManagerViewController.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//  SetNewVipLevelNameView 新增会员卡级别 接口界面
+//  NewVipCardView 请选择会员等级 接口界面
+//  NewVipCardView 的代理方法 本控制器进行 保存 新建会员卡请求
+#import "NewVipCardManagerViewController.h"
+#import "NewVipCardView.h"
+#import "ChooseVipCardTypeView.h"
+
+@interface NewVipCardManagerViewController ()<NewVipCardViewDelegate,ChooseVipCardTypeViewDelegate>
+
+@property (nonatomic,strong) NewVipCardView *vipCardView;
+
+@end
+
+@implementation NewVipCardManagerViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.title = @"创建电子会员卡";
+    self.view.backgroundColor = [UIColor colorWithHexString:@"f6f5fa"];
+    [self setUI];
+//    [self sendRequestToCreatNewCard];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)setUI{
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, KScreenWidth, KScreenHeight)];
+    [scrollView setContentSize:CGSizeMake(KScreenWidth, 600)];
+    _vipCardView = [[NewVipCardView alloc]initWithType:VipCardNoChoose];
+    _vipCardView.delegate = self;
+    _vipCardView.frame = CGRectMake(0, 12, KScreenWidth, 600);
+//    [_vipCardView setFrame:CGRectMake(0, 0, KScreenHeight, _vipCardView.bounds.size.height)];
+//    [self.view addSubview:_vipCardView];
+//    [_vipCardView mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.right.bottom.equalTo(scrollView);
+//        make.top.equalTo(scrollView).offset(12);
+//    }];
+    
+    [scrollView addSubview:_vipCardView];
+    [self.view addSubview:scrollView];
+}
+#pragma mark - 点击选择会员卡类型 - 创建新会员卡页面 -
+
+- (void)didClickChooseCardType:(NSString *)cardType{
+    ChooseVipCardTypeView *chooseVipCardTypeView = [[ChooseVipCardTypeView alloc]initWtihTypeStr:cardType];
+    chooseVipCardTypeView.delegate = self;
+    [self.view addSubview:chooseVipCardTypeView];
+    chooseVipCardTypeView.selectedStr = cardType;
+    [chooseVipCardTypeView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.left.bottom.top.equalTo(self.view);
+    }];
+}
+
+- (void)didClickTheButton:(NSString *)buttonTitle{
+    if ([buttonTitle isEqualToString:@"储值会员卡"]) {
+        _vipCardView.type = VipCardSaving;
+    }else if([buttonTitle isEqualToString:@"优惠会员卡"]){
+        _vipCardView.type = VipCardCoupon;
+    }else{
+        _vipCardView.type = VipCardNoChoose;
+    }
+}
+//zyc
+#pragma mark - 点击保存创建好的新会员卡 - 创建会员卡页面 -
+//代理方法 - NewVipCardView 页面的代理方法
+- (void)saveVIPCardBtn:(UIButton *)saveBtn setModel:(NewVipCardManagerVC_VipCard_Model *)model{
+    [self requestDataBySaveBtnWithModel:model];
+    NSLog(@"我点了保存");
+}
+//保存会员卡数据请求
+- (void)requestDataBySaveBtnWithModel:(NewVipCardManagerVC_VipCard_Model *)paramsModel{
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    
+    NSString *storeId = AccountInfo.storeId;
+     [params setObject:storeId forKey:@"storeId"];
+
+//    [params setObject:@"900000000077" forKey:@"storeId"];
+
+    [params setObject:paramsModel.businessType forKey:@"businessType"];
+    [params setObject:paramsModel.cardName forKey:@"cardName"];
+    [params setObject:paramsModel.cardLevel forKey:@"cardLevel"];
+    //折扣四舍五入设置
+    paramsModel.discount = [NSString stringWithFormat:@"%.1f",round([paramsModel.discount floatValue]*10)/10];
+    if ([paramsModel.discount floatValue] <= 0 || [paramsModel.discount floatValue] > 10.0) {
+        [SVProgressHUD showInfoWithStatus:@"折扣应大于0,小于等于10"];
+        return;
+    }
+    [params setObject:paramsModel.discount forKey:@"discount"];
+    [params setObject:paramsModel.validityTime forKey:@"validityTime"];
+    [params setObject:NoNullStr(paramsModel.initialAmount,@"") forKey:@"initialAmount"];
+    [params setObject:paramsModel.cardLevelValue forKey:@"cardLevelValue"];
+    [params setObject:NoNullStr(paramsModel.remarks,@"") forKey:@"remarks"];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+    [SVProgressHUD showWithStatus:@"正在保存..."];
+    [[MallNetworkEngine vipCardMGshare]requestNotEncodeWithDate:nil requestWithPath:API_VipCardManger_SaveVipCard Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        
+        if (Succeed(dic)) {
+            [SVProgressHUD showInfoWithStatus:@"保存成功"];
+            NSLog(@"%@",dic);
+            [self.navigationController popViewControllerAnimated:YES];
+        }else{
+        NSLog(@"%@,请重新填写信息",dic[@"msg"]);
+            [SVProgressHUD showInfoWithStatus:[NSString stringWithFormat:@"%@",dic[@"msg"]]];
+        }
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        NSLog(@"保存会员卡失败");
+        [SVProgressHUD showInfoWithStatus:@"保存失败"];
+    }];
+}
+
+//- (void)sendRequestToCreatNewCard {
+//    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+//    
+//    //businessType:（卡类型，1：储值卡 2：优惠卡）
+//    NSLog(@"----->>>:%@", AccountInfo.linkPhone);
+//    [params setObject:AccountInfo.storeId forKey:@"storeId"];
+//    [params setObject:@"1" forKey:@"businessType"];
+//    [params setObject:@"测试-储值卡" forKey:@"cardName"];
+//    [params setObject:@"测试-狗头" forKey:@"cardLevel"];
+//    [params setObject:@"8.888" forKey:@"discount"];
+//    [params setObject:@"180" forKey:@"validityTime"];
+//    [params setObject:@"9999999999999" forKey:@"initialAmount"];
+//    [params setObject:@"2" forKey:@"cardLevelValue"];
+//    [params setObject:@"好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，" forKey:@"remarks"];
+//    
+//    [[MallNetworkEngine vipCardMGshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_VipCardManger_MemberCardSave Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+//        NSDictionary *dic = [completedOperation responseDecodeToDic];
+//        
+//    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+//        
+//    }];
+//    
+//}
+
+
+//- (void)sendRequestToCreatNewCard {
+//    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+//    
+//    //businessType:（卡类型，1：储值卡 2：优惠卡）
+//    NSLog(@"----->>>:%@", AccountInfo.linkPhone);
+//    [params setObject:AccountInfo.storeId forKey:@"storeId"];
+//    [params setObject:@"1" forKey:@"businessType"];
+//    [params setObject:@"测试-储值卡" forKey:@"cardName"];
+//    [params setObject:@"测试-狗头" forKey:@"cardLevel"];
+//    [params setObject:@"8.888" forKey:@"discount"];
+//    [params setObject:@"180" forKey:@"validityTime"];
+//    [params setObject:@"9999999999999" forKey:@"initialAmount"];
+//    [params setObject:@"2" forKey:@"cardLevelValue"];
+//    [params setObject:@"好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，好吃你就多吃点，" forKey:@"remarks"];
+//    
+//    [[MallNetworkEngine vipCardMGshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_VipCardManger_MemberCardSave Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+//        NSDictionary *dic = [completedOperation responseDecodeToDic];
+//        
+//    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+//        
+//    }];
+//    
+//}
+
+@end

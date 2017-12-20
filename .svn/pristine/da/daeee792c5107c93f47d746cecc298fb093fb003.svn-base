@@ -1,0 +1,354 @@
+//
+//  HZCaseDetailVC.m
+//  BusinessManager
+//
+//  Created by 牛志胜 on 16/8/26.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "HZCaseDetailVC.h"
+#import "JMView.h"
+#import "WeiZhanModel.h"
+#import "JMPickCollectView.h"
+#import "HZCaseDetailCollectionViewCell.h"
+#import "HZCaseDetailFooterCell.h"
+#import "HZCaseDetailImageCell.h"
+
+#define ItemCount 4
+#define ItemSpace 10.0
+
+
+@interface HZCaseDetailVC ()<HZCaseDetailFooterCellDelegate,HZCaseDetailCollectionViewCellDelegate,HZCaseDetailImageCellDelegate,UICollectionViewDelegate,UICollectionViewDelegateFlowLayout,UICollectionViewDataSource>
+@property (nonatomic, strong) UICollectionView *collectionView;
+@property (nonatomic, strong) NSMutableArray *dataArray;
+@property (nonatomic, copy) NSString *imagePath;
+@end
+
+@implementation HZCaseDetailVC
+
+-(instancetype)initWithBlock:(CallBack)block{
+    
+    if (self = [super init]) {
+        
+        self.block = block;
+    }
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"经典案例详情编辑";
+    self.view.backgroundColor = [UIColor groupTableViewBackgroundColor];
+    
+    [self initSubViews];
+
+}
+-(void)setModel:(PartModel *)model{
+    _model = model;
+    NSArray* keys = KeysArry;
+    
+    [_model.templateModelnameDate.date enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        
+        TemplateModel* model = (TemplateModel*)obj;
+        
+        if (![keys containsObject:model.code]) {
+            ModelSection *modelSec = [[ModelSection alloc]init];
+            modelSec.model = model;
+            modelSec.type = ModelSectionTypeNomal;
+            [self.datasArry addObject:obj];
+            [self.dataArray insertObject:modelSec atIndex:self.dataArray.count-1];
+        }
+    }];
+}
+
+- (void)initSubViews{
+    
+    UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
+    flowLayout.minimumLineSpacing = 0;
+    flowLayout.scrollDirection = UICollectionViewScrollDirectionVertical;
+    
+    _collectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, KScreenWidth, KScreenHeight-NavigationH) collectionViewLayout:flowLayout];
+    
+    _collectionView.delegate = self;
+    _collectionView.dataSource = self;
+    _collectionView.backgroundColor = [UIColor whiteColor];
+    _collectionView.bounces = NO;
+    
+    [_collectionView registerNib:[UINib nibWithNibName:NSStringFromClass([HZCaseDetailCollectionViewCell class]) bundle:nil] forCellWithReuseIdentifier:HZCaseDetailCollectionViewCellID];
+    [_collectionView registerNib:[UINib nibWithNibName:NSStringFromClass([HZCaseDetailFooterCell class]) bundle:nil] forCellWithReuseIdentifier:HZCaseDetailFooterCellID];
+    [_collectionView registerNib:[UINib nibWithNibName:NSStringFromClass([HZCaseDetailImageCell class]) bundle:nil] forCellWithReuseIdentifier:HZCaseDetailImageCellID];
+    [self.view addSubview:_collectionView];
+    
+}
+#pragma mark UICollectionViewDataSource
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView{
+
+    return [self.dataArray count];
+}
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
+    if (section + 1 == [self.dataArray count]) {
+        return 1;
+    }
+    ModelSection *model = self.dataArray[section];
+    return [model.itemsArray count];
+}
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+    ModelSection *model = self.dataArray[indexPath.section];
+    
+    if (model.type == ModelSectionTypeNomal) {
+        if (indexPath.item == 0) {
+            HZCaseDetailCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:HZCaseDetailCollectionViewCellID forIndexPath:indexPath];
+            cell.delegate = self;
+            cell.model = self.dataArray[indexPath.section];
+            cell.caseNum.text = [NSString stringWithFormat:@"案例%ld:",indexPath.section];
+            cell.indexPath = indexPath;
+            return cell;
+        }
+        
+        HZCaseDetailImageCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:HZCaseDetailImageCellID forIndexPath:indexPath] ;
+        cell.labelBottom.hidden = YES;
+        cell.indexPath = indexPath;
+        [cell.imageView setImage:model.itemsArray[indexPath.item]];
+        cell.delegate = self;
+        
+        return cell;
+
+    }else{
+        HZCaseDetailFooterCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:HZCaseDetailFooterCellID forIndexPath:indexPath];
+        cell.delegate = self;
+        return cell;
+    }
+}
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+    ModelSection *model = self.dataArray[indexPath.section] ;
+    
+    if (model.type == ModelSectionTypeNomal){
+    
+        if (indexPath.item + 1 == [model.itemsArray count]) {
+            
+            [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage) {
+#warning adsadsadsadsa
+                [self uploadImage:mediaImage];
+                
+                NSIndexPath *newItemIndexPath = [NSIndexPath indexPathForItem:indexPath.item -1 inSection:indexPath.section];
+                [model.itemsArray insertObject:mediaImage atIndex:indexPath.item];
+                [_collectionView insertItemsAtIndexPaths:@[newItemIndexPath]];
+                NSIndexSet *set = [NSIndexSet indexSetWithIndex:indexPath.section];
+                [_collectionView reloadSections:set];
+                
+            }];
+        }
+    }
+}
+
+#pragma mark UICollectionViewDelegateFlowLayout
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+    if (indexPath.section + 1 == self.dataArray.count) {
+        return CGSizeMake(KScreenWidth, 158);
+    }
+    if (indexPath.item == 0) {
+        return CGSizeMake(KScreenWidth, 370);
+    }
+    CGFloat itemW = (KScreenWidth - ((ItemCount + 1) * ItemSpace)) / ItemCount;
+    
+    return CGSizeMake(itemW, itemW +25);
+}
+
+-(UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
+    
+    if (section + 1 == self.dataArray.count) {
+        return UIEdgeInsetsMake(0, 0, 0, 0);
+    }
+    return UIEdgeInsetsMake(0, 10, 10, 10);
+}
+
+
+#pragma mark HZCaseDetailFooterCellDelegate
+- (void)footerCellDidClickNewBtn
+{
+    NSInteger count = [self.dataArray count];
+    
+    if (count == 9) {
+        [OMGToast showWithText:@"最多添加8个"];
+        return;
+    }
+    
+    NSPredicate* predice = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",@"zdy[0-9]+"];
+    
+    ModelSection* lastModel = [self.dataArray lastObject];
+    
+    TemplateModel* model = lastModel.model;
+    
+    if (![predice evaluateWithObject:lastModel.model.code]) {
+        model.code = @"zdy0";//根据code判断
+    }else{
+        
+        NSInteger num = [[lastModel.model.code substringFromIndex:3] integerValue];
+        
+        lastModel.model.code = [NSString stringWithFormat:@"zdy%ld",num + 1];
+    }
+    lastModel.model.key = @"";
+    lastModel.model.value = @"";
+    lastModel.model.type = @"1";
+    
+    if ([lastModel.model.code isEqualToString:@"zdy7"]) {
+        [OMGToast showWithText:@"最多添加8个"];
+        return;
+    }
+    ModelSection *newModel = [[ModelSection alloc] init];
+    
+    newModel.model = model;
+    
+    newModel.type = ModelSectionTypeNomal;
+    
+    [self.dataArray insertObject:newModel atIndex:count-1];
+    
+    [_collectionView reloadData];
+    
+}
+- (void)footerCellDidClickSaveBtn{
+    
+    [self requestUpload];
+}
+
+
+#pragma mark -HZCaseDetailCollectionViewCellDelegate
+- (void)caseDetailCollectionViewCell:(HZCaseDetailCollectionViewCell *)cell actionWithButton:(UIButton *)sender{
+    
+//    NSInteger section = cell.indexPath.section;
+    if (sender.tag == ChooseImageTAG) {//上传图片的按钮
+        [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage) {
+#warning msadmsamdsam
+            [self uploadImage:mediaImage];
+            
+            [self.collectionView reloadData];
+        }];
+    }
+}
+
+-(void)requestUpload{
+    
+    [self.dataArray enumerateObjectsUsingBlock:^(ModelSection *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (obj.type == ModelSectionTypeNomal) {
+            [self.datasArry addObject:obj.model];
+        }
+    }];
+    
+    for (TemplateModel* model in self.datasArry.copy) {
+        
+        if (model.key.length == 0 && model.value.length == 0) {
+            
+            for (TemplateModel* mod in self.datasArry) {
+                
+                if ([mod.code isEqualToString:model.code]) {
+                    
+                    [self.datasArry removeObject:mod];
+                    
+                    break;
+                }
+            }
+        }else if (model.key.length > 0 && model.value.length > 0){
+            //buchuli...
+            
+        }else{
+            [OMGToast showWithText:@"请完善栏目信息"];
+            return;
+        }
+    }
+    
+    PartModel* model;
+    if (!self.model) {
+        model = [[PartModel alloc] init];
+        model.storeId = NoNullStr(AccountInfo.storeId, @"");
+        model.templateModelname = @"经典案例";
+        model.templateModelnameCode = JingDianCase;
+        model.id = self.model.id;
+        
+        TemplateModelData* data = [[TemplateModelData alloc] init];
+        data.date = self.datasArry.copy;
+        model.templateModelnameDate = data;
+        model.templateNo = JiaZhuang;
+        
+    }else{
+        self.model.templateModelnameDate.date = self.datasArry.copy;
+        model = self.model;
+    }
+    NSArray* arr = @[model];
+    __weak typeof(self) wSelf = self;
+    [self saveTemplte:arr.mutableCopy succeed:^(id responseObject) {
+        
+        wSelf.block(model,self.model?NO:YES);
+        
+        [wSelf.navigationController popViewControllerAnimated:YES];
+        
+    } error:^(NSError *error) {
+        
+    }];
+}
+
+#pragma mark -- HZCaseDetailImageCellDelegate
+- (void)caseDetailImageCell:(HZCaseDetailImageCell *)cell deleteImageWithButton:(UIButton *)sender{
+    
+    NSIndexPath *indexPath = cell.indexPath;
+    ModelSection *model = self.dataArray[indexPath.section];
+    [model.itemsArray removeObjectAtIndex:indexPath.item];
+    NSIndexSet *set = [NSIndexSet indexSetWithIndex:indexPath.section];
+    [_collectionView reloadSections:set];
+    
+}
+
+#pragma mark -- 上传图片得到路径
+- (void)uploadImage:(UIImage*)image{
+    // 上传图片
+    CGFloat offSet = 1;
+    if (image.size.height > 372) {
+        offSet = image.size.height / 372;
+    }
+    
+    NSData* imageData = UIImageJPEGRepresentation(UIImageScaleToSize(image, CGSizeMake(image.size.width/offSet,image.size.height/offSet)), 1.0);
+    
+    NSString* imageDataStr = [imageData base64EncodedString];
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    [params setObject:imageDataStr forKey:@"code"];
+    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [params setObject:@"png" forKey:@"suffix"];
+    [[MallNetManager share] request:API_ImageUpload prams:params succeed:^(id responseObject)   {
+        
+        ImageUpLoadBackModel* rsp = [ImageUpLoadBackModel mj_objectWithKeyValues:responseObject];
+        if (Succeed(rsp)) {
+            
+            [OMGToast showWithText:@"图片上传成功"];
+            _imagePath = rsp.data.imgPath;
+        
+        }
+        else{
+            [OMGToast showWithText:@"图片上传失败，请重新上传"];
+        }
+        
+    } showHUD:(YES)];
+}
+
+
+-(NSMutableArray *)datasArry{
+    
+    if (!_datasArry) {
+        _datasArry = [NSMutableArray array];
+    }
+    return _datasArry;
+}
+- (NSMutableArray *)dataArray{
+    
+    if (!_dataArray) {
+        
+        _dataArray = [[NSMutableArray alloc] init];
+        ModelSection *footerModel = [[ModelSection alloc] init];
+        footerModel.type = ModelSectionTypeFooter;
+        [_dataArray addObject:footerModel];
+    }
+    return _dataArray;
+}
+
+@end

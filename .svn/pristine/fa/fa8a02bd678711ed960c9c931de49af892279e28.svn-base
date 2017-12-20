@@ -1,0 +1,82 @@
+//
+//  WeiZhanBaseController.m
+//  BusinessManager
+//
+//  Created by zhaojh on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanBaseController.h"
+#import "WeiZhanModel.h"
+#import "MyWeiZhanVC.h"
+
+@interface WeiZhanBaseController ()
+
+@end
+
+@implementation WeiZhanBaseController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+}
+
+-(void)saveTemplte:(NSMutableArray*)datas succeed:(void (^)(id responseObject))succeed error:(void (^)(NSError* error))errored{
+
+    [SVProgressHUD showWithStatus:@"数据处理中..."];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeGradient];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    
+    [[MallNetManager share] request:API_TemplateSave parameters:[datas jm_ArryPrams] success:^(NSURLSessionDataTask *task, id responseObject) {
+         [SVProgressHUD dismiss];
+        
+        if (Succeed(responseObject)) {
+            if (succeed) {
+                succeed(responseObject);
+                NSLog(@"保存成功");
+            }
+        }else{
+         
+          [OMGToast showWithText:responseObject[@"msg"]];
+        }
+       
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        [SVProgressHUD dismiss];
+        [SVProgressHUD showErrorWithStatus:@"网络异常"];
+        if (errored) {
+             errored(error);
+        }
+    }];
+}
+
+-(void)saveTemple:(NSString*)templeNo andshopName:(NSString *)shopName{
+
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    [prams setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [prams setObject:NoNullStr(templeNo, @"") forKey:@"templateNo"];
+    [prams setObject:NoNullStr(shopName, @"") forKey:@"shopName"];
+    
+    [[MallNetManager share] request:API_storeTemplateSave prams:prams succeed:^(id responseObject) {
+        
+        [OMGToast showWithText:@"模板保存成功"];
+        
+        for (UIViewController* vc in self.navigationController.viewControllers) {
+            
+            if ([vc isKindOfClass:[MyWeiZhanVC class]]) {
+                
+                MyWeiZhanVC* wzVC = (MyWeiZhanVC*)vc;
+                
+                if (wzVC.refreshBlock) {
+                    wzVC.refreshBlock();
+                }
+                [self.navigationController popToViewController:wzVC animated:YES];
+            }
+        }
+        
+    } showHUD:YES];
+
+
+}
+
+
+@end

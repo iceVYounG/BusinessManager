@@ -1,0 +1,55 @@
+//
+//  MPBuySMSVC.m
+//  BusinessManager
+//
+//  Created by KL on 16/8/1.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "MPBuySMSVC.h"
+
+@interface MPBuySMSVC ()<UIWebViewDelegate>
+@property (weak, nonatomic) IBOutlet UIWebView *buyWebView;
+
+@end
+
+@implementation MPBuySMSVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self setUpViews];
+    
+    [self.buyWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.url]]];
+}
+
+- (void)setUpViews {
+    [self.buyWebView setUserInteractionEnabled:YES];
+    self.buyWebView.delegate = self;
+    [self.buyWebView setScalesPageToFit:YES];
+    
+    self.title = @"收银台";
+    
+}
+
+#pragma mark - WebViewDelegate
+
+- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
+    return YES;
+}
+
+- (void)webViewDidStartLoad:(UIWebView *)webView {
+
+}
+
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
+    
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+@end

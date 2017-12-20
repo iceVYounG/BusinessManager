@@ -1,0 +1,51 @@
+//
+//  AddDrawCell.m
+//  BusinessManager
+//
+//  Created by The Only on 16/8/12.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "AddDrawCell.h"
+
+@implementation AddDrawCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+}
+-(void)setModel:(RedBagModel *)model
+{
+    _model = model;
+    if (model.type == nil) {
+        
+        self.heightInfoPrestent.constant = 0;
+        self.prizeTypeView.hidden = YES;
+    }
+    else
+    {
+        self.heightInfoPrestent.constant = 238;
+        self.prizeTypeView.hidden = NO;
+    }
+    
+    [self.redBagBtn setTitle:model.btnTitle forState:UIControlStateNormal];
+    [self.redBagBtn setTitleColor:[UIColor colorWithHexString:@"000000"] forState:UIControlStateNormal];
+    
+}
+
+- (IBAction)chooseTypePresentAction:(id)sender
+{
+    if ([self.delegate respondsToSelector:@selector(choosePresentTypeOfAddDrawCell:)])
+    {
+        
+        [self.delegate choosePresentTypeOfAddDrawCell:self];
+    }
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

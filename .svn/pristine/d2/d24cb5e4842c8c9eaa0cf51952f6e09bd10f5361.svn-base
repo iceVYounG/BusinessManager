@@ -1,0 +1,30 @@
+//
+//  VMRechargeRecordView.h
+//  BusinessManager
+//
+//  Created by KL on 16/8/15.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@class recordTBCell;
+
+@interface VMRechargeRecordView : UIView<UITableViewDataSource, UITableViewDelegate>
+
+@property (nonatomic, strong) UITableView *recordTableView; //tabelView;
+@property (nonatomic, strong) NSMutableArray *dataArry;     //数据源
+
+- (instancetype)init;
+
+@end
+
+@interface recordTBCell : UITableViewCell
+
+@property (nonatomic, strong) UILabel *phoneNumLab;
+@property (nonatomic, strong) UILabel *cardNameLab;
+@property (nonatomic, strong) UILabel *payCountLab;
+@property (nonatomic, strong) UILabel *timeLabel;
+
+@end
+

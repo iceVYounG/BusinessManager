@@ -1,0 +1,13 @@
+//
+//  EC_TitleEdtitng.h
+//  BusinessManager
+//
+//  Created by 王启明 on 16/8/16.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanBaseController.h"
+
+@interface EC_TitleEdtitng : WeiZhanBaseController
+
+@end

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9532" systemVersion="15C50" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="KGk-i7-Jjw" customClass="RechargeDetailCell">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="48"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="375" height="47.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fpl-QT-MHg">
+                        <rect key="frame" x="115" y="23" width="121" height="0.0"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vsT-q8-6Wf">
+                        <rect key="frame" x="230" y="23.5" width="130" height="0.0"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="meG-18-ZcT">
+                        <rect key="frame" x="15" y="47" width="345" height="1"/>
+                        <color key="backgroundColor" red="0.85490196078431369" green="0.85490196078431369" blue="0.85490196078431369" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="1" id="iaN-Oo-FoR"/>
+                        </constraints>
+                    </view>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mbe-Pj-4ai">
+                        <rect key="frame" x="15" y="23" width="100" height="0.0"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="trailing" secondItem="meG-18-ZcT" secondAttribute="trailing" constant="15" id="1l3-nr-SJg"/>
+                    <constraint firstAttribute="bottom" secondItem="meG-18-ZcT" secondAttribute="bottom" id="DdG-Bd-8HP"/>
+                    <constraint firstItem="fpl-QT-MHg" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="KKA-7Y-Cju"/>
+                    <constraint firstItem="mbe-Pj-4ai" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="15" id="Q8k-is-spd"/>
+                    <constraint firstItem="meG-18-ZcT" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="15" id="RCY-WI-DxF"/>
+                    <constraint firstItem="mbe-Pj-4ai" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="gPl-dw-hm7"/>
+                    <constraint firstAttribute="trailing" secondItem="vsT-q8-6Wf" secondAttribute="trailing" constant="15" id="gqW-ic-reo"/>
+                    <constraint firstItem="vsT-q8-6Wf" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="syW-g7-HI5"/>
+                    <constraint firstItem="fpl-QT-MHg" firstAttribute="leading" secondItem="mbe-Pj-4ai" secondAttribute="trailing" id="wMC-uO-ANR"/>
+                </constraints>
+            </tableViewCellContentView>
+            <constraints>
+                <constraint firstItem="mbe-Pj-4ai" firstAttribute="width" secondItem="KGk-i7-Jjw" secondAttribute="width" multiplier="100/375" id="Ciy-WL-KTo"/>
+                <constraint firstItem="vsT-q8-6Wf" firstAttribute="width" secondItem="KGk-i7-Jjw" secondAttribute="width" multiplier="124/375" constant="6" id="O5N-Rb-EXV"/>
+                <constraint firstItem="fpl-QT-MHg" firstAttribute="width" secondItem="KGk-i7-Jjw" secondAttribute="width" multiplier="121/375" id="TOX-aK-XdQ"/>
+            </constraints>
+            <connections>
+                <outlet property="moneyLabel" destination="fpl-QT-MHg" id="rqn-cv-Vp7"/>
+                <outlet property="numLabel" destination="mbe-Pj-4ai" id="M89-fS-ILv"/>
+                <outlet property="timeLabel" destination="vsT-q8-6Wf" id="IGt-v5-SS9"/>
+            </connections>
+        </tableViewCell>
+    </objects>
+</document>

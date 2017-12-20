@@ -1,0 +1,349 @@
+//
+//  WC_GeneralVC.m
+//  BusinessManager
+//
+//  Created by zhaojh on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WC_GeneralVC.h"
+#import "GenealWeiZhanCell.h"
+#import "JMView.h"
+#import "WeiZhanModel.h"
+#import "LocationService.h"
+#import "TY_TitleEditVC.h"
+#import "WCG_ShopServicevc.h"
+
+@interface WC_GeneralVC ()<JMViewDelegate>
+
+@property(nonatomic,strong)UITableView* tableView;
+@property(nonatomic,strong)NSArray* keyPathArry;
+@property(nonatomic,strong)SearPartData* dataSource;
+@end
+
+@implementation WC_GeneralVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"通用微站配置";
+    self.view.backgroundColor = [UIColor groupTableViewBackgroundColor];
+    
+    [self requestMyWeiZhanData];
+    
+    _keyPathArry = @[
+                     @[ShopName],
+                     @[ShopService],
+                     @[QiangHB,DaZP,GuaGK],
+                     @[ShopDetail]
+                     ];
+}
+
+#pragma mark - TableView Delegate
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+
+    return 5;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    
+    switch (section) {
+        case 1:{
+            PartModel* model = [[self getTempleData:WeiZhanDetail] lastObject];
+            return model.templateModelnameDate.date.count;
+        }
+            break;
+        default:{
+        
+            return 1;
+        }
+            break;
+    }
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+
+    switch (indexPath.section) {
+        case 0:{
+            
+            NSString* idengfier=@"EditingTitleCell_ident";
+            EditingTitleCell *cell = [tableView dequeueReusableCellWithIdentifier:idengfier];
+            if (!cell) {
+                cell = [[[NSBundle mainBundle] loadNibNamed:@"GenealWeiZhanCell" owner:nil options:nil] objectAtIndex:1];
+            }
+            cell.cellType = WeiZhanName;
+            cell.jView.tag = cell.cellType + 100;
+            cell.jView.delegate = self;
+            
+            return cell;
+        }
+            break;
+        case 1:{
+            
+            NSString* idengfier=@"DetailInfoCell_ident";
+            DetailInfoCell *cell = [tableView dequeueReusableCellWithIdentifier:idengfier];
+            if (!cell) {
+                cell = [[[NSBundle mainBundle] loadNibNamed:@"GenealWeiZhanCell" owner:nil options:nil] objectAtIndex:2];
+            }
+            cell.cellType = WeiZhanDetail;
+            if (indexPath.row == 0) {
+                [cell addEditingSender];
+                cell.jView.tag = cell.cellType + 100;
+                cell.jView.delegate = self;
+                cell.jView.hidden = NO;
+            }else if(cell.jView){
+            
+                cell.jView.hidden = YES;
+            }
+            
+            PartModel* model = [[self getTempleData:WeiZhanDetail] lastObject];
+            cell.model = [model.templateModelnameDate.date objectAtIndex:indexPath.row];
+            return cell;
+        }
+            break;
+        case 2:{
+            
+            NSString* idengfier=@"HongBaoHuoDong_ident";
+            GenealWeiZhanCell *cell = [tableView dequeueReusableCellWithIdentifier:idengfier];
+            if (!cell) {
+                cell = [[GenealWeiZhanCell alloc]initWithStyle:0 reuseIdentifier:idengfier];
+            }
+            cell.cellType = HongBaoHongDong;
+            cell.jView.tag = cell.cellType + 100;
+            cell.jView.delegate = self;
+            cell.selectionStyle = 0;
+            return cell;
+        }
+            break;
+        case 3:{
+            
+            NSString* idengfier=@"BusinessDetail_ident";
+            BusinessDetail *cell = [tableView dequeueReusableCellWithIdentifier:idengfier];
+            if (!cell) {
+                cell = [[[NSBundle mainBundle] loadNibNamed:@"GenealWeiZhanCell" owner:nil options:nil] objectAtIndex:3];
+            }
+            cell.cellType = ShangHuJieshao;
+            cell.jView.tag = cell.cellType + 100;
+            cell.jView.delegate = self;
+            return cell;
+        }
+            break;
+        case 4:{
+            
+            NSString* idengfier=@"CallSenderCell_ident";
+            CallSenderCell *cell = [tableView dequeueReusableCellWithIdentifier:idengfier];
+            if (!cell) {
+                cell = [[[NSBundle mainBundle] loadNibNamed:@"GenealWeiZhanCell" owner:nil options:nil] objectAtIndex:4];
+            }
+            cell.cellType = YiJianHuJiaoFuWu;
+            cell.jView.tag = cell.cellType + 100;
+            cell.jView.delegate = self;
+            
+            return cell;
+        }
+            break;
+
+        default:
+            break;
+    }
+
+    return nil;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+
+    switch (indexPath.section) {
+        case 0:{
+            return kEditingTitleCellH;
+        }
+            break;
+        case 1:{
+            return kDetailInfoCellH;
+        }
+            break;
+        case 2:{
+            return 80;
+        }
+            break;
+        case 3:{
+            return kDetailInfoContentH + 21;
+        }
+            break;
+        case 4:{
+            return kCallSenderCellH;
+        }
+            break;
+        default:{
+            return 0;
+        }
+            break;
+    }
+
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+
+    switch (section) {
+        case 0:{
+            return 0;
+        }
+            break;
+        default:{
+            
+            return 10;
+        }
+            break;
+    }
+}
+
+-(UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+
+    switch (section) {
+        case 0:{
+            return nil;
+        }
+            break;
+        default:{
+            UIView* spaceView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 10)];
+            spaceView.backgroundColor = [UIColor groupTableViewBackgroundColor];
+            return spaceView;
+        }
+            break;
+    }
+}
+
+#pragma mark - Request
+-(void)requestMyWeiZhanData{
+    
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    [prams setObject:@"900000010723" forKey:@"storeId"];
+    [prams setObject:Tongyong forKey:@"templateNo"];
+    
+    [[MallNetManager share] request:API_Storecenter_TemplateSearch prams:prams succeed:^(id responseObject) {
+        
+        self.dataSource = [SearPartData mj_objectWithKeyValues:responseObject];
+        
+        [self.tableView reloadData];
+        
+    } showHUD:YES];
+    
+}
+
+-(void)requestSave{
+    
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    [prams setObject:@"900000010723" forKey:@"storeId"];
+    [prams setObject:Tongyong forKey:@"templateNo"];
+    
+    [[MallNetManager share] request:API_storeTemplateSave prams:prams succeed:^(id responseObject) {
+        
+        
+        
+    } showHUD:YES];
+
+}
+
+-(NSMutableArray*)getTempleData:(JMCellType)type{
+    
+    NSMutableArray* targetArr = [NSMutableArray array];
+    
+    NSArray* tArr = [_keyPathArry objectAtIndex:type];
+    
+    for (PartModel*model in self.dataSource.data) {
+        
+        if ([tArr containsObject:model.templateModelnameCode]) {
+            
+            [targetArr addObject:model];
+        }
+    }
+    return targetArr;
+}
+-(void)setrTempleData:(NSArray*)tArrData isNew:(BOOL)isNew{
+    
+    if (!isNew) {
+        for (PartModel*model1 in self.dataSource.data) {
+            
+            for (PartModel*model2 in tArrData) {
+                
+                if ([model1.templateModelnameCode isEqualToString:model2.templateModelnameCode]) {
+                    
+                    model1.templateModelnameDate = model2.templateModelnameDate;
+                }
+            }
+        }
+        return;
+    }
+    
+    NSMutableArray* tempArr = [NSMutableArray array];
+    [tempArr addObjectsFromArray:self.dataSource.data];
+    [tempArr addObjectsFromArray:tArrData];
+    
+    self.dataSource.data = tempArr.copy;
+}
+
+
+#pragma mark - 编辑代理
+-(void)userDidSelectTitle:(NSString *)title atIndex:(NSInteger)index inView:(UIView *)view{
+    
+    __weak typeof(self) wSelf = self;
+    switch (view.tag - 100) {
+        case WeiZhanName:{
+        
+        TY_TitleEditVC* vc = [[TY_TitleEditVC alloc]initWithBlock:^(PartModel* model,BOOL isNewData) {
+            [wSelf setrTempleData:@[model] isNew:isNewData];
+        }];
+        vc.model = [[self getTempleData:WeiZhanName] lastObject];
+        [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case WeiZhanDetail:{
+           
+            WCG_ShopServicevc *vc = [[WCG_ShopServicevc alloc]initWithBlock:^(PartModel *model, BOOL isNew) {
+                
+            }];
+            vc.model = [[self getTempleData:WeiZhanDetail] lastObject];
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case HongBaoHongDong:{
+            
+        }
+            break;
+        case ShangHuJieshao:{
+            
+        }
+            break;
+        default:
+            break;
+    }
+    
+}
+#pragma mark - 初始化
+
+-(UITableView *)tableView{
+
+    if (!_tableView) {
+        
+        __weak typeof(self) wSelf = self;
+        _tableView = [[UITableView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, KScreenHeight - NavigationH) style:0];
+        
+        _tableView.delegate = self;
+        _tableView.dataSource = self;
+        _tableView.backgroundColor = [UIColor clearColor];
+        _tableView.separatorStyle = 0;
+        _tableView.tableFooterView = [[SaveView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 90) tipHiden:NO block:^{
+            
+            [wSelf requestSave];
+        }];
+        
+        [self.view addSubview:_tableView];
+    }
+    return _tableView;
+}
+
+-(SearPartData *)dataSource{
+
+    if (!_dataSource) {
+        
+        _dataSource = [[SearPartData alloc] init];
+    }
+    return _dataSource;
+}
+
+@end

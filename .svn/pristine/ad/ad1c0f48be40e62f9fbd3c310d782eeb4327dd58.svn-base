@@ -1,0 +1,386 @@
+//
+//  E_Commerce.m
+//  BusinessManager
+//
+//  Created by 王启明 on 16/8/15.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "E_Commerce.h"
+#import "E_CommerceCell.h"
+#import "WeiZhanModel.h"
+#import "EC_TitleEdtitng.h"
+#import "EC_ProductRelatedVC.h"
+#import "BannerEditVC.h"
+#import "EC_ProductActivityVC.h"
+
+
+@interface E_Commerce ()<UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout,JMViewDelegate>
+@property (nonatomic,strong)UICollectionView *myCo;
+@property (nonatomic,strong)NSArray *keyPathArray;
+@property (nonatomic,strong)NSMutableArray *sectionHTitleArr;//区头标题
+@property (nonatomic,strong)NSMutableArray *dataArr;
+@property (nonatomic,strong)NSDictionary *btnDic;
+@property (nonatomic,strong)SearPartData *dataSource;
+@property (nonatomic,strong)SaveView *saveV;
+
+@end
+
+@implementation E_Commerce
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title=@"电商微站配置";
+    _keyPathArray=@[];
+    [self.view addSubview:self.myCo];
+    [self addEditingSender];
+ 
+    
+    // Do any additional setup after loading the view.
+}
+
+
+#pragma mark-privateMethods
+-(void)addEditingSender{
+    CGFloat w = [JMView getWidth:@[@"显示活动"]];
+    JMView *jView = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, 100+80+KScreenWidth/4.0+139, w, JMViewH) btnNames:@[@"显示活动"]];
+    jView.delegate=self;
+    jView.tag = 103;
+    [self.myCo addSubview:jView];
+    CGFloat w1 = [JMView getWidth:@[@"编辑"]];
+    JMView *jView1 = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w1, 180+80+KScreenWidth/4.0+139, w1, JMViewH) btnNames:@[@"编辑"]];
+    jView1.delegate=self;
+    jView1.tag = 104;
+    [self.myCo addSubview:jView1];
+    CGFloat w2 = [JMView getWidth:@[@"编辑"]];
+    JMView *jView2 = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w2, 180+80+KScreenWidth/4.0+139+169*2, w2, JMViewH) btnNames:@[@"编辑"]];
+    jView2.tag = 105;
+    jView2.delegate=self;
+    [self.myCo addSubview:jView2];
+}
+
+
+
+
+#pragma mark-collectionDataSource
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
+    switch (section) {
+        case 0:
+        case 2:
+        case 1:
+            return 1;
+        case 3:
+            return 4;
+        case 4:
+            return 2;
+        default:
+            return 0;
+    }
+  
+}
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView{
+    return 5;
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
+    switch (indexPath.section) {
+        case 0:{
+            ECShopNameCell *cell=[collectionView dequeueReusableCellWithReuseIdentifier:@"ECShopNameCell" forIndexPath:indexPath];
+            cell.jView.delegate=self;
+            return cell;
+            
+        }
+        case 1:{
+            ECBtnCell *cell=[collectionView dequeueReusableCellWithReuseIdentifier:@"ECBtnCell" forIndexPath:indexPath];
+            cell.dic=self.btnDic;
+            cell.jView.delegate=self;
+            return cell;
+        }
+        case 2:{
+            ECImageCell *cell=[collectionView dequeueReusableCellWithReuseIdentifier:@"ECImageCell" forIndexPath:indexPath];
+            cell.jView.delegate=self;
+            return cell;
+        }
+        case 3:
+        case 4:{
+            ECProductorCell *cell=[collectionView dequeueReusableCellWithReuseIdentifier:@"ECProductorCell" forIndexPath:indexPath];
+         
+//            cell.model=self.dataArr[indexPath.item];
+            return cell;
+        }
+        default:
+            break;
+    }
+    UICollectionViewCell *cell=[collectionView dequeueReusableCellWithReuseIdentifier:@"cell" forIndexPath:indexPath];
+    cell.backgroundColor=[UIColor redColor];
+    return cell;
+}
+
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath{
+    UICollectionReusableView *head=nil;
+    if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
+        head =[collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"head" forIndexPath:indexPath];
+        head.backgroundColor=[UIColor whiteColor];
+        UILabel *lab=[UILabel new];
+        lab.tag=10;
+        [head addSubview:lab];
+    }else{
+        UICollectionReusableView *foot=[collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"foot" forIndexPath:indexPath];
+      
+        [foot addSubview:self.saveV];
+        return foot;
+
+    }
+    UILabel *lab=[head viewWithTag:10];
+    NSString *title=self.sectionHTitleArr[indexPath.section-2];
+    CGFloat width = [title sizeWithAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:24]}].width;
+    lab.frame=CGRectMake(15, 0, width, 40);
+    lab.text=title;
+    return head;
+}
+#pragma mark-collectionDelegate
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section{
+    if (section==2||section==3||section==4) {
+        return CGSizeMake(KScreenWidth, 40);
+    }
+    return CGSizeZero;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section{
+    if (section==4) {
+         return CGSizeMake(KScreenWidth, 90);
+    }
+    return CGSizeZero;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+    switch (indexPath.section) {
+        case 0:
+           return CGSizeMake(KScreenWidth, 117);
+        case 1:
+            return CGSizeMake(KScreenWidth, KScreenWidth/4.0);
+        case 2:
+            return CGSizeMake(KScreenWidth, 139);
+        case 3:
+        case 4:
+            return CGSizeMake((KScreenWidth-3)/2, 169);
+        
+    }
+    return CGSizeMake(0, 0);
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section{
+    if (section==3||section==4) {
+        return 3;
+    }
+    return 0;
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section{
+    if (section==3||section==4) {
+        return 3;
+    }
+    return 0;
+}
+
+- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section{
+    if (section==4) {
+        return UIEdgeInsetsMake(0, 0, 20, 0);
+    }
+    return UIEdgeInsetsMake(0, 0, 15, 0);
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+    [collectionView deselectItemAtIndexPath:indexPath animated:YES];
+   
+}
+
+-(void)userDidSelectIndex:(NSInteger)index inView:(UIView*)view data:(id)data{
+    
+}
+
+- (void)userDidSelectTitle:(NSString *)title atIndex:(NSInteger)index inView:(UIView *)view{
+    NSLog(@"view.tag:%ld",view.tag);
+    __weak typeof(self) wSelf = self;
+    switch (view.tag) {
+        case 100:
+        {
+            BannerEditVC* vc = [[BannerEditVC alloc] initWithNibName:@"BannerEditVC" bundle:nil block:^(PartModel *model, BOOL isNewData) {
+                [wSelf setTempleData:@[model] isNew:isNewData];
+                [wSelf.myCo reloadData];
+                
+            }];
+            vc.isBig = NO;
+            
+            
+            //vc.model = [[self getTempleData:ShopNameStatus] lastObject];
+            
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case 101:
+        {
+            EC_ProductActivityVC* vc = [[EC_ProductActivityVC alloc] init];
+            
+            vc.dataSource = self.dataSource;
+            vc.status = FourButtonStatus;
+            [self.navigationController pushViewController:vc animated:YES];
+            
+        }
+            break;
+    
+        case 102:
+        {
+            EC_TitleEdtitng *vc=[[EC_TitleEdtitng alloc]init];
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case 103:
+        {
+           
+        }
+            break;
+            
+        case 104:{
+            EC_ProductRelatedVC *vc=[[EC_ProductRelatedVC alloc]init];
+            vc.titleName=@"商品配置";
+            vc.isRelated=NO;
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case 105:{
+            EC_ProductRelatedVC *vc=[[EC_ProductRelatedVC alloc]init];
+            vc.titleName=@"商品配置";
+            vc.isRelated=NO;
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        default:
+            break;
+    }
+}
+
+-(NSMutableArray*)getTempleData:(JMCellType)type{
+    
+    NSMutableArray* targetArr = [NSMutableArray array];
+    
+    NSArray* tArr = [_keyPathArray objectAtIndex:type];
+    
+    for (PartModel*model in self.dataSource.data) {
+        
+        if ([tArr containsObject:model.templateModelnameCode]) {
+            
+            [targetArr addObject:model];
+        }
+    }
+    return targetArr;
+}
+
+-(void)setTempleData:(NSArray*)tArrData isNew:(BOOL)isNew{
+    
+    if (!isNew) {
+        for (PartModel*model1 in self.dataSource.data) {
+            
+            for (PartModel*model2 in tArrData) {
+                
+                if ([model1.templateModelnameCode isEqualToString:model2.templateModelnameCode]) {
+                    
+                    model1.templateModelnameDate = model2.templateModelnameDate;
+                }
+            }
+        }
+        [self setDataSource:_dataSource];
+        return;
+    }
+    
+    NSMutableArray* tempArr = [NSMutableArray array];
+    [tempArr addObjectsFromArray:self.dataSource.data];
+    [tempArr addObjectsFromArray:tArrData];
+    
+    self.dataSource.data = tempArr.copy;
+    [self setDataSource:_dataSource];
+}
+
+
+
+#pragma mark-getter&&setter
+- (UICollectionView *)myCo{
+    if (!_myCo) {
+        UICollectionViewFlowLayout *layout=[[UICollectionViewFlowLayout alloc]init];
+        _myCo=[[UICollectionView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, KScreenHeight-NavigationH) collectionViewLayout:layout];
+        [_myCo registerClass:[ECShopNameCell class] forCellWithReuseIdentifier:@"ECShopNameCell"];
+        [_myCo registerClass:[ECBtnCell class] forCellWithReuseIdentifier:@"ECBtnCell"];
+        [_myCo registerClass:[ECImageCell class] forCellWithReuseIdentifier:@"ECImageCell"];
+        [_myCo registerClass:[ECProductorCell  class] forCellWithReuseIdentifier:@"ECProductorCell"];
+        [_myCo registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"head"];
+        [_myCo registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"foot"];
+        _myCo.backgroundColor=[UIColor colorWithHexString:@"#f5f4f9"];
+        _myCo.delegate=self;
+        _myCo.dataSource=self;
+    }
+    return _myCo;
+}
+
+- (NSMutableArray *)sectionHTitleArr{
+    if (!_sectionHTitleArr) {
+        _sectionHTitleArr=[[NSMutableArray alloc]init];
+        for (int i=0; i<3; i++) {
+            [_sectionHTitleArr addObject:@"配置标题"];
+        }
+    }
+    return _sectionHTitleArr;
+}
+
+- (NSMutableArray *)dataArr{
+    if (!_dataArr) {
+        _dataArr=[[NSMutableArray alloc]init];
+    }
+    return _dataArr;
+}
+
+- (NSDictionary *)btnDic{
+    if (!_btnDic) {
+        NSArray *titleArr=@[@"了解我们",@"为您推荐",@"联系我们",@"为您导航"];
+        NSArray *imageArr=@[@"60",@"65",@"61",@"66"];
+        _btnDic=@{@"title":titleArr,@"image":imageArr};
+    }
+    return _btnDic;
+}
+
+- (SearPartData *)dataSource{
+    
+    if (!_dataSource) {
+        _dataSource = [[SearPartData alloc] init];
+    }
+    
+    return _dataSource;
+}
+
+- (SaveView *)saveV{
+    if (!_saveV) {
+        _saveV=[[SaveView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 90) tipHiden:NO block:^{
+            
+            [self saveTemple:DianShang];
+        }];
+    }
+    return _saveV;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

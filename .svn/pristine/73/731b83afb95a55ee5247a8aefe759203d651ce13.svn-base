@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10117" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="YuyueDetailEditVC">
+            <connections>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+                <outletCollection property="shiJiaBtns" destination="peB-UG-bEs" id="zk6-cP-ggl"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="下列默认选中的四项是生成微站后用户必填项，点击&quot;+&quot;新增需要用户填写的栏目" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hC0-dq-QoE">
+                    <rect key="frame" x="15" y="8" width="345" height="32"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                    <color key="textColor" red="0.94509803921568625" green="0.3529411764705882" blue="0.29019607843137252" alpha="1" colorSpace="calibratedRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="w8A-Hs-vKj">
+                    <rect key="frame" x="15" y="50" width="166" height="44"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="44" id="oWG-Ef-VcM"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <state key="normal" title="联系人姓名" backgroundImage="lansebeijing">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="peB-UG-bEs">
+                    <rect key="frame" x="194" y="50" width="166" height="44"/>
+                    <constraints>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="d9A-UC-r7a"/>
+                        <constraint firstAttribute="height" constant="44" id="i8q-qv-Z58"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <state key="normal" title="联系人手机号码" backgroundImage="lansebeijing">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <variation key="default">
+                        <mask key="constraints">
+                            <exclude reference="d9A-UC-r7a"/>
+                        </mask>
+                    </variation>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wqR-up-h3f">
+                    <rect key="frame" x="15" y="109" width="166" height="44"/>
+                    <constraints>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="Cje-T8-vv0"/>
+                        <constraint firstAttribute="height" constant="44" id="zpB-tI-65t"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <state key="normal" title="试驾的车型" backgroundImage="lansebeijing">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <variation key="default">
+                        <mask key="constraints">
+                            <exclude reference="Cje-T8-vv0"/>
+                        </mask>
+                    </variation>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2Ju-Jm-rRP">
+                    <rect key="frame" x="194" y="109" width="166" height="44"/>
+                    <constraints>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="Go3-wh-mPJ"/>
+                        <constraint firstAttribute="height" constant="44" id="w4A-ol-alo"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <state key="normal" title="试驾时间" backgroundImage="lansebeijing">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <variation key="default">
+                        <mask key="constraints">
+                            <exclude reference="Go3-wh-mPJ"/>
+                        </mask>
+                    </variation>
+                </button>
+            </subviews>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstItem="wqR-up-h3f" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="15" id="4lE-V2-EYR"/>
+                <constraint firstItem="2Ju-Jm-rRP" firstAttribute="top" secondItem="peB-UG-bEs" secondAttribute="bottom" constant="15" id="594-gU-vIm"/>
+                <constraint firstAttribute="trailing" secondItem="peB-UG-bEs" secondAttribute="trailing" constant="15" id="A5a-ZI-tYJ"/>
+                <constraint firstItem="wqR-up-h3f" firstAttribute="top" secondItem="w8A-Hs-vKj" secondAttribute="bottom" constant="15" id="A6l-lc-bY1"/>
+                <constraint firstAttribute="trailing" secondItem="hC0-dq-QoE" secondAttribute="trailing" constant="15" id="BOK-af-KXF"/>
+                <constraint firstAttribute="trailing" secondItem="2Ju-Jm-rRP" secondAttribute="trailing" constant="15" id="FnO-cY-dyv"/>
+                <constraint firstItem="hC0-dq-QoE" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="8" id="Fv2-rf-5Ke"/>
+                <constraint firstItem="w8A-Hs-vKj" firstAttribute="top" secondItem="hC0-dq-QoE" secondAttribute="bottom" constant="10" id="Gj5-9v-haB"/>
+                <constraint firstItem="peB-UG-bEs" firstAttribute="leading" secondItem="w8A-Hs-vKj" secondAttribute="trailing" constant="13" id="NGY-IC-kJl"/>
+                <constraint firstItem="2Ju-Jm-rRP" firstAttribute="width" secondItem="w8A-Hs-vKj" secondAttribute="width" id="SQU-1E-6l8"/>
+                <constraint firstItem="w8A-Hs-vKj" firstAttribute="width" secondItem="i5M-Pr-FkT" secondAttribute="width" multiplier="332/750" id="TRY-Jl-kmO"/>
+                <constraint firstItem="wqR-up-h3f" firstAttribute="width" secondItem="w8A-Hs-vKj" secondAttribute="width" id="UFz-pw-ruw"/>
+                <constraint firstItem="w8A-Hs-vKj" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="15" id="XY4-WA-pF1"/>
+                <constraint firstItem="w8A-Hs-vKj" firstAttribute="top" secondItem="hC0-dq-QoE" secondAttribute="bottom" constant="25" id="j1T-5m-28C"/>
+                <constraint firstItem="peB-UG-bEs" firstAttribute="centerY" secondItem="w8A-Hs-vKj" secondAttribute="centerY" id="lpn-st-sUe"/>
+                <constraint firstItem="2Ju-Jm-rRP" firstAttribute="width" secondItem="wqR-up-h3f" secondAttribute="width" id="nbG-xz-Ys4"/>
+                <constraint firstItem="2Ju-Jm-rRP" firstAttribute="leading" secondItem="wqR-up-h3f" secondAttribute="trailing" constant="13" id="p1w-yA-lnv"/>
+                <constraint firstItem="peB-UG-bEs" firstAttribute="width" secondItem="w8A-Hs-vKj" secondAttribute="width" id="pMo-Ms-mQ2"/>
+                <constraint firstAttribute="trailing" secondItem="hC0-dq-QoE" secondAttribute="trailing" constant="45" id="qQa-Cf-YX0"/>
+                <constraint firstItem="hC0-dq-QoE" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="15" id="v2K-2C-fih"/>
+            </constraints>
+            <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
+            <variation key="default">
+                <mask key="constraints">
+                    <exclude reference="qQa-Cf-YX0"/>
+                    <exclude reference="TRY-Jl-kmO"/>
+                    <exclude reference="j1T-5m-28C"/>
+                    <exclude reference="UFz-pw-ruw"/>
+                    <exclude reference="SQU-1E-6l8"/>
+                </mask>
+            </variation>
+            <point key="canvasLocation" x="253.5" y="332.5"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="lansebeijing" width="166" height="44"/>
+    </resources>
+</document>

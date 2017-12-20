@@ -1,0 +1,144 @@
+//
+//  ShopServerCell.m
+//  BusinessManager
+//
+//  Created by zhaojh on 16/8/4.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "ShopServerCell.h"
+#import "WeiZhanModel.h"
+
+@implementation ShopServerCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+    self.valueFild.delegate = self;
+    self.valueFild.textColor = [UIColor grayColor];
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+-(void)setModel:(TemplateModel *)model{
+    _model = model;
+    self.keyLabel.text = model.key;
+
+    self.valueFild.text = NoNullStr(model.value,@"");
+}
+- (void)drawRect:(CGRect)rect{
+    UIBezierPath *bezierPath;
+    bezierPath = [UIBezierPath bezierPath];
+    [bezierPath moveToPoint:CGPointMake(0.0, rect.size.height - .5)];
+    [bezierPath addLineToPoint:CGPointMake(rect.size.width, rect.size.height - .5)];
+    [[UIColor lightGrayColor] setStroke];
+    [bezierPath setLineWidth:.5];
+    [bezierPath stroke];
+}
+
+-(void)textFieldDidEndEditing:(UITextField *)textField{
+    _model.value = textField.text;
+    
+}
+
+
+@end
+
+@implementation ShopServerEditCell
+
+-(instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        
+        [self creatSubView];
+        
+    }
+    return self;
+}
+
+-(void)creatSubView{
+    
+    self.keyTextV = [[UIPlaceHolderTextView alloc]initWithFrame:CGRectZero];
+    self.keyTextV.font = [UIFont systemFontOfSize:14];
+    self.keyTextV.placeholder = @"请输入栏目标题";
+    self.keyTextV.textContainerInset = UIEdgeInsetsMake(0, 2, 0, 0);
+    self.keyTextV.showsVerticalScrollIndicator = NO;
+    self.keyTextV.backgroundColor = [UIColor clearColor];
+    self.keyTextV.delegate = self;
+    [self.contentView addSubview:_keyTextV];
+
+    
+    self.valueTextV = [[UIPlaceHolderTextView alloc]initWithFrame:CGRectZero];
+    self.valueTextV.font = [UIFont systemFontOfSize:14];
+    self.valueTextV.placeholder = @"请输入栏目内容";
+    self.valueTextV.textContainerInset = UIEdgeInsetsMake(0, 2, 0, 0);
+    self.valueTextV.showsVerticalScrollIndicator = NO;
+    self.valueTextV.backgroundColor = [UIColor clearColor];
+    self.valueTextV.delegate = self;
+    [self.contentView addSubview:_valueTextV];
+    
+    self.deleteSender = [[UIButton alloc]initWithFrame:CGRectMake(KScreenWidth - 15 - 5, 0, 15, 15)];
+    [self.deleteSender setImage:[UIImage imageNamed:@"cancel"] forState:UIControlStateNormal];
+    [self.deleteSender addTarget:self action:@selector(deleteAction) forControlEvents:UIControlEventTouchUpInside];
+    [self.contentView addSubview:self.deleteSender];
+}
+-(void)setModel:(TemplateModel *)model{
+    _model = model;
+    
+    self.keyTextV.text = model.key;
+
+    self.valueTextV.text = NoNullStr(model.value,@"");
+    
+    [self layOutTextView];
+}
+
+-(void)layOutTextView{
+    
+    CGFloat keyH = HeightForString(_model.key,15,90);
+    if (keyH > self.height) {
+        keyH = self.height;
+    }
+    self.keyTextV.frame = CGRectMake(15, (self.height - keyH)/2, 90, keyH);
+
+
+    CGFloat valueH = HeightForString(_model.value,15,KScreenWidth - 130);
+    if (valueH > self.height) {
+        valueH = self.height;
+    }
+    self.valueTextV.frame = CGRectMake(CGRectGetMaxX(self.keyTextV.frame)+8, (self.height - valueH)/2, KScreenWidth - 130, valueH);
+}
+
+- (void)drawRect:(CGRect)rect{
+    UIBezierPath *bezierPath;
+    bezierPath = [UIBezierPath bezierPath];
+    [bezierPath moveToPoint:CGPointMake(0.0, rect.size.height - .5)];
+    [bezierPath addLineToPoint:CGPointMake(rect.size.width, rect.size.height - .5)];
+    [[UIColor lightGrayColor] setStroke];
+    [bezierPath setLineWidth:.5];
+    [bezierPath stroke];
+}
+
+-(void)deleteAction{
+ 
+    if (self.delegate && [self.delegate respondsToSelector:@selector(userDidDeleteTheCell:)]) {
+        
+        [self.delegate userDidDeleteTheCell:_model];
+    }
+}
+
+
+-(void)textViewDidChange:(UITextView *)textView{
+    if (textView == self.keyTextV) {
+        _model.key = textView.text;
+    }else{
+        _model.value = textView.text;
+    }
+
+}
+
+
+@end

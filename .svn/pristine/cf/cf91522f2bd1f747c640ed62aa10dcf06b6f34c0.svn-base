@@ -1,0 +1,188 @@
+//
+//  EditCardViewController.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "EditCardViewController.h"
+#import "EditCardView.h"
+#import "VipCardModel.h"
+#import "ChooseVipLevelView.h"
+#import "SetNewVipLevelNameView.h"
+
+@interface EditCardViewController ()<EditCardViewDeleagte,ChooseVipLevelViewDelegate,SetNewVipLevelNameViewDelegate>
+
+@property (nonatomic, strong) EditCardView *editCardView;
+@property (nonatomic, strong) NSString *chooseBtnName;
+
+@end
+
+@implementation EditCardViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.title = @"编辑电子会员卡";
+    [self requestCardDetail];
+    [self setUI];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)setUI{
+    _editCardView = [[EditCardView alloc]initWithType:VipCardCoupon];
+    _editCardView.delegate = self;
+    [self.view addSubview:_editCardView];
+    [_editCardView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.bottom.equalTo(self.view);
+    }];
+}
+
+#pragma mark-------request
+
+- (void)requestCardDetail{
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:@"900000000077" forKey:@"storeId"];
+    [params setObject:self.ID forKey:@"id"];
+    
+    [[MallNetworkEngine loginshare]requestNotEncodeWithDate:self.requestDate requestWithPath:API_VipCardManger_VipCardDetail Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        _editCardView.model = [[VipCardModel alloc]initWithDic:[dic objectForKey:@"data"]];
+        NSLog(@"%@",dic);
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"%@",dic);
+    }];
+}
+
+- (void)requestCardLevel{
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:@"900000000077" forKey:@"storeId"];
+//    [params setObject:self.ID forKey:@"id"];
+    
+    [[MallNetworkEngine loginshare]requestNotEncodeWithDate:self.requestDate requestWithPath:API_VipCardManger_memberCardLevelList Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        if (Succeed(dic)) {
+            VipCardLevelListModel *listModel = [VipCardLevelListModel mj_objectWithKeyValues:dic];
+            NSMutableArray *array = [NSMutableArray array];
+            for (VipCardLevelItemModel * model in listModel.data) {
+                [array addObject:model.levelName];
+            }
+            [self showChooseVipLevelWithArray:array];
+        }
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"%@",dic);
+    }];
+}
+
+//添加会员等级
+- (void)addCardLevel:(NSString *)cardLevenName{
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:@"900000000077" forKey:@"storeId"];
+    [params setObject:self.ID forKey:@"id"];
+    [params setObject:cardLevenName forKey:@"levelName"];
+    
+    [[MallNetworkEngine loginshare]requestNotEncodeWithDate:self.requestDate requestWithPath:API_VipCardManger_AddCardLevel Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"%@",dic);
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"%@",dic);
+    }];
+}
+
+//删除会员卡
+- (void)deleteCardResquest{
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:@"900000000077" forKey:@"storeId"];
+    [params setObject:self.ID forKey:@"id"];
+    
+    [[MallNetworkEngine loginshare]requestNotEncodeWithDate:self.requestDate requestWithPath:API_VipCardManger_DeleteVipCard Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"%@",dic);
+        [OMGToast showWithText:[dic objectForKey:@"msg"]];
+        [self.navigationController popViewControllerAnimated:YES];
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"%@",dic);
+    }];
+}
+
+//保存会员卡
+- (void)saveCardResquest:(VipCardModel *)model{
+    NSMutableDictionary *params = [[NSMutableDictionary alloc]init];
+    [params setObject:@"900000000077" forKey:@"storeId"];
+    [params setObject:self.ID forKey:@"id"];
+    [params setObject:model.businessType forKey:@"businessType"];
+    [params setObject:model.cardName forKey:@"cardName"];
+    [params setObject:model.cardLevel forKey:@"cardLevel"];
+    [params setObject:model.discount forKey:@"discount"];
+    [params setObject:model.validityTime forKey:@"validityTime"];
+    if([model.businessType isEqualToString:@"0"]){
+        [params setObject:model.initialAmount forKey:@"initialAmount"];
+    }
+    [params setObject:model.cardLevelValue forKey:@"cardLevelValue"];
+    if (model.remarks.length) {
+        [params setObject:model.remarks forKey:@"remarks"];
+    }
+    
+    [[MallNetworkEngine loginshare]requestNotEncodeWithDate:self.requestDate requestWithPath:API_VipCardManger_SaveVipCard Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"%@",dic);
+        [OMGToast showWithText:[dic objectForKey:@"msg"]];
+        [self.navigationController popViewControllerAnimated:YES];
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"%@",dic);
+    }];
+}
+
+#pragma mark ---- delegate
+
+- (void)didClickChooseVipLevelBtn:(NSString *)btnName{
+    self.chooseBtnName = btnName;
+    [self requestCardLevel];
+}
+
+- (void)showChooseVipLevelWithArray:(NSMutableArray *)array{
+    ChooseVipLevelView *chooseViewLevelView = [[ChooseVipLevelView alloc]initWithVipLevelNameArray:array btnName:self.chooseBtnName];
+    chooseViewLevelView.delegate = self;
+    [self.view addSubview:chooseViewLevelView];
+    [chooseViewLevelView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.bottom.equalTo(self.view);
+    }];
+}
+
+- (void)didClickCardLevel:(NSString *)str{
+    [_editCardView.vipCardLevel setTitle:str forState:UIControlStateNormal];
+}
+
+- (void)didClickSaveBtnWithModel:(VipCardModel *)model{
+    [self saveCardResquest:model];
+}
+
+- (void)didClickDeleteBtn{
+    [self deleteCardResquest];
+}
+
+- (void)didClickAddVipLevelBtn{
+    SetNewVipLevelNameView *setNewVipLevelNameView = [[SetNewVipLevelNameView alloc]init];
+    setNewVipLevelNameView.delegate = self;
+    [self.view addSubview:setNewVipLevelNameView];
+    [setNewVipLevelNameView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.bottom.equalTo(self.view);
+    }];
+}
+
+- (void)didClickAddLevelNameBtn:(NSString *)name{
+    [self addCardLevel:name];
+}
+
+
+@end

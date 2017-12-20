@@ -1,0 +1,57 @@
+//
+//  EditCardViewController.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "EditCardViewController.h"
+#import "EditCardView.h"
+#import "VipCardModel.h"
+
+@interface EditCardViewController ()
+
+@property (nonatomic ,strong) EditCardView *editCardView;
+
+@end
+
+@implementation EditCardViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.title = @"编辑电子会员卡";
+    [self request];
+    [self setUI];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)setUI{
+    _editCardView = [[EditCardView alloc]initWithType:VipCardCoupon];
+    [self.view addSubview:_editCardView];
+    [_editCardView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.bottom.equalTo(self.view);
+    }];
+}
+
+- (void)request{
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:@"900000000077" forKey:@"storeId"];
+    [params setObject:self.ID forKey:@"id"];
+    
+    [[MallNetworkEngine loginshare]requestNotEncodeWithDate:self.requestDate requestWithPath:API_VipCardManger_VipCardDetail Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        _editCardView.model = [[VipCardModel alloc]initWithDic:[dic objectForKey:@"data"]];
+        NSLog(@"%@",dic);
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"%@",dic);
+    }];
+}
+
+@end

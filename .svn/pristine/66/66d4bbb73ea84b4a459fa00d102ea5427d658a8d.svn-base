@@ -1,0 +1,13 @@
+//
+//  WZ_PilotVC.h
+//  BusinessManager
+//
+//  Created by Niuyp on 16/8/2.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanBaseController.h"
+
+@interface WZ_PilotVC : WeiZhanBaseController
+
+@end

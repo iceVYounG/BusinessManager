@@ -1,0 +1,16 @@
+//
+//  HZCaseDetailImageCell.m
+//  BusinessManager
+//
+//  Created by 牛志胜 on 16/9/2.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "HZCaseDetailImageCell.h"
+NSString *const HZCaseDetailImageCellID = @"HZCaseDetailImageCellID";
+@implementation HZCaseDetailImageCell
+
+- (void)awakeFromNib {
+    
+}
+@end

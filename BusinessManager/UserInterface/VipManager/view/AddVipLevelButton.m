@@ -1,0 +1,39 @@
+//
+//  AddVipLevelButton.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "AddVipLevelButton.h"
+
+@implementation AddVipLevelButton
+
+- (id)init{
+    self = [super init];
+    if (self) {
+        self.layer.borderWidth = 1;
+        self.layer.borderColor = [UIColor colorWithHexString:@"cccccc"].CGColor;
+        self.layer.cornerRadius = 4;
+        self.titleEdgeInsets = UIEdgeInsetsMake(0, 25, 0, 0);
+        self.titleLabel.font = [UIFont systemFontOfSize:13];
+        [self setTitle:@"新增级别" forState:UIControlStateNormal];
+        [self setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        
+        UIImageView *addImageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"VipCardManager_AddVipCardLevel"]];
+        [self addSubview:addImageView];
+        [addImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_equalTo(CGSizeMake(20, 20));
+            make.centerY.equalTo(self);
+            make.left.equalTo(self).offset(5);
+        }];
+    }
+    return self;
+}
+
+- (void)dealloc {
+    NSLog(@"AddVipLevelButton --> dealloc...");
+}
+
+@end

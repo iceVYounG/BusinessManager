@@ -1,0 +1,21 @@
+//
+//  FoodWeiZhanVC.h
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanBaseController.h"
+
+@interface FoodWeiZhanVC : WeiZhanBaseController
+
+@end
+
+@interface BannerModel : BaseModel
+
+@property (nonatomic, copy) NSString *shopName;
+@property (nonatomic, copy) NSString *phoneNumber;
+@property (nonatomic, strong) UIImage *image;
+
+@end

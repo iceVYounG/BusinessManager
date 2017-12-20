@@ -1,0 +1,34 @@
+//
+//  ADCollectionViewCell.h
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@protocol ImageSenderDelegate <NSObject>
+
+- (void)jump2ImagePickerVCsender:(UIButton* )sender;
+
+- (void)deleteImageCell:(UIButton *)sender;
+- (void)textFieldChange:(NSString *)nameStr andPrice:(NSString *)priceStr andIndex:(NSInteger)index;
+
+@end
+@class TemplateModel;
+
+@interface ADCollectionViewCell : UICollectionViewCell<UITextFieldDelegate>
+@property (weak, nonatomic) IBOutlet UIButton *imageSender;
+@property (weak, nonatomic) IBOutlet UITextField *nameField;
+
+@property (weak, nonatomic) IBOutlet UITextField *priceField;
+
+@property (weak, nonatomic) IBOutlet UIButton *deleteSender;
+@property (weak, nonatomic) id<ImageSenderDelegate> delegate;
+
+@property (nonatomic, strong) TemplateModel *model;
+@property (nonatomic, assign) NSInteger index;
+
+
+@end

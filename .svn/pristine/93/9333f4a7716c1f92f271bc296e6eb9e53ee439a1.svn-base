@@ -1,0 +1,150 @@
+//
+//  CreateActivityVC.m
+//  BusinessManager
+//
+//  Created by smile apple on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "CreateActivityVC.h"
+#import "AddMarketACtivityVC.h"
+#import "MPChooseUserTypeView.h"
+#import "UUDatePicker.h"
+
+@interface CreateActivityVC ()<UUDatePickerDelegate>
+
+@end
+
+@implementation CreateActivityVC{
+    UUDatePicker *datePicker;
+     __weak IBOutlet UITextField *SpecifiedTime;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.view.backgroundColor = [UIColor colorWithHexString:@"f6f5fa"];
+    
+    self.nextBtn.layer.cornerRadius = 4;
+    self.title = @"新增营销活动";
+    
+    NSDate *now = [NSDate date];
+    
+        datePicker
+        = [[UUDatePicker alloc]initWithframe:CGRectMake(0, 0, self.view.frame.size.width, 216)
+                                 PickerStyle:0
+                                 didSelected:^(NSString *year,
+                                               NSString *month,
+                                               NSString *day,
+                                               NSString *hour,
+                                               NSString *minute,
+                                               NSString *second,
+                                               NSString *weekDay) {
+                                     self.beginTimeTF.text = [NSString stringWithFormat:@"%@-%@-%@ %@:%@:%@",year,month,day,hour,minute,second];
+                                 }];
+//        if (field == Max) {
+//            datePicker.maxLimitDate = [now dateByAddingTimeInterval:2222];
+//        }
+//        else if (field == Min){
+//            datePicker.minLimitDate = [[NSDate date]dateByAddingTimeInterval:-2222];
+//        }
+//        field.inputView = datePicker;
+    
+    
+    
+    //delegate
+    UUDatePicker *datePick= [[UUDatePicker alloc]initWithframe:CGRectMake(0, 0, self.view.frame.size.width, 216)
+                                                        Delegate:self
+                                                     PickerStyle:UUDateStyle_YearMonthDayHourMinuteSecond];
+    datePick.ScrollToDate = now;
+//    datePick.maxLimitDate = now;
+//    datePick.minLimitDate = [now dateByAddingTimeInterval:-111111111];
+      self.beginTimeTF.inputView = datePick;
+
+}
+
+#pragma mark - UUDatePicker's delegate
+- (void)uuDatePicker:(UUDatePicker *)datePicker
+                year:(NSString *)year
+               month:(NSString *)month
+                 day:(NSString *)day
+                hour:(NSString *)hour
+              minute:(NSString *)minute
+              second:(NSString *)second
+             weekDay:(NSString *)weekDay
+{
+    self.beginTimeTF.text = [NSString stringWithFormat:@"%@-%@-%@ %@:%@:%@",year,month,day,hour,minute,second];
+}
+
+//hide keyboard
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    [super touchesBegan:touches withEvent:event];
+    [self.view endEditing:YES];
+}
+
+- (IBAction)beginActionBtn:(id)sender {
+    datePicker.hidden = NO;
+//    NSDate *now = [NSDate date];
+//
+//    datePicker
+//    = [[UUDatePicker alloc]initWithframe:CGRectMake(0, 0, self.view.frame.size.width, 216)
+//                             PickerStyle:0
+//                             didSelected:^(NSString *year,
+//                                           NSString *month,
+//                                           NSString *day,
+//                                           NSString *hour,
+//                                           NSString *minute,
+//                                           NSString *second,
+//                                           NSString *weekDay) {
+//                                 self.beginTimeTF.text = [NSString stringWithFormat:@"%@-%@-%@ %@:%@:%@",year,month,day,hour,minute,second];
+//                             }];
+//
+//    //delegate
+//    UUDatePicker *datePick= [[UUDatePicker alloc]initWithframe:CGRectMake(0, 0, self.view.frame.size.width, 216)
+//                                                      Delegate:self
+//                                                   PickerStyle:UUDateStyle_YearMonthDayHourMinuteSecond];
+//    datePick.ScrollToDate = now;
+//    datePick.maxLimitDate = now;
+//    datePick.minLimitDate = [now dateByAddingTimeInterval:-111111111];
+////    [self.view addSubview:datePick];
+//    self.beginTimeTF.inputView = datePick;
+    
+}
+
+//点击下一步
+- (IBAction)goToAddMacket:(id)sender {
+    AddMarketACtivityVC *avc = [[AddMarketACtivityVC alloc]initWithNibName:@"AddMarketACtivityVC" bundle:nil];
+    [self.navigationController pushViewController:avc animated:YES];
+}
+
+//选择活动目标用户
+- (IBAction)selectUserBtn:(id)sender {
+    WS(weakSelf);
+    MPChooseUserTypeView *view = [[MPChooseUserTypeView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_SIZE.width, SCREEN_SIZE.height) block:^(NSString *userType, NSString *userNum) {
+        
+        [weakSelf.userBtn setTitle:userType forState:UIControlStateNormal];
+        
+        
+    }];
+    
+    [view show];
+    
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+
+
+@end

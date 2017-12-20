@@ -1,0 +1,247 @@
+//
+//  E_CommerceCell.m
+//  BusinessManager
+//
+//  Created by 王启明 on 16/8/15.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "E_CommerceCell.h"
+#import "UIView+UIViewController.h"
+#import "JMPickCollectView.h"
+#import "WeiZhanModel.h"
+#import "WeiZhanBaseController.h"
+#import "Masonry.h"
+#import "JMButton.h"
+
+@implementation E_CommerceCell
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+        self.backgroundColor=[UIColor whiteColor];
+    }
+    return self;
+}
+
+-(void)setCellType:(JMCellType)cellType{
+    _cellType = cellType;
+}
+@end
+
+@implementation ECShopNameCell
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+        [self refreshUI];
+        [self addEditingSender];
+        }
+    return self;
+}
+
+-(void)addEditingSender{
+    CGFloat w = [JMView getWidth:@[@"编辑"]];
+    self.jView = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, (self.contentView.frame.size.height - JMViewH) * 0.5 + 16, w, JMViewH) btnNames:@[@"编辑"]];
+    self.jView.tag = 100;
+    [self.contentView addSubview:self.jView];
+}
+-(void)refreshUI{
+    UIImageView *imageV=[[UIImageView alloc]init];
+    [self.contentView addSubview:imageV];
+    [imageV mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(self).insets(UIEdgeInsetsMake(0, 0, 0, 0));
+    }];
+    imageV.image=[UIImage imageNamed:@"dianshang-banner1"];
+    self.imgV=imageV;
+    UILabel *SNlab=[UILabel new];
+    SNlab.font=[UIFont systemFontOfSize:14];
+    SNlab.text=@"店铺名称";
+    SNlab.textColor=[UIColor colorWithHexString:@"#FAFAFA"];
+    SNlab.backgroundColor=[UIColor colorWithHexString:@"#00aaee" alpha:0.5];
+    [self.contentView addSubview:SNlab];
+    [SNlab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self).offset(15);
+        make.top.equalTo(self).offset(12);
+        make.height.equalTo(@21);
+    }];
+    self.shopNameLab=SNlab;
+    UILabel *pNLab=[UILabel new];
+    pNLab.font=[UIFont systemFontOfSize:14];
+    pNLab.text=@"客服电话";
+    pNLab.textColor=[UIColor colorWithHexString:@"#FAFAFA"];
+    pNLab.backgroundColor=[UIColor colorWithHexString:@"#00aaee" alpha:0.5];
+    [self.contentView addSubview:pNLab];
+    [pNLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(self).offset(-15);
+        make.bottom.equalTo(self).offset(-12);
+        make.height.equalTo(@21);
+    }];
+    self.phoneNumberLab=pNLab;
+}
+
+- (void)setModel:(TemplateModel *)model{
+    _model = model;
+    
+    if (!_model) {
+        return;
+    }
+    self.shopNameLab.text = model.name;
+    self.phoneNumberLab.text = model.type;
+    if (model.imgPath) {
+        NSString* imagePath = [NSString stringWithFormat:@"%@%@",ImagePre,model.imgPath];
+        
+        [self.imgV sd_setImageWithURL:[NSURL URLWithString:imagePath] placeholderImage:[UIImage imageNamed:@"dianshang-banner1"]];
+        
+    }
+    
+}
+
+@end
+
+@implementation ECBtnCell
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+      
+        
+    }
+    return self;
+}
+
+-(void)creatBottomSenders:(ADImageModel*)model{
+    
+    CGFloat width = KScreenWidth/4;
+    CGFloat height = self.contentView.height;
+    CGFloat imageW = 30;
+    CGFloat titleW = 27;
+    [model.titles enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        
+        JMButton* sender = [JMButton creatButton:CGRectMake(width*idx, 1, width, height-2)];
+        
+        sender.tag = idx + 998;
+        sender.ImagePrams(model.images[idx],0).TitlePrams(model.titles[idx],13,[UIColor grayColor])
+        .ImageEdgInsets((width - imageW) * 0.5,(height - imageW - titleW)*0.5,imageW,imageW)
+        .TitleEdgInsets(4,(height - imageW - titleW*0.4),width - 8,imageW)
+        .ClickAction(self,nil);
+        [self.contentView addSubview:sender];
+    }];
+}
+
+- (void)setModel:(ADImageModel *)model{
+         _model=model;
+    
+        if (!model) {
+            return;
+        }
+        BOOL isContain = NO;
+        for (UIView* view in self.contentView.subviews) {
+            
+            if (view.tag == 998) {
+                isContain = YES;
+            }
+        }
+        if (!isContain) {
+            [self creatBottomSenders:model];
+                CGFloat w = [JMView getWidth:OneBtnsEdit];
+                self.jView = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, (KScreenWidth/4.0 - JMViewH) * 0.5, w, JMViewH) btnNames:OneBtnsEdit];
+                self.jView.tag = 101;
+                [self addSubview:self.jView];
+        }  
+    }
+   
+
+@end
+
+@implementation ECImageCell
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+       SDCycleScrollView *imageV=[[SDCycleScrollView alloc]init];
+        imageV.userInteractionEnabled=NO;
+        [self.contentView addSubview:imageV];
+//        imageV.delegate=self;
+        [imageV mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.equalTo(self).insets(UIEdgeInsetsMake(0, 0, 0, 0));
+        }];
+        self.scroV=imageV;
+        self.scroV.localizationImagesGroup=@[[UIImage imageNamed:@"dianshang-lunbo"]];
+        [self addEditingSender];
+        
+    }
+    return self;
+}
+
+-(void)addEditingSender{
+    CGFloat w = [JMView getWidth:@[@"编辑"]];
+    self.jView = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, (self.contentView.frame.size.height - JMViewH) * 0.5 + 16, w, JMViewH) btnNames:@[@"编辑"]];
+    self.jView.tag = 102;
+    [self.contentView addSubview:self.jView];
+}
+
+- (void)setImgeArr:(NSMutableArray *)imgeArr{
+   _imgeArr=imgeArr;
+    if (imgeArr&&imgeArr.count>0) {
+        NSMutableArray *imgPathArray=[[NSMutableArray alloc]init];
+     [imgeArr enumerateObjectsUsingBlock:^(TemplateModel *obj, NSUInteger idx, BOOL * _Nonnull stop) {
+         NSString *oldImagePath=obj.imgPath;
+         NSString *imagePath=[NSString stringWithFormat:@"%@%@",ImagePre,oldImagePath];
+         [imgPathArray addObject:imagePath];
+     }];
+        
+        self.scroV.imageURLStringsGroup=imgPathArray;
+    }
+}
+//- (void)cycleScrollView:(SDCycleScrollView *)cycleScrollView didSelectItemAtIndex:(NSInteger)index{
+//
+//
+//}
+
+@end
+
+@implementation ECProductorCell
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+        [self refreshUI];
+    }
+    return self;
+}
+
+- (void)refreshUI{
+    UIImageView *imageV=[UIImageView new];
+    imageV.image=[UIImage imageNamed:@"img"];
+    [self.contentView addSubview:imageV];
+    [imageV mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.equalTo(self);
+        make.height.equalTo(@125);
+    }];
+    self.imgV=imageV;
+    UILabel *tLab=[UILabel new];
+    tLab.text=@"三只松鼠_小贱牛肉粒100克";
+    tLab.font=[UIFont systemFontOfSize:14];
+    tLab.backgroundColor=[UIColor whiteColor];
+    tLab.textColor=[UIColor colorWithHexString:@"#333333"];
+    [self.contentView addSubview:tLab];
+    [tLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(imageV.mas_bottom).offset(0);
+        make.left.equalTo(self).offset(15);
+        make.height.equalTo(@28);
+    }];
+    self.detailLab=tLab;
+    UILabel *pLab=[UILabel new];
+    pLab.font=[UIFont systemFontOfSize:14];
+    pLab.text=@"¥ 15.9";
+    pLab.backgroundColor=[UIColor whiteColor];
+    pLab.textColor=[UIColor colorWithHexString:@"F1594B"];
+    [self.contentView addSubview:pLab];
+    [pLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(tLab.mas_bottom);
+        make.left.equalTo(self).offset(15);
+        make.height.equalTo(@15);
+    }];
+    self.priceLab=pLab;
+}
+
+- (void)setModel:(ECProductModel *)model{
+    _model=model;
+    if (model) {
+        [self.imgV sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",ImagePre,model.webPath]] placeholderImage:[UIImage imageNamed:@"img"]];
+        self.priceLab.attributedText=model.changeShopPrice;
+        self.detailLab.text=model.shortName;
+    }
+}
+@end

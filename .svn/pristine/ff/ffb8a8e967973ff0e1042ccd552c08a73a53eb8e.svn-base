@@ -1,0 +1,232 @@
+//
+//  WeiZhanBaseController.m
+//  BusinessManager
+//
+//  Created by zhaojh on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanBaseController.h"
+#import "WeiZhanModel.h"
+#import "MyWeiZhanVC.h"
+#import "HomeController.h"
+
+@interface WeiZhanBaseController ()<UIAlertViewDelegate>
+
+@end
+
+@implementation WeiZhanBaseController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+
+    // Do any additional setup after loading the view.
+}
+
+-(void)saveTemplte:(NSMutableArray*)datas succeed:(void (^)(id responseObject))succeed error:(void (^)(NSError* error))errored{
+
+    [SVProgressHUD showWithStatus:@"数据处理中..."];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeGradient];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    
+    [[MallNetManager share] request:API_TemplateSave parameters:[datas jm_ArryPrams] success:^(NSURLSessionDataTask *task, id responseObject) {
+         [SVProgressHUD dismiss];
+        
+        if (Succeed(responseObject)) {
+            if (succeed) {
+                succeed(responseObject);
+                NSLog(@"保存成功");
+            }
+        }else{
+         
+          [OMGToast showWithText:responseObject[@"msg"]];
+        }
+       
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        [SVProgressHUD dismiss];
+        [SVProgressHUD showErrorWithStatus:@"网络异常"];
+        if (errored) {
+             errored(error);
+        }
+    }];
+}
+
+-(void)saveTemple:(NSString*)templeNo andshopName:(NSString *)shopName{
+
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    [prams setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [prams setObject:NoNullStr(templeNo, @"") forKey:@"templateNo"];
+    [prams setObject:NoNullStr(shopName, @"") forKey:@"shopName"];
+    
+    [[MallNetManager share] request:API_storeTemplateSave prams:prams succeed:^(id responseObject) {
+        
+        [OMGToast showWithText:@"模板保存成功"];
+        
+        for (UIViewController* vc in self.navigationController.viewControllers) {
+            
+            if ([vc isKindOfClass:[MyWeiZhanVC class]]) {
+                
+                MyWeiZhanVC* wzVC = (MyWeiZhanVC*)vc;
+                
+                if (wzVC.refreshBlock) {
+                    wzVC.refreshBlock();
+                }
+                [self.navigationController popToViewController:wzVC animated:YES];
+            }
+        }
+        
+    } showHUD:YES];
+
+
+}
+
+
+-(void)quickRegister:(NSString *)linkePhone smsCode:(NSString *)smscode store:(NSString *)storeName{
+    
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    [prams setObject:NoNullStr(storeName, @"") forKey:@"storeName"];
+    [prams setObject:NoNullStr(linkePhone, @"") forKey:@"linkPhone"];
+    [prams setObject:NoNullStr(smscode, @"") forKey:@"smsCode"];
+    
+    
+    
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+    [SVProgressHUD showWithStatus:@"数据请求中..."];
+    [[MallNetManager share]request:API_fastRegister parameters:prams success:^(NSURLSessionDataTask *task, id responseObject) {
+        NSDictionary *dic = responseObject;
+        
+        NSString *code = [dic objectForKey:@"code"];
+        NSString *msg = [dic objectForKey:@"msg"];
+        
+        if ([code isEqualToString:@"00-00"]) {
+            [SVProgressHUD dismiss];
+            NSDictionary *data = [dic objectForKey:@"data"];
+            if ([data isKindOfClass:[NSDictionary class]]) {
+                
+               int storeFlag = [[data objectForKey:@"storeFlag"] integerValue];
+                self.targetStoreId = [data objectForKey:@"storeId"];
+                
+                //已存在商户
+                if (storeFlag ==0) {
+                    UIAlertView *alter = [ [UIAlertView alloc] initWithTitle:@"" message:@"该账号下已有模板是否覆盖" delegate:self cancelButtonTitle:@"否" otherButtonTitles:@"是", nil];
+                    [alter show];
+                }else{
+                    
+                    [self updateStoreInforRequest:self.tempStoreId targetId:self.targetStoreId];
+                    
+                }
+                
+                
+            }
+            
+            
+        }else{
+            
+            [SVProgressHUD showInfoWithStatus:msg];
+            
+        }
+        
+        
+        NSLog(@"%@",dic);
+
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        
+    }];
+
+    
+}
+
+
+-(void)requestGetSeqno{
+    
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+
+    
+    
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+    [SVProgressHUD showWithStatus:@"数据请求中..."];
+    [[MallNetworkEngine vipCardMGshare]requestNotEncodeWithDate:self.requestDate requestWithPath:API_getSeqno Params:prams CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        
+        NSString *code = [dic objectForKey:@"code"];
+        NSString *msg = [dic objectForKey:@"msg"];
+        
+        if ([code isEqualToString:@"00-00"]) {
+            
+            NSDictionary *data = [dic objectForKey:@"data"];
+            if ([data isKindOfClass:[NSDictionary class]]) {
+                
+                NSString *seqno = [data objectForKey:@"seqno"];
+                self.tempStoreId = seqno;
+                
+            }else{
+                [SVProgressHUD dismiss];
+                
+            }
+            
+        }else{
+            [SVProgressHUD showInfoWithStatus:msg];
+            
+        }
+        
+        
+        NSLog(@"%@",dic);
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        [SVProgressHUD showInfoWithStatus:@"数据请求失败"];
+    }];
+}
+
+
+-(void)updateStoreInforRequest:(NSString *)sourceId targetId:(NSString *)targetId{
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    [prams setObject:NoNullStr(sourceId, @"") forKey:@"sourceId"];
+    [prams setObject:NoNullStr(targetId, @"") forKey:@"targetId"];
+    
+    
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+    [SVProgressHUD showWithStatus:@"数据请求中..."];
+    [[MallNetManager share]request:API_updateStoreInfo  parameters:prams success:^(NSURLSessionDataTask *task, id responseObject) {
+        NSDictionary *dic = responseObject;
+        
+        NSString *code = [dic objectForKey:@"code"];
+        NSString *msg = [dic objectForKey:@"msg"];
+        
+        if ([code isEqualToString:@"00-00"]) {
+            [SVProgressHUD dismiss];
+            NSMutableArray *vcs = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
+            [vcs removeLastObject];
+            HomeController* homeVC = [[HomeController alloc]init];
+
+            [vcs addObject:homeVC];
+            
+            MyWeiZhanVC *weizhan  = [[MyWeiZhanVC alloc]init];
+            
+            [vcs addObject:weizhan];
+            
+            self.navigationController.viewControllers = vcs;
+            
+        }else{
+            [SVProgressHUD showInfoWithStatus:msg];
+            
+        }
+        
+        
+        NSLog(@"%@",dic);
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        [SVProgressHUD showInfoWithStatus:@"数据请求失败"];
+
+    }];
+}
+
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    [[NSNotificationCenter defaultCenter]postNotificationName:@"快速登录" object:@(buttonIndex)];
+     [self updateStoreInforRequest:self.tempStoreId targetId:self.targetStoreId];
+}
+
+@end

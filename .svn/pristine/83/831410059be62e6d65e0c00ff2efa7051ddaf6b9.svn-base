@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9532" systemVersion="15G1004" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="gTV-IL-0wX" customClass="HZCaseDetailImageCell">
+            <rect key="frame" x="0.0" y="0.0" width="75" height="96"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="75" height="96"/>
+                <subviews>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="7Zi-uW-2H2">
+                        <rect key="frame" x="0.0" y="0.0" width="75" height="75"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="75" id="N9n-TM-Naa"/>
+                        </constraints>
+                    </imageView>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="点击上传图片" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BQs-KK-KJn">
+                        <rect key="frame" x="0.0" y="75" width="75" height="21"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                        <color key="textColor" red="0.79744764400000001" green="0.79744764400000001" blue="0.79744764400000001" alpha="1" colorSpace="calibratedRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EWy-Cb-Abq">
+                        <rect key="frame" x="60" y="0.0" width="15" height="15"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="15" id="9cn-Po-1Bc"/>
+                            <constraint firstAttribute="width" constant="15" id="RAs-05-jVi"/>
+                        </constraints>
+                        <state key="normal" backgroundImage="VipCardManager_CancelImage"/>
+                    </button>
+                </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+            </view>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="7Zi-uW-2H2" secondAttribute="trailing" id="5pi-eO-L78"/>
+                <constraint firstItem="BQs-KK-KJn" firstAttribute="top" secondItem="7Zi-uW-2H2" secondAttribute="bottom" id="69J-VM-tmu"/>
+                <constraint firstItem="7Zi-uW-2H2" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="AJu-2F-fIw"/>
+                <constraint firstItem="BQs-KK-KJn" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="HNn-MU-Kuv"/>
+                <constraint firstAttribute="bottom" secondItem="BQs-KK-KJn" secondAttribute="bottom" id="amp-03-9dQ"/>
+                <constraint firstAttribute="trailing" secondItem="BQs-KK-KJn" secondAttribute="trailing" id="lGB-PC-qd2"/>
+                <constraint firstItem="EWy-Cb-Abq" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="n7w-dB-TiO"/>
+                <constraint firstAttribute="trailing" secondItem="EWy-Cb-Abq" secondAttribute="trailing" id="ofK-iM-obA"/>
+                <constraint firstItem="7Zi-uW-2H2" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="wXJ-C4-b0V"/>
+            </constraints>
+            <size key="customSize" width="120" height="126"/>
+            <connections>
+                <outlet property="deleteImgBtn" destination="EWy-Cb-Abq" id="ae7-PU-ny5"/>
+                <outlet property="imageView" destination="7Zi-uW-2H2" id="DK3-9u-fHg"/>
+                <outlet property="labelBottom" destination="BQs-KK-KJn" id="NhT-lg-saZ"/>
+            </connections>
+            <point key="canvasLocation" x="297.5" y="232"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="VipCardManager_CancelImage" width="18" height="18"/>
+    </resources>
+</document>

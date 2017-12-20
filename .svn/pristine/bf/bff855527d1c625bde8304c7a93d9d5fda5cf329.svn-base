@@ -1,0 +1,136 @@
+//
+//  WZ_TextViewPhotoVC.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WZ_TextViewPhotoVC.h"
+#import "JMPickCollectView.h"
+#import "TZImageManager.h"
+
+@interface WZ_TextViewPhotoVC () <UITextViewDelegate>
+
+@property (nonatomic, strong) JMPickCollectView *collectionView;
+@property (nonatomic, strong) UILabel* placeholderLabel;
+@property (weak, nonatomic) IBOutlet UITextView *textView;
+
+@property (nonatomic, strong) UIButton* saveSender;
+
+@end
+
+@implementation WZ_TextViewPhotoVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self setUpSubView];
+ 
+ }
+
+- (void)setUpSubView{
+    
+    self.textView.delegate = self;
+    self.textView.returnKeyType = UIReturnKeyDone;
+    [self.textView addSubview:self.placeholderLabel];
+
+    self.placeholderLabel.text = self.placeholder;
+   
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textViewDidChange) name:UITextViewTextDidChangeNotification object:nil];
+    
+    [self collectionView];
+    
+    [self.view addSubview:self.saveSender];
+
+}
+
+#pragma mark - text view delegate
+- (void)textViewDidChange:(UITextView *)textView{
+   
+    self.placeholderLabel.hidden = YES;
+
+}
+
+- (void)textViewDidEndEditing:(UITextView *)textView{
+    
+    if (textView.text.length == 0) {
+        self.placeholderLabel.hidden = NO;
+    }
+    
+}
+
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text{
+    
+    if ([text isEqualToString:@"\n"]) {
+        [self.textView resignFirstResponder];
+        return NO;
+        // 默认的return（确认）会换行，返回 NO 则不会换行
+    }
+    
+    return YES;
+}
+#pragma mark - 观察textView内容的变化
+- (void)textViewDidChange{
+    
+    self.placeholderLabel.hidden = self.textView.text.length == 0 ? NO : YES;
+}
+#pragma mark - 点击空白，收起键盘
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)even{
+    [self.textView resignFirstResponder];
+}
+
+
+@synthesize collectionView = _collectionView,placeholderLabel = _placeholderLabel,saveSender = _saveSender;
+
+- (UIButton *)saveSender{
+    if (!_saveSender) {
+        _saveSender = [UIButton buttonWithType:UIButtonTypeCustom];
+        _saveSender.frame = CGRectMake(15, KScreenHeight - 55 - NavigationH, KScreenWidth - 15 * 2, 40);
+        [_saveSender setTitle:@"保存" forState:UIControlStateNormal];
+        
+        [_saveSender setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        _saveSender.backgroundColor = [UIColor blueColor];
+        _saveSender.clipsToBounds = YES;
+        _saveSender.layer.cornerRadius = 5.f;
+        
+    }
+    return _saveSender;
+}
+
+- (UILabel *)placeholderLabel{
+    if (!_placeholderLabel) {
+        _placeholderLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 5, KScreenWidth - 20, 20)];
+
+        _placeholderLabel.font = [UIFont systemFontOfSize:14.f];
+        _placeholderLabel.textColor = [UIColor grayColor];
+    }
+    return _placeholderLabel;
+}
+-(JMPickCollectView *)collectionView{
+
+    if (!_collectionView) {
+        PickPrameModel* model = [[PickPrameModel alloc] init];
+        
+        model.frame = CGRectMake(0, 200, KScreenWidth, KScreenHeight - 200 - NavigationH - 55);
+        model.numOfRow = 4;
+        model.margin = 4;
+        model.maxCount = 9;
+        _collectionView = [JMPickCollectView creatWithPramModel:model block:^(NSMutableArray *photos, NSMutableArray *assets) {
+        
+        }];
+        
+//        _collectionView = [JMPickCollectView creatWithFrame:CGRectMake(0, 200, KScreenWidth, KScreenHeight - 200 - NavigationH - 55) maxCount:9 block:^(NSMutableArray *photos, NSMutableArray *assets) {
+//         
+//        }];
+        [self.view addSubview:_collectionView];
+    }   
+    return _collectionView;
+}
+
+
+- (void)dealloc{
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+@end

@@ -1,0 +1,41 @@
+//
+//  QuestionListCell.m
+//  BusinessManager
+//
+//  Created by 朕 on 16/9/5.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "QuestionListCell.h"
+
+@implementation QuestionListCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    self.textView.layer.borderColor = [UIColor colorWithHexString:@"e5e5e5"].CGColor;
+    self.textView.layer.borderWidth = 0.5;
+    [self.textView.layer masksToBounds];
+    self.textView.layer.cornerRadius = 3;
+    
+    self.textView.delegate = self;
+}
+
+- (void)textViewDidBeginEditing:(UITextView *)textView
+{
+    self.placeholderLabel.hidden = YES;
+}
+
+- (void)textViewDidEndEditing:(UITextView *)textView
+{
+    if ([self.textView.text isEqualToString:@""]) {
+        self.placeholderLabel.hidden = NO;
+    }
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

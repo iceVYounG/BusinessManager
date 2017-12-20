@@ -1,0 +1,252 @@
+//
+//  PrepaidSavingCardView.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/25.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "PrepaidSavingCardView.h"
+
+
+
+@implementation PrepaidSavingCardView
+
+- (id)init{
+    self = [super init];
+    if (self) {
+        self.backgroundColor = [UIColor colorWithHexString:@"f6f5fa"];
+        [self setUI];
+    }
+    return self;
+}
+
+- (void)setUI{
+    UILabel *moneyTitleLabel = [[UILabel alloc]init];
+    moneyTitleLabel.text = @"您的账户余额:";
+    moneyTitleLabel.textAlignment = NSTextAlignmentLeft;
+    moneyTitleLabel.textColor = [UIColor colorWithHexString:@"666666"];
+    moneyTitleLabel.font = [UIFont systemFontOfSize:13];
+    moneyTitleLabel.backgroundColor = [UIColor clearColor];
+    [self addSubview:moneyTitleLabel];
+    [moneyTitleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self).offset(15);
+        make.height.mas_equalTo(@48);
+        make.top.equalTo(self);
+    }];
+    
+    self.moneyLabel = [[UILabel alloc]init];
+    self.moneyLabel.text = @"140.00元";
+    self.moneyLabel.textAlignment = NSTextAlignmentLeft;
+    self.moneyLabel.textColor = [UIColor colorWithHexString:@"f1594b"];
+    self.moneyLabel.font = [UIFont systemFontOfSize:13];
+    self.moneyLabel.backgroundColor = [UIColor clearColor];
+    [self addSubview:self.moneyLabel];
+    [self.moneyLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(moneyTitleLabel.mas_right);
+        make.height.mas_equalTo(@48);
+        make.top.equalTo(self);
+    }];
+    
+    UIView *whiteView = [[UIView alloc]init];
+    whiteView.backgroundColor = [UIColor whiteColor];
+    whiteView.layer.borderColor = [UIColor colorWithHexString:@"dadada"].CGColor;
+    whiteView.layer.borderWidth = 1;
+    [self addSubview:whiteView];
+    [whiteView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.left.equalTo(self);
+        make.top.equalTo(self).offset(49);
+        make.height.mas_equalTo(@221);
+    }];
+    
+    self.button50 = [[SelectedButton alloc]initWithTitle:@"50"];
+    [self.button50 addTarget:self action:@selector(buttonSelected:) forControlEvents:UIControlEventTouchUpInside];
+    [whiteView addSubview:self.button50];
+    [self.button50 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(whiteView).offset(15);
+        make.top.equalTo(whiteView).offset(18);
+        make.height.mas_equalTo(@50);
+        make.right.equalTo(whiteView.mas_centerX).offset(-15);
+    }];
+    
+    self.button100 = [[SelectedButton alloc]initWithTitle:@"100"];
+    [self.button100 addTarget:self action:@selector(buttonSelected:) forControlEvents:UIControlEventTouchUpInside];
+    [whiteView addSubview:self.button100];
+    [self.button100 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(whiteView).offset(-15);
+        make.top.equalTo(whiteView).offset(18);
+        make.height.mas_equalTo(@50);
+        make.left.equalTo(whiteView.mas_centerX).offset(15);
+    }];
+    
+    self.button500 = [[SelectedButton alloc]initWithTitle:@"500"];
+    [self.button500 addTarget:self action:@selector(buttonSelected:) forControlEvents:UIControlEventTouchUpInside];
+    [whiteView addSubview:self.button500];
+    [self.button500 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.button50);
+        make.top.equalTo(self.button50.mas_bottom).offset(15);
+        make.height.mas_equalTo(@50);
+        make.right.equalTo(whiteView.mas_centerX).offset(-15);
+    }];
+    
+    self.button1000 = [[SelectedButton alloc]initWithTitle:@"1000"];
+    [self.button1000 addTarget:self action:@selector(buttonSelected:) forControlEvents:UIControlEventTouchUpInside];
+    [whiteView addSubview:self.button1000];
+    [self.button1000 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(whiteView).offset(-15);
+        make.top.equalTo(self.button500);
+        make.height.mas_equalTo(@50);
+        make.left.equalTo(whiteView.mas_centerX).offset(15);
+    }];
+    
+    
+    UILabel *afterMoneyTFLabel = [[UILabel alloc]init];
+    afterMoneyTFLabel.text = @"元(最小支持的充值金额为0.01)";
+    afterMoneyTFLabel.textColor = [UIColor colorWithHexString:@"666666"];
+    afterMoneyTFLabel.textAlignment = NSTextAlignmentRight;
+    afterMoneyTFLabel.font = [UIFont systemFontOfSize:13];
+    [whiteView addSubview:afterMoneyTFLabel];
+    [afterMoneyTFLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.equalTo(self.moneyTF.mas_right);
+        make.top.equalTo(self.button500.mas_bottom).offset(38);
+        make.right.equalTo(self).offset(-15);
+//        make.centerY.equalTo(self.moneyTF);
+        make.width.mas_equalTo(@180);
+    }];
+    
+    self.moneyTF = [[UITextField alloc]init];
+    self.moneyTF.placeholder = @"手动输入金额";
+    self.moneyTF.font = [UIFont systemFontOfSize:15];
+    self.moneyTF.layer.borderWidth = 1;
+    self.moneyTF.layer.cornerRadius = 4;
+    self.moneyTF.layer.borderColor = [UIColor colorWithHexString:@"dadada"].CGColor;
+    self.moneyTF.keyboardType = UIKeyboardTypeNumberPad;
+    self.moneyTF.delegate  = self;
+    [whiteView addSubview:self.moneyTF];
+    [self.moneyTF mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.size.mas_equalTo(CGSizeMake(164, 46));
+        make.height.mas_equalTo(@46);
+//        make.top.equalTo(self.button500.mas_bottom).offset(24);
+        make.centerY.equalTo(afterMoneyTFLabel);
+        make.left.equalTo(self.button50);
+        make.right.equalTo(afterMoneyTFLabel.mas_left);
+    }];
+    
+    self.perpaidButton = [[UIButton alloc]init];
+    [self.perpaidButton setTitle:@"立即充值" forState:UIControlStateNormal];
+    [self.perpaidButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    self.perpaidButton.layer.cornerRadius = 4;
+    self.perpaidButton.backgroundColor = [UIColor colorWithHexString:@"01aaef"];
+    [self addSubview:self.perpaidButton];
+    [self.perpaidButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(whiteView.mas_bottom).offset(15);
+        make.left.equalTo(self).offset(15);
+        make.right.equalTo(self).offset(-15);
+        make.height.mas_equalTo(@44);
+    }];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldDidEditing:) name:UITextFieldTextDidChangeNotification object:nil];
+    
+}
+
+
+
+- (void)buttonSelected:(SelectedButton *)btn {
+    NSInteger tag = btn.tag;
+    btn.selected = !btn.selected;
+    self.moneyTF.text = [NSString stringWithFormat:@"%ld", (long)tag];
+    
+    switch (tag) {
+        case 50:{
+
+            [self SelectedAction:self.button50];
+            [self DeselectedAction:self.button100];
+            [self DeselectedAction:self.button500];
+            [self DeselectedAction:self.button1000];
+            
+        }
+            break;
+        case 100:  {
+
+            [self SelectedAction:self.button100];
+            [self DeselectedAction:self.button50];
+            [self DeselectedAction:self.button500];
+            [self DeselectedAction:self.button1000];
+            
+        }
+            break;
+        case 500:{
+
+            [self SelectedAction:self.button500];
+            [self DeselectedAction:self.button50];
+            [self DeselectedAction:self.button100];
+            [self DeselectedAction:self.button1000];
+
+        }
+            break;
+        case 1000:{
+
+            [self SelectedAction:self.button1000];
+            [self DeselectedAction:self.button50];
+            [self DeselectedAction:self.button100];
+            [self DeselectedAction:self.button500];
+
+        }
+            break;
+        default:
+            break;
+    }
+}
+
+#pragma mark - 选中方法
+- (void)SelectedAction:(SelectedButton *)btn {
+    btn.selected = YES;
+    btn.backgroundColor = [UIColor colorWithHexString:@"00aaee"];
+    [btn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    
+}
+#pragma mark - 取消选中
+- (void)DeselectedAction:(SelectedButton *)btn {
+    btn.selected = NO;
+    btn.backgroundColor = [UIColor whiteColor];
+    [btn setTitleColor:[UIColor colorWithHexString:@"00aaee"] forState:UIControlStateNormal];
+}
+
+#pragma mark - UITextField 通知
+
+- (void)textFieldDidEditing:(NSNotification *)noti {
+    
+    [self DeselectedAction:self.button50];
+    [self DeselectedAction:self.button100];
+    [self DeselectedAction:self.button500];
+    [self DeselectedAction:self.button1000];
+    
+    if ([self.moneyTF.text isEqualToString:@"50"]) {
+        [self SelectedAction:self.button50];
+        [self DeselectedAction:self.button100];
+        [self DeselectedAction:self.button500];
+        [self DeselectedAction:self.button1000];
+        
+    }else if ([self.moneyTF.text isEqualToString:@"100"]) {
+        [self SelectedAction:self.button100];
+        [self DeselectedAction:self.button50];
+        [self DeselectedAction:self.button500];
+        [self DeselectedAction:self.button1000];
+       
+    }else if ([self.moneyTF.text isEqualToString:@"500"]) {
+        [self SelectedAction:self.button500];
+        [self DeselectedAction:self.button50];
+        [self DeselectedAction:self.button100];
+        [self DeselectedAction:self.button1000];
+       
+    }else if ([self.moneyTF.text isEqualToString:@"1000"]) {
+        [self SelectedAction:self.button1000];
+        [self DeselectedAction:self.button50];
+        [self DeselectedAction:self.button100];
+        [self DeselectedAction:self.button500];
+
+    }
+    
+}
+
+@end

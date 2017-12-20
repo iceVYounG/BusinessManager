@@ -1,0 +1,17 @@
+//
+//  HZCaseDetailImageCell.h
+//  BusinessManager
+//
+//  Created by 牛志胜 on 16/9/2.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+extern NSString *const HZCaseDetailImageCellID ;
+@interface HZCaseDetailImageCell : UICollectionViewCell
+@property (weak, nonatomic) IBOutlet UIImageView *imageView;
+@property (weak, nonatomic) IBOutlet UILabel *labelBottom;
+@property (weak, nonatomic) IBOutlet UIButton *deleteImgBtn;
+@property (strong, nonatomic)NSMutableArray *images;
+@property (strong, nonatomic)NSIndexPath *indexPath;
+@end

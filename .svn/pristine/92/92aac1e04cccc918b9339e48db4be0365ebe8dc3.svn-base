@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10117" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="HVMainCell" id="KGk-i7-Jjw" customClass="HVMainCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="72"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="71"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wFG-su-Tda">
+                        <rect key="frame" x="0.0" y="0.0" width="80" height="71"/>
+                        <subviews>
+                            <button opaque="NO" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="L24-WH-Y4B">
+                                <rect key="frame" x="0.0" y="0.0" width="80" height="71"/>
+                                <state key="highlighted" backgroundImage="ss_btn_highlight_bg.png"/>
+                                <connections>
+                                    <action selector="tableClickAction:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="b43-6s-dS8"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="实时监控" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OwK-6z-7ea">
+                                <rect key="frame" x="8" y="43" width="64" height="15"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="15" id="daA-FY-6fY"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                <color key="textColor" red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="hv_monitor_icon" translatesAutoresizingMaskIntoConstraints="NO" id="7c4-Np-YfY">
+                                <rect key="frame" x="26" y="12" width="28" height="28"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="28" id="4Ju-9B-VG6"/>
+                                    <constraint firstAttribute="width" constant="28" id="jh2-sA-PWM"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="OwK-6z-7ea" secondAttribute="trailing" constant="8" id="B4C-cR-GDJ"/>
+                            <constraint firstItem="OwK-6z-7ea" firstAttribute="top" secondItem="7c4-Np-YfY" secondAttribute="bottom" constant="3" id="CF5-LT-GAh"/>
+                            <constraint firstItem="L24-WH-Y4B" firstAttribute="leading" secondItem="wFG-su-Tda" secondAttribute="leading" id="CNv-F7-HZk"/>
+                            <constraint firstItem="7c4-Np-YfY" firstAttribute="top" secondItem="wFG-su-Tda" secondAttribute="top" constant="12" id="PUq-sf-Ftp"/>
+                            <constraint firstItem="7c4-Np-YfY" firstAttribute="centerX" secondItem="wFG-su-Tda" secondAttribute="centerX" id="QqV-g8-4fO"/>
+                            <constraint firstAttribute="width" constant="80" id="jMY-T1-OTM"/>
+                            <constraint firstItem="OwK-6z-7ea" firstAttribute="leading" secondItem="wFG-su-Tda" secondAttribute="leading" constant="8" id="n9W-9P-Z7M"/>
+                            <constraint firstAttribute="bottom" secondItem="L24-WH-Y4B" secondAttribute="bottom" id="naA-it-cBx"/>
+                            <constraint firstItem="L24-WH-Y4B" firstAttribute="top" secondItem="wFG-su-Tda" secondAttribute="top" id="q4K-kA-ZM9"/>
+                            <constraint firstAttribute="trailing" secondItem="L24-WH-Y4B" secondAttribute="trailing" id="smS-E5-21p"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="wFG-su-Tda" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="topMargin" constant="-8" id="JFq-lr-lUr"/>
+                    <constraint firstAttribute="bottomMargin" secondItem="wFG-su-Tda" secondAttribute="bottom" constant="-8" id="qcj-y9-AF1"/>
+                    <constraint firstItem="wFG-su-Tda" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" constant="-8" id="tTd-IO-rrh"/>
+                </constraints>
+            </tableViewCellContentView>
+            <point key="canvasLocation" x="211" y="229"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="hv_monitor_icon" width="28" height="28"/>
+        <image name="ss_btn_highlight_bg.png" width="10" height="10"/>
+    </resources>
+</document>

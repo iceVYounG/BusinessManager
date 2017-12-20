@@ -1,0 +1,243 @@
+//
+//  HongBaoCell.m
+//  BusinessManager
+//
+//  Created by zhaojh on 16/8/9.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "HongBaoTableCell.h"
+#import "JMButton.h"
+#import "WeiZhanModel.h"
+#import "WeiZhanBaseController.h"
+
+@implementation HongBaoTableCell
+
+-(instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        
+        self.selectionStyle = 0;
+    }
+    return self;
+}
+
+@end
+
+
+@implementation  HongBaoTypeCell
+
+-(instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        
+        [self creatSubViews];
+    }
+    return self;
+}
+
+-(void)creatSubViews{
+
+    _titleLabel = [[UILabel alloc]initWithFrame:CGRectMake(15, 0, 300, 43)];
+    _titleLabel.text = @"选择活动进行方式";
+    _titleLabel.font = [UIFont systemFontOfSize:17];
+    [self.contentView addSubview:_titleLabel];
+    
+    _backView = [[UIView alloc]initWithFrame:CGRectMake(0, 45, KScreenWidth, HongBaoTypeH - 44)];
+    _backView.backgroundColor = [UIColor clearColor];
+    [self.contentView addSubview:_backView];
+    
+    NSArray* btnNames = @[@"红包",@"大转盘",@"刮刮乐"];
+    NSArray* icons = @[@"asdf",@"106",@"lkjhgf"];
+    
+    CGFloat width = KScreenWidth/3;
+    CGFloat height = _backView.height;
+    CGFloat imageW = 54;
+    CGFloat titleH = 20;
+    [btnNames enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        JMButton* sender = [JMButton creatButton:CGRectMake(width*idx, 1, width, height-2)];
+        sender.tag = idx + 998;
+        sender.ImagePrams(icons[idx],0).TitlePrams(btnNames[idx],14,[UIColor blackColor])
+        .ImageEdgInsets((width - imageW)/2,15,imageW,imageW)
+        .TitleEdgInsets(0,15 + imageW + 9,width,titleH)
+        .ClickAction(self,@selector(hongBaoTypeAction:));
+        sender.jmLabel.textAlignment = 1;
+        [self.backView addSubview:sender];
+        
+        if (idx == 0) {
+            [self setSelect:sender.tag];
+            _lastSelectTag = sender.tag;
+        }
+    }];
+}
+
+-(void)hongBaoTypeAction:(UITapGestureRecognizer*)tap{
+
+    if (tap.view.tag == _lastSelectTag) {
+        return;
+    }
+    [self setSelect:tap.view.tag];
+    
+    _lastSelectTag = tap.view.tag;
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(selectedHongBaoType:)]) {
+        [self.delegate selectedHongBaoType:tap.view.tag - 998];
+    }
+}
+
+-(void)setSelect:(NSInteger)tag{
+
+    JMButton* sender = [self.backView viewWithTag:tag];
+    CGFloat w = 20;
+    UIImageView* imagev = [[UIImageView alloc]initWithFrame:CGRectMake(34, 0, w, w)];
+    imagev.image = [UIImage imageNamed:@"dfghj"];
+    [sender.jmImagev addSubview:imagev];
+    
+    for (int i = 0; i < 3; i++) {
+        if (i != tag - 998) {
+            
+            JMButton* sender = [self.backView viewWithTag:i + 998];
+            [sender.jmImagev removeAllSubviews];
+        }
+    }
+}
+
+
+-(void)setModel:(PartModel *)model{
+    _model = model;
+    
+    NSInteger index = [HB_KeysArry indexOfObject:model.templateModelnameCode];
+    
+    if (index != 0) {
+        [self setSelect:index + 998];
+        
+        _lastSelectTag = index + 998;
+    }
+}
+
+- (void)drawRect:(CGRect)rect{
+    
+    UIBezierPath *bezierPath = [UIBezierPath bezierPath];
+    [bezierPath moveToPoint:CGPointMake(15,44)];
+    [bezierPath addLineToPoint:CGPointMake(rect.size.width - 15, 44)];
+    [[UIColor lightGrayColor] setStroke];
+    [bezierPath setLineWidth:.5];
+    [bezierPath stroke];
+
+}
+@end
+
+@implementation HongBaoInfoCell
+
+-(instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        
+         [self creatSubViews];
+        
+         UITapGestureRecognizer* tap = [[UITapGestureRecognizer alloc]initWithTarget:self
+                                                                              action:@selector(selectImage)];
+        _imageV.userInteractionEnabled = YES;
+        [_imageV addGestureRecognizer:tap];
+    }
+    return self;
+}
+-(void)creatSubViews{
+
+    _titleLabel = [[UILabel alloc]initWithFrame:CGRectMake(15, 0, 300, 44)];
+    _titleLabel.text = @"活动入口banner图";
+    _titleLabel.font = [UIFont systemFontOfSize:17];
+    [self.contentView addSubview:_titleLabel];
+    
+    _imageV = [[UIImageView alloc]initWithFrame:CGRectMake(_titleLabel.origin.x, CGRectGetMaxY(_titleLabel.frame), KScreenWidth - 30, 69)];
+    _imageV.image = [UIImage imageNamed:@"hongbao"];
+    [self.contentView addSubview:_imageV];
+    
+    _keyLabel = [[UILabel alloc]initWithFrame:CGRectMake(_titleLabel.origin.x, CGRectGetMaxY(_imageV.frame)+12, 60, 36)];
+    _keyLabel.text = @"祝福语:";
+    _keyLabel.font = [UIFont systemFontOfSize:15];
+    [self.contentView addSubview:_keyLabel];
+    
+    CGFloat x = CGRectGetMaxX(_keyLabel.frame)+9;
+    _valueFiled = [[UITextField alloc]initWithFrame:CGRectMake(x, _keyLabel.origin.y, KScreenWidth - x - 15, _keyLabel.height)];
+    _valueFiled.placeholder = @"恭喜发财,大吉大利!";
+    _valueFiled.font = [UIFont systemFontOfSize:15];
+    _valueFiled.borderStyle = UITextBorderStyleNone;
+    _valueFiled.layer.borderColor = [UIColor groupTableViewBackgroundColor].CGColor;
+    _valueFiled.layer.borderWidth = 1;
+    _valueFiled.layer.cornerRadius = 3;
+    _valueFiled.layer.masksToBounds = YES;
+    _valueFiled.delegate = self;
+    [self.contentView addSubview:_valueFiled];
+    
+}
+
+-(void)selectImage{
+    if (self.delegate) {
+        [self.delegate selectedImageActionWithHongBaoType:self.type];
+    }
+}
+
+-(void)setType:(HongBaoType)type{
+    _type = type;
+    
+    NSString* imgPath = [self.actArry objectAtIndex:type];
+    
+    if ([imgPath containsString:@"/"]) {
+         [_imageV sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",ImagePre,[self.actArry objectAtIndex:type]]] placeholderImage:[UIImage imageNamed:@""]];
+    }else{
+    
+        _imageV.image = [UIImage imageNamed:imgPath];
+    }
+}
+
+-(void)textFieldDidEndEditing:(UITextField *)textField{
+
+    if (self.delegate && [self.delegate respondsToSelector:@selector(userDidEndEditContent:)]) {
+        
+        [self.delegate userDidEndEditContent:self.valueFiled.text];
+    }
+}
+
+-(void)setModel:(PartModel *)model{
+    _model = model;
+    
+    NSString* imagePath = [(TemplateModel*)_model.templateModelnameDate.date.lastObject imgPath];
+    [_imageV sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",ImagePre,imagePath]] placeholderImage:[UIImage imageNamed:[self.actArry objectAtIndex:[HB_KeysArry indexOfObject:_model.templateModelnameCode]]]];
+
+    if (imagePath){
+      [self.actArry replaceObjectAtIndex:[HB_KeysArry indexOfObject:_model.templateModelnameCode] withObject:imagePath];
+    }
+    
+    self.valueFiled.text = NoNullStr([(TemplateModel*)_model.templateModelnameDate.date.lastObject content],@"");
+}
+
+@synthesize actArry = _actArry;
+-(NSMutableArray *)actArry{
+    if (!_actArry){
+     
+        NSArray* imgs = @[@"hongbao",@"canyin-banner",@"dianshang-lunbo"];
+        
+         _actArry = [NSMutableArray arrayWithArray:imgs];
+    }
+    return _actArry;
+}
+
+
+@end
+
+@implementation MyHongBaoCell
+
+-(instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        
+        
+    }
+    return self;
+}
+
+@end
+
+
+

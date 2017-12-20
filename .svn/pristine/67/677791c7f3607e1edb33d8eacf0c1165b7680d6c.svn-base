@@ -1,0 +1,60 @@
+//
+//  VerifyRecordViewController.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/8/24.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "VerifyRecordViewController.h"
+//#import "ChooseButtonView.h"
+#import "VerifyRecordView.h"
+#import "VerifyRecordModel.h"
+
+@interface VerifyRecordViewController ()
+
+@property (nonatomic, strong) VerifyRecordView *chooseBtnView;
+
+@end
+
+@implementation VerifyRecordViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.title = @"验证纪录";
+    
+    _chooseBtnView = [[VerifyRecordView alloc]init];
+    [self.view addSubview:_chooseBtnView];
+    [_chooseBtnView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.equalTo(self.view);
+        make.top.equalTo(self.view).offset(15);
+    }];
+    [self request:@"7"];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)request:(NSString *)day{
+    NSMutableArray *dataArray = [NSMutableArray array];
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:day forKey:@"days"];
+    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [[MallNetworkEngine vipCardMGshare]requestNotEncodeWithDate:nil requestWithPath:API_ConsumeList Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        for (NSDictionary *tDic in [dic objectForKey:@"data"]) {
+            VerifyRecordModel *model = [[VerifyRecordModel alloc]initWithDic:tDic];
+            [dataArray addObject:model];
+        }
+        _chooseBtnView.dataArray = dataArray;
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"%@",dic);
+    }];
+}
+
+@end

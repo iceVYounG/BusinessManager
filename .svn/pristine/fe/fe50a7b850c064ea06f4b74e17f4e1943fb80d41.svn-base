@@ -1,0 +1,58 @@
+//
+//  EaditDrawCell.h
+//  BusinessManager
+//
+//  Created by The Only on 16/7/27.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "RedBagModel.h"
+#import "LuckDrawModel.h"
+@class EaditDrawCell;
+@protocol EaditDrawCellDelegate <NSObject>
+-(void)chooseTypeOnEaditDrawCell:(EaditDrawCell *)cell;
+-(void)deleteEaditDrawCell:(EaditDrawCell *)cell;
+-(void)eaditDrawCell:(EaditDrawCell *)myCell redBagNameTF:(UITextField *)RName redBagCountTF:(UITextField *)RCount redBagNumberTF:(UITextField *)RNumber redBagChance:(UITextField *)RChance redBagMoney:(UITextField *)RMoney Type:(NSString *)RType;
+@end
+
+@interface EaditDrawCell : UITableViewCell
+@property (strong, nonatomic) IBOutlet UIView *presentTypeView;// 奖品类型View
+@property (weak, nonatomic) IBOutlet UIButton *redTypeBtn;// 红包类型
+@property (weak, nonatomic) IBOutlet UITextField *redNameTF;// 红包名称
+@property (weak, nonatomic) IBOutlet UITextField *singleRedMoneyTF;// 单个红包金额
+@property (weak, nonatomic) IBOutlet UITextField *redCountTF;//红包个数
+@property (weak, nonatomic) IBOutlet UITextField *winningChanceTF;// 中间概率
+@property (weak, nonatomic) IBOutlet UIButton *prizeDeleteBtn;// 删除单个活动奖品
+@property (weak, nonatomic) IBOutlet UITextField *winningCountTF;// 中奖次数
+ 
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *infoViewHeightConstraint;
+
+@property (strong,nonatomic)RedBagModel * model;
+
+@property (strong,nonatomic) activityInfoItem* DrawModel;
+
+@property (nonatomic,weak)id<EaditDrawCellDelegate> delegate;
+
+@property (nonatomic, assign) NSInteger cellTags;//cell的Tag
+
+/** btn title*/
+@property (nonatomic ,copy)NSString *btnTitle;
+@property (nonatomic,copy)NSString *prizInfoId;
+
+@property (weak, nonatomic) IBOutlet UILabel *redNameLable;
+@property (weak, nonatomic) IBOutlet UILabel *redMoneyLable;
+@property (weak, nonatomic) IBOutlet UILabel *redCountLable;
+
+@property (weak, nonatomic) IBOutlet UILabel *prizeGLLable;
+@property (weak, nonatomic) IBOutlet UILabel *zhongJiangCiShu;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *singleMoneyHeight;// 单个红包金额的高
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *deleteHeight;// 删除按钮的高
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *HLineViewHeight;// 垂直线的高
+
+@property (weak, nonatomic) IBOutlet UIView *singleLineView;
+
+
+
+-(void)setData:(activityInfoItem *)model;
+@end

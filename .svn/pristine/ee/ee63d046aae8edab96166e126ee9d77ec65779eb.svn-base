@@ -1,0 +1,44 @@
+//
+//  GiveVipCardViewController.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/26.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "GiveVipCardViewController.h"
+#import "GiveVipCardChildView.h"
+
+@interface GiveVipCardViewController ()
+
+@end
+
+@implementation GiveVipCardViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"发放会员卡";
+    GiveVipCardChildView *vc = [[GiveVipCardChildView alloc]init];
+    [self.view addSubview:vc];
+    [vc mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.bottom.equalTo(self.view);
+    }];
+    // Do any additional setup after loading the view.
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

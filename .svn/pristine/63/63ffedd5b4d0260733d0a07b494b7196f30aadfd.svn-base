@@ -1,0 +1,103 @@
+//
+//  FlowerShopCell.m
+//  BusinessManager
+//
+//  Created by 王启明 on 16/9/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "FlowerShopCell.h"
+
+@implementation FlowerShopCell
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+        self.imageV=[[UIImageView alloc]init];
+        self.imageV.image=[UIImage imageNamed:@"012"];
+        [self.contentView addSubview:self.imageV];
+        [self.imageV mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.equalTo(self).insets(UIEdgeInsetsMake(0, 0, 0, 0));
+        }];
+        [self addEditingSender];
+    }
+    return self;
+}
+
+- (void)setModel:(PartModel *)model{
+    _model=model;
+    if (model) {
+        
+    }
+}
+
+-(void)addEditingSender{
+    CGFloat w = [JMView getWidth:@[@"更换门头"]];
+    self.view = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, (self.contentView.frame.size.height - JMViewH) * 0.5 + 16, w, JMViewH) btnNames:@[@"更换门头"]];
+    self.view.tag = 100;
+    [self.contentView addSubview:self.view];
+}
+@end
+
+@implementation FlowerShopSectionTwoCell
+
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+        self.nameLab=[UILabel new];
+        self.nameLab.text=@"珍爱一生花店";
+        self.phoneLab=[UILabel new];
+        self.phoneLab.text=@"123456789";
+        self.addressLab=[UILabel new];
+        self.addressLab.text=@"苏州市姑苏区干将西路1306号";
+        [self.contentView addSubview:self.nameLab];
+        [self.contentView addSubview:self.phoneLab];
+        [self.contentView addSubview:self.addressLab];
+        [self.nameLab mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.left.right.equalTo(self);
+            make.height.equalTo(@20);
+        }];
+        [self.phoneLab mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.nameLab.mas_bottom);
+            make.left.right.equalTo(self);
+            make.height.equalTo(@20);
+        }];
+        
+        [self.addressLab mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.phoneLab.mas_bottom);
+            make.left.right.bottom.equalTo(self);
+        }];
+    }
+    return self;
+}
+
+- (void)setModel:(PartModel *)model{
+    _model=model;
+    if (model) {
+        
+    }
+}
+
+@end
+
+@implementation FlowerShopLunBoCell
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+        self.myScro=[[SDCycleScrollView alloc]init];
+        [self.contentView addSubview:self.myScro];
+        [self.myScro mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.equalTo(self).insets(UIEdgeInsetsMake(0, 0, 0, 0));
+        }];
+        self.myScro.localizationImagesGroup=@[[UIImage imageNamed:@"dianshang-lunbo"]];
+        self.myScro.pageControlStyle=SDCycleScrollViewPageContolStyleClassic;
+    }
+    return self;
+}
+
+- (void)setModel:(PartModel *)model{
+    _model=model;
+    if (model) {
+        
+    }
+
+}
+
+
+@end

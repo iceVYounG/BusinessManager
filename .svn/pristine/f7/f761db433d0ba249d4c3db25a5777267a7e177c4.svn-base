@@ -1,0 +1,37 @@
+//
+//  WZ_ConfigGoodsImageViewCell.m
+//  BusinessManager
+//
+//  Created by KL on 16/9/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WZ_ConfigGoodsImageViewCell.h"
+
+@implementation WZ_ConfigGoodsImageViewCell
+
+- (void)awakeFromNib {
+    UITapGestureRecognizer *tapAction = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(chooseImageAction:)];
+    [self.goodsImgView addGestureRecognizer:tapAction];
+}
+
+- (IBAction)deleteBtnClick:(UIButton *)sender {
+    if ([self.imageViewCellDelegate conformsToProtocol:@protocol(WZ_ConfigGoodsImageViewCellDelegate)]
+        &&
+        [self.imageViewCellDelegate respondsToSelector:@selector(WZ_ConfigGoodsImageViewCell_DeleteGoodsWithIndexPath:)]) {
+        [self.imageViewCellDelegate WZ_ConfigGoodsImageViewCell_DeleteGoodsWithIndexPath:self.indexPath];
+    }
+}
+
+//add GoodsImg
+- (void)chooseImageAction:(UITapGestureRecognizer *)gesture {
+    if (gesture.numberOfTouches == 1) {
+        if ([self.imageViewCellDelegate conformsToProtocol:@protocol(WZ_ConfigGoodsImageViewCellDelegate)]
+            &&
+            [self.imageViewCellDelegate respondsToSelector:@selector(WZ_ConfigGoodsImageViewCell_ChoosePhotoWithIndexPath:)]) {
+            [self.imageViewCellDelegate WZ_ConfigGoodsImageViewCell_ChoosePhotoWithIndexPath:self.indexPath];
+        }
+    }
+}
+
+@end

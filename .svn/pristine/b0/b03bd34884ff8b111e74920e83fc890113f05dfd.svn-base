@@ -1,0 +1,97 @@
+//
+//  AddDrawCell.m
+//  BusinessManager
+//
+//  Created by The Only on 16/8/12.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "AddDrawCell.h"
+
+@interface AddDrawCell()<UITextFieldDelegate>
+
+@end
+@implementation AddDrawCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code zhebian
+    
+    self.prizeChance.delegate = self;
+    self.prizeNameTF.delegate = self;
+    self.prizeCount.delegate = self;
+    self.prizeNumber.delegate = self;
+    self.prizeSingeMoneyTF.delegate = self;
+    
+    
+}
+-(void)setModel:(RedBagModel *)model
+{
+    _model = model;
+    if (model.heightType == nil) {
+        
+        self.heightInfoPrestent.constant = 0;
+        self.prizeTypeView.hidden = YES;
+    }
+    else
+    {
+        if ([model.heightType isEqualToString:@"singleMoney"])
+        {
+            self.heightInfoPrestent.constant = 192;
+            self.singleMoneyHeight.constant = 0;
+            self.singleMoneyLineView.hidden = YES;
+            self.prizeTypeView.hidden = NO;
+        }
+        else
+        {
+            self.heightInfoPrestent.constant = 240;
+            self.prizeTypeView.hidden = NO;
+            self.singleMoneyHeight.constant = 48;
+            self.singleMoneyLineView.hidden = NO;
+        }
+       
+    }
+    
+    [self.redBagBtn setTitle:model.btnTitle forState:UIControlStateNormal];
+    [self.redBagBtn setTitleColor:[UIColor colorWithHexString:@"000000"] forState:UIControlStateNormal];
+    
+    self.prizeNameTF.text = model.redName;
+    self.prizeCount.text = model.redNum;
+    self.prizeNumber.text = model.singleLmLum;
+    self.prizeChance.text = model.drawProbability;
+    self.prizeSingeMoneyTF.text = model.singleAmount;
+}
+
+- (IBAction)chooseTypePresentAction:(id)sender
+{
+ 
+    if ([self.delegate respondsToSelector:@selector(choosePresentTypeOfAddDrawCell:)])
+    {
+        
+        [self.delegate choosePresentTypeOfAddDrawCell:self];
+    }
+}
+-(void)textFieldDidEndEditing:(UITextField *)textField
+{
+    if ([self.delegate respondsToSelector:@selector(addDrawCell:prizeNameTF:prizeCountTF:prizeNumberTF:prizeChance:prizeMoney:type:)]) {
+        
+        [self.delegate addDrawCell:self prizeNameTF:self.prizeNameTF prizeCountTF:self.prizeCount prizeNumberTF:self.prizeNumber prizeChance:self.prizeChance prizeMoney:self.prizeSingeMoneyTF type:[self.redBagBtn.titleLabel.text integerValue]];
+    }
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+ 
+
+
+
+
+
+
+
+
+
+@end

@@ -1,0 +1,227 @@
+//
+//  VerifyDetailView.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/8/25.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "VerifyDetailView.h"
+#import "VerifyVipCardModel.h"
+
+@interface VerifyDetailView ()
+
+@property (nonatomic, strong) UIScrollView *scrollView;
+
+@end
+
+@implementation VerifyDetailView
+
+- (instancetype)initWithFrame:(CGRect)frame{
+    self = [super initWithFrame:frame];
+    if (self) {
+    }
+    return self;
+}
+
+- (void)setDataArray:(NSArray *)dataArray{
+    VerifyVipCardModel *cardModel;
+    VerifyVipCardModel *czkCardModel;
+    VerifyVipCardModel *yhkCardModel;
+    if (dataArray.count == 1) {
+        cardModel = (VerifyVipCardModel *)dataArray[0];
+        _scrollView = [[UIScrollView alloc]init];
+        _scrollView.frame = CGRectMake(0, 0, SCREEN_SIZE.width, SCREEN_SIZE.height);
+        _scrollView.contentSize = CGSizeMake(SCREEN_SIZE.width, SCREEN_SIZE.height);
+    }else{
+        czkCardModel = dataArray[0];
+        yhkCardModel = dataArray[1];
+        _scrollView = [[UIScrollView alloc]init];
+        _scrollView.frame = CGRectMake(0, 0, SCREEN_SIZE.width, SCREEN_SIZE.height);
+        _scrollView.contentSize = CGSizeMake(SCREEN_SIZE.width, 800);
+    }
+    
+    [self addSubview:_scrollView];
+    UIView *backgroundView = [[UIView alloc]init];
+    backgroundView.backgroundColor = [UIColor whiteColor];
+    backgroundView.layer.borderWidth = 1;
+    backgroundView.layer.borderColor = [UIColor colorWithHexString:@"dadada"].CGColor;
+    [_scrollView addSubview:backgroundView];
+    [backgroundView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(_scrollView).offset(12);
+        make.left.right.equalTo(_scrollView);
+        make.height.mas_equalTo(@293);
+    }];
+    
+    for (int i = 0; i < 5; i ++) {
+        UIView *lineView = [[UIView alloc]init];
+        lineView.backgroundColor = [UIColor colorWithHexString:@"e5e5e5"];
+        [backgroundView addSubview:lineView];
+        [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(@1);
+            make.left.equalTo(_scrollView).offset(15);
+            make.top.equalTo(backgroundView.mas_top).offset(48 * (i + 1) + (i - 1));
+            make.right.equalTo(backgroundView);
+        }];
+    }
+    
+    NSArray *labelNameArray = @[@"会员手机号码",@"会员卡号",@"会员卡类型",@"会员卡级别",@"会员卡折扣",@"余额"];
+    
+    for (int i = 0; i < labelNameArray.count; i ++) {
+        UILabel *msgNameLabel  =[[UILabel alloc]init];
+        msgNameLabel.textAlignment = NSTextAlignmentLeft;
+        msgNameLabel.text = labelNameArray[i];
+        msgNameLabel.textColor = [UIColor blackColor];
+        msgNameLabel.font = [UIFont systemFontOfSize:15];
+        [backgroundView addSubview:msgNameLabel];
+        [msgNameLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(@48);
+            make.left.equalTo(backgroundView).offset(15);
+            make.width.mas_equalTo(@126);
+            make.top.equalTo(backgroundView).offset(i * 49);
+        }];
+    }
+    
+    NSArray *detailArray;
+    if(dataArray.count == 1){
+        NSString *carType;
+        if ([cardModel.BUSINESS_TYPE isEqualToString:@"1"]) {
+            carType = @"储值卡";
+        }else{
+            carType = @"优惠卡";
+        }
+        detailArray = @[cardModel.USER_MOBILE,cardModel.U_ID,carType,cardModel.CARD_LEVEL,[NSString stringWithFormat:@"%@(%@)",cardModel.DISCOUNT,cardModel.REMARKS],cardModel.CARD_NUM];
+    }else{
+        NSString *carType;
+        if ([czkCardModel.BUSINESS_TYPE isEqualToString:@"1"]) {
+            carType = @"储值卡";
+        }else{
+            carType = @"优惠卡";
+        }
+        detailArray = @[czkCardModel.USER_MOBILE,czkCardModel.U_ID,carType,czkCardModel.CARD_LEVEL,[NSString stringWithFormat:@"%@(%@)",czkCardModel.DISCOUNT,czkCardModel.REMARKS],czkCardModel.CARD_NUM];
+    }
+    
+    for (int i = 0; i < detailArray.count; i ++) {
+        UILabel *detailLabel  =[[UILabel alloc]init];
+        detailLabel.textAlignment = NSTextAlignmentLeft;
+        detailLabel.text = detailArray[i];
+        detailLabel.textColor = [UIColor colorWithHexString:@"888888"];
+        detailLabel.font = [UIFont systemFontOfSize:15];
+        [backgroundView addSubview:detailLabel];
+        [detailLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(@48);
+            make.left.equalTo(backgroundView).offset(126 + 15);
+            make.right.equalTo(backgroundView);
+            make.top.equalTo(backgroundView).offset(i * 49);
+        }];
+    }
+    
+    UIView *expenditureView = [[UIView alloc]init];
+    expenditureView.backgroundColor = [UIColor whiteColor];
+    expenditureView.layer.borderWidth = 1;
+    expenditureView.layer.borderColor = [UIColor colorWithHexString:@"dadada"].CGColor;
+    [_scrollView addSubview:expenditureView];
+    [expenditureView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(backgroundView.mas_bottom).offset(12);
+        make.left.right.equalTo(backgroundView);
+        make.height.mas_equalTo(@48);
+    }];
+    
+    UITextField *expenditureTF = [[UITextField alloc]init];
+    expenditureTF.placeholder = @"请输入本次消费金额";
+    expenditureTF.font = [UIFont systemFontOfSize:16];
+    expenditureTF.textColor = [UIColor colorWithHexString:@"cccccc"];
+    [_scrollView addSubview:expenditureTF];
+    [expenditureTF mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(expenditureView).offset(15);
+        make.right.bottom.top.equalTo(expenditureView);
+    }];
+    
+    UIButton *confirmBtn = [[UIButton alloc]init];
+    [confirmBtn setTitle:@"确认扣减" forState:UIControlStateNormal];
+    [confirmBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    confirmBtn.backgroundColor = [UIColor colorWithHexString:@"01aafe"];
+    confirmBtn.layer.cornerRadius = 5;
+    [_scrollView addSubview:confirmBtn];
+    [confirmBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(expenditureView.mas_bottom).offset(20);
+        make.left.equalTo(_scrollView).offset(15);
+        make.height.mas_equalTo(@48);
+        make.right.equalTo(_scrollView.mas_centerX).offset(-8.5);
+    }];
+    
+    UIButton *cancelBtn = [[UIButton alloc]init];
+    [cancelBtn setTitle:@"取消" forState:UIControlStateNormal];
+    [cancelBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    cancelBtn.backgroundColor = [UIColor whiteColor];
+    cancelBtn.layer.cornerRadius = 5;
+    [_scrollView addSubview:cancelBtn];
+    [cancelBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(expenditureView.mas_bottom).offset(20);
+        make.left.equalTo(confirmBtn.mas_right).offset(17);
+        make.height.mas_equalTo(@48);
+        make.right.equalTo(_scrollView).offset(-15);
+    }];
+    
+    if (dataArray.count == 2) {
+        UIView *secondBackgroundView = [[UIView alloc]init];
+        secondBackgroundView.backgroundColor = [UIColor whiteColor];
+        secondBackgroundView.layer.borderColor = [UIColor colorWithHexString:@"dadada"].CGColor;
+        secondBackgroundView.layer.borderWidth = 1;
+        [_scrollView addSubview:secondBackgroundView];
+        [secondBackgroundView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.equalTo(_scrollView);
+            make.top.equalTo(cancelBtn.mas_bottom).offset(20);
+            make.height.mas_equalTo(@244);
+        }];
+        
+        NSArray *labelNameArray = @[@"会员手机号码",@"会员卡号",@"会员卡类型",@"会员卡级别",@"会员卡折扣"];
+        
+        for (int i = 0; i < labelNameArray.count; i ++) {
+            UILabel *msgNameLabel  =[[UILabel alloc]init];
+            msgNameLabel.textAlignment = NSTextAlignmentLeft;
+            msgNameLabel.text = labelNameArray[i];
+            msgNameLabel.textColor = [UIColor blackColor];
+            msgNameLabel.font = [UIFont systemFontOfSize:15];
+            [secondBackgroundView addSubview:msgNameLabel];
+            [msgNameLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.height.mas_equalTo(@48);
+                make.left.equalTo(secondBackgroundView).offset(15);
+                make.width.mas_equalTo(@126);
+                make.top.equalTo(secondBackgroundView).offset(i * 49);
+            }];
+        }
+        
+        for (int i = 0; i < 4; i ++) {
+            UIView *lineView = [[UIView alloc]init];
+            lineView.backgroundColor = [UIColor colorWithHexString:@"e5e5e5"];
+            [secondBackgroundView addSubview:lineView];
+            [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.height.mas_equalTo(@1);
+                make.left.equalTo(_scrollView).offset(15);
+                make.top.equalTo(secondBackgroundView.mas_top).offset(48 * (i + 1) + (i - 1));
+                make.right.equalTo(secondBackgroundView);
+            }];
+        }
+        
+
+        NSArray *detailArray = @[yhkCardModel.USER_MOBILE,yhkCardModel.CARD_ID,@"优惠卡",yhkCardModel.CARD_LEVEL,[NSString stringWithFormat:@"%@(%@)",yhkCardModel.DISCOUNT,yhkCardModel.REMARKS]];
+        
+        for (int i = 0; i < detailArray.count; i ++) {
+            UILabel *detailLabel  =[[UILabel alloc]init];
+            detailLabel.textAlignment = NSTextAlignmentLeft;
+            detailLabel.text = detailArray[i];
+            detailLabel.textColor = [UIColor colorWithHexString:@"888888"];
+            detailLabel.font = [UIFont systemFontOfSize:15];
+            [secondBackgroundView addSubview:detailLabel];
+            [detailLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.height.mas_equalTo(@48);
+                make.left.equalTo(secondBackgroundView).offset(126 + 15);
+                make.right.equalTo(secondBackgroundView);
+                make.top.equalTo(secondBackgroundView).offset(i * 49);
+            }];
+        }
+    }
+}
+
+@end

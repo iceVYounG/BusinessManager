@@ -1,0 +1,481 @@
+//
+//  EC_TitleEdtitng.m
+//  BusinessManager
+//
+//  Created by 王启明 on 16/8/16.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "EC_TitleEdtitng.h"
+#import "UIColor+Hex.h"
+#import "Masonry.h"
+#import "EC_proTabCell.h"
+#import "EC_ProductRelatedVC.h"
+#import "JMPickCollectView.h"
+@interface EC_TitleEdtitng ()<UITableViewDelegate,UITableViewDataSource,UIImagePickerControllerDelegate,UINavigationControllerDelegate>{
+    UITextField *titleTF;
+}
+@property (nonatomic,strong)UITableView *myTab;
+@property (nonatomic,strong)UIView *headView;
+@property (nonatomic,strong)UIView *footView;
+@property (nonatomic,strong)NSMutableDictionary *dataDIc;
+@property (nonatomic,assign)NSInteger section;
+@property (nonatomic,strong)NSMutableDictionary *imgeDic;
+@property (nonatomic,strong)PartModel *partModel;
+@property (nonatomic,strong)NSMutableArray *imageArray;
+
+
+@end
+
+@implementation EC_TitleEdtitng
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title=@"轮播图编辑";
+    self.view.backgroundColor=[UIColor whiteColor];
+    [self refreshUI];
+    
+    // Do any additional setup after loading the view.
+}
+
+#pragma mark-private methods
+- (void)refreshUI{
+    self.view.backgroundColor=[UIColor colorWithHexString:@"#f6f5fa"];
+    [self.view addSubview:self.myTab];
+    [self.myTab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(self.view).insets(UIEdgeInsetsMake(0, 0, 0, 0));
+    }];
+
+}
+
+- (void)uploadImage:(UIImage *)image indexPath:(NSIndexPath *)indexPath{
+    CGFloat offSet = 1;
+    if (image.size.height > 750) {
+        offSet = image.size.height / 750;
+    }
+    NSString *key=[NSString stringWithFormat:@"%@",@(indexPath.section)];
+    NSData* imageData = UIImageJPEGRepresentation(UIImageScaleToSize(image, CGSizeMake(image.size.width/offSet,image.size.height/offSet)), 1.0);
+    NSString* imageDataStr = [imageData base64EncodedString];
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    [params setObject:imageDataStr forKey:@"code"];
+    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [params setObject:@"png" forKey:@"suffix"];
+    
+    [[MallNetManager share] request:API_ImageUpload prams:params succeed:^(id responseObject)   {
+        ImageUpLoadBackModel* rsp = [ImageUpLoadBackModel mj_objectWithKeyValues:responseObject];
+        
+        if (Succeed(rsp)) {
+           // [self.imageArray addObject:rsp.data.imgPath];
+            [self.imgeDic setObject:rsp.data.imgPath forKey:key];
+            [self.myTab reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            
+        }
+        
+        else{
+            [OMGToast showWithText:@"图片上传失败，请重新上传"];
+            
+        }
+        
+    } showHUD:(YES)];
+    
+}
+
+
+
+- (void)requestSaveWithLunBo{
+    NSArray *dataArray=[self.dataDIc allKeys];
+    PartModel* model = [[PartModel alloc] init];
+     NSMutableArray *array=[[NSMutableArray alloc]init];
+    self.imageArray=[[self.imgeDic allValues] mutableCopy];
+    if (!self.dataSource) {
+    model.templateModelname = titleTF.text;
+    model.id=0;
+    model.templateModelnameCode = LunBT;
+    model.templateNo = DianShang;
+    model.storeId = NoNullStr(AccountInfo.storeId, @"");
+        TemplateModelData* data = [[TemplateModelData alloc] init];
+        [self.imageArray enumerateObjectsUsingBlock:^(NSString  *obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            TemplateModel* temp = [[TemplateModel alloc] init];
+            NSString *key=[NSString stringWithFormat:@"%@",@(idx)];
+            if([dataArray containsObject:key]){
+                TemplateModel *model1=self.dataDIc[key];
+                temp=model1;
+            }
+            temp.imgPath=obj;
+            temp.type=@"1";
+            [array addObject:temp];
+        }];
+        data.date = [array copy];
+        model.templateModelnameDate = data;
+    }else{
+        [self.imageArray enumerateObjectsUsingBlock:^(NSString  *obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            TemplateModel* temp = [[TemplateModel alloc] init];
+            NSString *key=[NSString stringWithFormat:@"%@",@(idx)];
+            if([dataArray containsObject:key]){
+                TemplateModel *model1=self.dataDIc[key];
+                temp=model1;
+            }
+            temp.imgPath=obj;
+            temp.type=@"1";
+            [array addObject:temp];
+        }];
+        self.dataSource.templateModelname=titleTF.text;
+        self.dataSource.templateModelnameDate.date = [array copy];
+        model=self.dataSource;
+    
+    }
+    
+        NSArray* arr = @[model];
+    
+    __weak typeof(self) wSelf = self;
+    
+    [[MallNetManager share] request:API_TemplateSave parameters:[arr jm_ArryPrams] success:^(NSURLSessionDataTask *task, id responseObject) {
+        
+        if (Succeed(responseObject)) {
+            
+            SearPartData* rsp = [SearPartData mj_objectWithKeyValues:responseObject];
+            if (rsp) {
+             
+                
+            }
+            wSelf.dataBack(titleTF.text,model,wSelf.dataSource?NO:YES);
+            [wSelf.navigationController popViewControllerAnimated:YES];
+            
+        }else{
+            [OMGToast showWithText:responseObject[@"msg"]];
+            
+        }
+        
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        
+        [OMGToast showWithText:@"服务器忙，请稍后再试！"];
+    }];
+    
+}
+
+#pragma mark-event response
+- (void)addLunBo:(UIButton *)Sender{
+    NSArray *titleArr=[self.dataDIc allKeys];
+    NSArray *dataArr=[self.imgeDic allKeys];
+    NSString *sectionStr=[NSString stringWithFormat:@"%@",@(self.section-1)];
+    if(titleArr.count==dataArr.count&&titleArr.count!=0&&[[titleArr lastObject]isEqualToString:sectionStr] ){
+        self.section++;
+        [self.myTab reloadData];
+    }else{
+        [OMGToast showWithText:@"请填写完整"];
+    }
+}
+
+- (void)saveModel:(UIButton *)Sender{
+    
+    if (![titleTF.text isEqualToString:@""]) {
+        [self requestSaveWithLunBo];
+        [self.navigationController popViewControllerAnimated:YES];
+    }else{
+        [OMGToast showWithText:@"标题缺少"];
+    }
+
+    
+    
+   
+}
+
+- (void)cancelAction:(UIButton *)Sender{
+    EC_proTabCell *cell=(EC_proTabCell *)[[Sender superview]superview];
+    NSIndexPath *indexPath=[self.myTab indexPathForCell:cell];
+    [self.dataDIc removeObjectForKey:[NSString stringWithFormat:@"%@",@(indexPath.section)]];
+    [self.myTab reloadSections:[NSIndexSet indexSetWithIndex:indexPath.section] withRowAnimation:UITableViewRowAnimationNone];
+
+}
+#pragma mark-tableViewDataSource
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return 2;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+
+    return self.section==0?1:self.section;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+     NSString *key=[NSString stringWithFormat:@"%@",@(indexPath.section)];
+    if (indexPath.row==0) {
+        UITableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:@"cell"];
+        if (!cell) {
+            cell=[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"cell"];
+            UIImageView *imageV=[UIImageView new];
+            imageV.image=[UIImage imageNamed:@"addImage"];
+            [cell.contentView addSubview:imageV];
+            [imageV mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.centerX.equalTo(cell.mas_centerX);
+                make.top.equalTo(cell).offset(44);
+                make.size.mas_equalTo(CGSizeMake(27, 27));
+                
+            }];
+            UILabel *lab=[UILabel new];
+            lab.text=@"点我上传图片";
+            lab.textColor=[UIColor colorWithHexString:@"#bbbbbb"];
+            [cell.contentView addSubview:lab];
+            [lab mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.top.equalTo(imageV.mas_bottom).offset(10);
+                make.centerX.equalTo(cell.mas_centerX);
+                make.height.equalTo(@10);
+            }];
+            UIImageView *imgeV=[UIImageView new];
+            imgeV.tag=10;
+            imgeV.backgroundColor=[UIColor colorWithHexString:@"#e8e8e8" alpha:0.5];
+            [cell.contentView addSubview:imgeV];
+            [imgeV mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.left.right.top.equalTo(cell);
+                make.height.equalTo(@174);
+            }];
+            UILabel *selectImageLab=[UILabel new];
+            selectImageLab.text=@"*图片尺寸建议：750*278（像素）";
+            selectImageLab.font=[UIFont systemFontOfSize:13];
+            selectImageLab.textColor=[UIColor colorWithHexString:@"#F15A4A"];
+            selectImageLab.textAlignment=NSTextAlignmentCenter;
+            selectImageLab.userInteractionEnabled=YES;
+            selectImageLab.backgroundColor=[UIColor colorWithHexString:@"#f6f5fa"];
+            [cell.contentView addSubview:selectImageLab];
+            [selectImageLab mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.centerX.equalTo(cell);
+                make.top.equalTo(imgeV.mas_bottom).offset(10);
+                make.height.equalTo(@30);
+            }];
+            cell.selectionStyle=UITableViewCellSelectionStyleNone;
+             cell.backgroundColor=[UIColor colorWithHexString:@"#f6f5fa"];
+        }
+        UIImageView *imageV=[cell viewWithTag:10];
+         if (![[self.imgeDic allKeys] containsObject:key]) {
+          imageV.image=nil;
+         }else{
+       [imageV sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",ImagePre ,self.imgeDic[key]]]];
+         }
+        return cell;
+    }else{
+        if (![[self.dataDIc allKeys] containsObject:key]) {
+            UITableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:@"cell1"];
+            if (!cell) {
+                cell=[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"cell1"];
+                UILabel *lab=[UILabel new];
+                lab.textColor=[UIColor colorWithHexString:@"#01aaef"];
+                lab.layer.cornerRadius=4;
+                lab.layer.masksToBounds=YES;
+                lab.layer.borderWidth=1.0f;
+                lab.layer.borderColor=[UIColor colorWithHexString:@"#01aaef"].CGColor;
+                lab.textAlignment=NSTextAlignmentCenter;
+                lab.text=@"关联商品";
+                lab.font=[UIFont systemFontOfSize:18];
+                [cell.contentView addSubview:lab];
+                [lab mas_makeConstraints:^(MASConstraintMaker *make) {
+                    make.top.equalTo(cell);
+                    make.centerX.equalTo(cell.mas_centerX);
+                    make.size.mas_equalTo(CGSizeMake(106, 36));
+                    
+                }];
+                cell.backgroundColor=[UIColor colorWithHexString:@"#f6f5fa"];
+                cell.selectionStyle=UITableViewCellSelectionStyleNone;
+            }
+            
+            return cell;
+        }else{
+            EC_proTabCell *cell=[tableView dequeueReusableCellWithIdentifier:@"EC_proTabCell" forIndexPath:indexPath];
+            cell.cancelBtn.hidden=NO;
+            [cell.cancelBtn addTarget:self action:@selector(cancelAction:) forControlEvents:UIControlEventTouchUpInside];
+            cell.cancelBtn.tag=indexPath.section;
+           cell.model=self.dataDIc[key];
+            return cell;
+        }
+      
+    }
+
+    return nil;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+      NSString *key=[NSString stringWithFormat:@"%@",@(indexPath.section)];
+    switch (indexPath.row) {
+            case 0:{
+                __weak typeof(self) wSelf = self;
+                [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage){
+                    [wSelf uploadImage:mediaImage indexPath:indexPath];
+                }];
+               
+        }
+            break;
+            case 1:{
+            if (![[self.dataDIc allKeys] containsObject:key]) {
+                EC_ProductRelatedVC *vc=[[EC_ProductRelatedVC alloc]init];
+                vc.isRelated=YES;
+                vc.titleName=@"关联商品";
+                __weak typeof(self) wSelf = self;
+                vc.backModel=^(TemplateModel *model){
+                [wSelf.dataDIc setValue:model forKey:[NSString stringWithFormat:@"%@",@(indexPath.section)]];
+                    [wSelf.myTab reloadSections:[NSIndexSet indexSetWithIndex:indexPath.section] withRowAnimation:UITableViewRowAnimationNone];
+                };
+                [self.navigationController pushViewController:vc animated:YES];
+            }
+        }
+            break;
+        default:
+            break;
+    }
+
+
+}
+
+#pragma mark-TableViewDelegate;
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (indexPath.row==0) {
+        return 214;
+    }
+    return 67;
+    
+}
+
+#pragma mark-getter&&setter
+- (UITableView *)myTab{
+    if (!_myTab) {
+        _myTab=[[UITableView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, KScreenHeight-NavigationH) style:UITableViewStyleGrouped];
+        _myTab.tableHeaderView=self.headView;
+        _myTab.tableFooterView=self.footView;
+        _myTab.dataSource=self;
+        _myTab.delegate=self;
+        _myTab.backgroundColor=[UIColor colorWithHexString:@"#f6f5fa"];
+        [_myTab registerNib:[UINib nibWithNibName:@"EC_proTabCell" bundle:nil] forCellReuseIdentifier:@"EC_proTabCell"];
+        _myTab.sectionFooterHeight=15;
+        _myTab.sectionHeaderHeight=0;
+
+    }
+    return _myTab;
+}
+
+-(UIView *)headView{
+    if (!_headView) {
+        _headView=[UIView new];
+        _headView.backgroundColor=[UIColor colorWithHexString:@"#f6f5fa"];
+        _headView.frame=CGRectMake(0, 0, KScreenWidth, 78);
+        titleTF=[[UITextField alloc]init];
+        UIView *view=[UIView new];
+        view.bounds=CGRectMake(0, 0, 20, 46);
+        titleTF.leftView=view;
+        titleTF.leftViewMode=UITextFieldViewModeAlways;
+        titleTF.placeholder=@"请输入栏目名称";
+        titleTF.backgroundColor=[UIColor colorWithHexString:@"#ffffff"];
+        titleTF.font = [UIFont systemFontOfSize:14];
+        titleTF.returnKeyType = UIReturnKeyDone;
+        titleTF.layer.borderWidth=1.0f;
+        titleTF.layer.borderColor=[UIColor colorWithHexString:@"#dadada"].CGColor;
+        [_headView addSubview:titleTF];
+        [titleTF mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(_headView).offset(15);
+            make.left.equalTo(_headView).offset(-1);
+            make.right.equalTo(_headView).offset(1);
+            make.height.equalTo(@46);
+        }];
+
+    }
+    return _headView;
+}
+
+- (UIView *)footView{
+    if (!_footView) {
+        _footView=[UIView new];
+        _footView.backgroundColor=[UIColor whiteColor];
+        _footView.frame=CGRectMake(0, 0, KScreenWidth, 161);
+        UIButton *addLunBo=[UIButton buttonWithType:UIButtonTypeSystem];
+        [addLunBo setBackgroundImage:[UIImage imageNamed:@"addImage"] forState:UIControlStateNormal];
+         [addLunBo addTarget:self action:@selector(addLunBo:) forControlEvents:UIControlEventTouchUpInside];
+        [_footView addSubview:addLunBo];
+        [addLunBo mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(_footView).offset(9);
+            make.centerX.equalTo(_footView);
+            make.size.mas_equalTo(CGSizeMake(27, 27));
+        }];
+        UILabel *titleLb=[UILabel new];
+        titleLb.text=@"点击新增轮播图";
+        [_footView addSubview:titleLb];
+        [titleLb mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(addLunBo.mas_bottom).offset(7);
+            make.centerX.equalTo(_footView);
+            make.height.equalTo(@15);
+        }];
+        UIButton *saveBtn=[UIButton buttonWithType:UIButtonTypeSystem];
+        [saveBtn setBackgroundColor:[UIColor colorWithHexString:@"#01aaef"]];
+        [saveBtn setTitle:@"保存" forState:UIControlStateNormal];
+        [saveBtn setTitleColor:[UIColor colorWithHexString:@"#FFFFFF"] forState:UIControlStateNormal];
+        saveBtn.layer.cornerRadius=4;
+        saveBtn.layer.masksToBounds=YES;
+        [saveBtn addTarget:self action:@selector(saveModel:) forControlEvents:UIControlEventTouchUpInside];
+        [_footView addSubview:saveBtn];
+        UIImageView *imageV=[UIImageView new];
+        imageV.backgroundColor=[UIColor colorWithHexString:@"#e8e8e8" alpha:0.5];
+        [_footView addSubview:imageV];
+        [imageV mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.left.right.equalTo(_footView);
+            make.height.equalTo(@77);
+        }];
+        [saveBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(imageV.mas_bottom).offset(20);
+            make.left.equalTo(_footView).offset(15);
+            make.right.equalTo(_footView).offset(-15);
+            make.height.equalTo(@44);
+        }];
+    }
+    return _footView;
+}
+
+- (NSMutableDictionary *)dataDIc{
+    if (!_dataDIc) {
+        _dataDIc=[[NSMutableDictionary alloc]init];
+    }
+    return _dataDIc;
+}
+
+- (NSMutableDictionary *)imgeDic{
+    if (!_imgeDic) {
+        _imgeDic=[[NSMutableDictionary alloc]init];
+    }
+    return _imgeDic;
+}
+
+- (NSMutableArray *)imageArray  {
+    if (!_imageArray) {
+        _imageArray=[[NSMutableArray alloc]init];
+    }
+    return _imageArray;
+}
+
+- (void)setDataSource:(PartModel *)dataSource{
+    _dataSource=dataSource;
+    if (dataSource) {
+    self.section=dataSource.templateModelnameDate.date.count;
+    [dataSource.templateModelnameDate.date enumerateObjectsUsingBlock:^(TemplateModel *obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSString *key=[NSString stringWithFormat:@"%@",@(idx)];
+        [self.imgeDic setObject:obj.imgPath forKey:key];
+        [self.dataDIc setObject:obj forKey:key];
+       
+    }];
+        titleTF.text=dataSource.templateModelname;
+        [self.myTab reloadData];
+    }
+
+
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

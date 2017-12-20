@@ -1,0 +1,43 @@
+//
+//  NewVipCardView.h
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "VipCardMessageTextField.h"
+#import "VipCardModel.h"
+@protocol NewVipCardViewDelegate <NSObject>
+
+- (void)didClickChooseCardType:(NSString *)cardType;
+//zyc
+- (void)saveVIPCardBtn:(UIButton *)saveBtn setModel:(NewVipCardManagerVC_VipCard_Model *)model;
+@end
+
+typedef NS_ENUM(NSInteger,VipCard){
+    VipCardSaving,
+    VipCardCoupon,
+    VipCardNoChoose
+};
+
+@interface NewVipCardView : UIView
+
+- (id)initWithType:(VipCard)type;
+
+@property (nonatomic) VipCard type;
+@property (nonatomic) id<NewVipCardViewDelegate> delegate;
+
+//zyc
+@property (nonatomic, strong) VipCardMessageTextField *cardNameTF;//会员名称
+@property (nonatomic, strong) VipCardMessageTextField *cardDiscountTF;//优惠金额
+@property (nonatomic, strong) VipCardMessageTextField *cardUseDateTF;//有效天数
+@property (nonatomic, strong) UILabel *cardVipLevelLabel;//会员等级
+@property (nonatomic, strong) NSString *cardLevelValue;//会员卡级别id
+@property (nonatomic, strong) NSString *levelName;//新增会员卡级别
+@property (nonatomic, strong) NSMutableArray *cardLevelValueArr;
+@property (nonatomic, strong) NSMutableArray *cardLevelNameArr;
+@property (nonatomic, strong) VipCardMessageTextField *cardDiscountMsgTF;//备注信息
+@property (nonatomic, strong) VipCardMessageTextField *cardMoneyTF;//会员卡储值金额
+@end

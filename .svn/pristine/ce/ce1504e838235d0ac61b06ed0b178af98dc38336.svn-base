@@ -1,0 +1,207 @@
+//
+//  VMRechargeRecordView.m
+//  BusinessManager
+//
+//  Created by KL on 16/8/15.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "VMRechargeRecordView.h"
+
+
+
+@implementation VMRechargeRecordView
+
+- (instancetype)init {
+    if (self = [super init]) {
+        [self setUpViews];
+        self.backgroundColor = [UIColor colorWithHexString:@"#f6f5fa"];
+    }
+    return self;
+}
+
+- (void)setUpViews {
+    
+    //headView
+    UIView *headView = [[UIView alloc] init];
+    headView.backgroundColor = [UIColor whiteColor];
+    [self addSubview:headView];
+    [headView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self).offset(12);
+        make.left.right.equalTo(self);
+        make.height.mas_equalTo(@48);
+    }];
+    
+    //用户手机号码
+    UILabel *phoneNumLab = [[UILabel alloc] init];
+    [phoneNumLab setFont:[UIFont systemFontOfSize:13]];
+    [phoneNumLab setTextAlignment:NSTextAlignmentCenter];
+    [phoneNumLab setTextColor:[UIColor colorWithHexString:@"#333333"]];
+    [headView addSubview:phoneNumLab];
+    [phoneNumLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(headView.mas_centerY);
+        make.left.equalTo(self).offset(15);
+        make.width.mas_equalTo(@92);
+    }];
+    
+    //会员卡名称
+    UILabel *cardNamelab = [[UILabel alloc] init];
+    [cardNamelab setFont:[UIFont systemFontOfSize:13]];
+    [cardNamelab setTextAlignment:NSTextAlignmentCenter];
+    [cardNamelab setTextColor:[UIColor colorWithHexString:@"#333333"]];
+    [headView addSubview:cardNamelab];
+    [cardNamelab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(headView.mas_centerY);
+        make.left.equalTo(phoneNumLab.mas_right);
+        make.width.mas_equalTo(@85);
+    }];
+    
+    //充值金额
+    UILabel *payCountLab = [[UILabel alloc] init];
+    [payCountLab setFont:[UIFont systemFontOfSize:13]];
+    [payCountLab setTextAlignment:NSTextAlignmentCenter];
+    [payCountLab setTextColor:[UIColor colorWithHexString:@"#333333"]];
+    [headView addSubview:payCountLab];
+    [payCountLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(headView.mas_centerY);
+        make.left.equalTo(phoneNumLab.mas_right);
+        make.width.mas_equalTo(@85);
+    }];
+    
+    //充值时间
+    UILabel *timeLab = [[UILabel alloc] init];
+    [timeLab setFont:[UIFont systemFontOfSize:13]];
+    [timeLab setTextAlignment:NSTextAlignmentCenter];
+    [timeLab setTextColor:[UIColor colorWithHexString:@"#333333"]];
+    [headView addSubview:timeLab];
+    [timeLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(headView.mas_centerY);
+        make.left.equalTo(payCountLab.mas_right);
+        make.width.mas_equalTo(@85);
+        make.right.equalTo(self).offset(-15);
+    }];
+    
+    
+    self.recordTableView = [[UITableView alloc] init];
+    self.recordTableView.rowHeight = 48;
+    self.recordTableView.dataSource = self;
+    self.recordTableView.delegate = self;
+    self.recordTableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+    [self addSubview:self.recordTableView];
+    [self.recordTableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(headView.mas_bottom);
+        make.left.right.equalTo(self);
+        make.bottom.equalTo(self);
+    }];
+}
+
+#pragma mark - UITableViewDelegate, DataSource
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return self.dataArry.count;
+    
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    recordTBCell *cell = [tableView dequeueReusableCellWithIdentifier:@"recordTBCell"];
+    if (cell == nil) {
+        cell = [[recordTBCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"recordTBCell"];
+        cell.separatorInset = UIEdgeInsetsMake(0, 15, 0, 15);
+    }
+    
+    return cell;
+}
+
+
+
+
+@end
+
+@implementation recordTBCell
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        [self setUpViews];
+    }
+    return self;
+}
+
+- (void)setUpViews {
+    //PhoneNum;
+    self.phoneNumLab = [[UILabel alloc] init];
+    [self.phoneNumLab setFont:[UIFont systemFontOfSize:13]];
+    [self.phoneNumLab setTextAlignment:NSTextAlignmentCenter];
+    [self.phoneNumLab setTextColor:[UIColor colorWithHexString:@"#666666"]];
+    [self addSubview:self.phoneNumLab];
+    [self.phoneNumLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(self);
+        make.left.equalTo(self).offset(15);
+        make.width.mas_equalTo(@92);
+    }];
+    
+    //cardNameLab
+    self.cardNameLab = [[UILabel alloc] init];
+    [self.cardNameLab setFont:[UIFont systemFontOfSize:13]];
+    [self.cardNameLab setTextAlignment:NSTextAlignmentCenter];
+    [self.cardNameLab setTextColor:[UIColor colorWithHexString:@"#666666"]];
+    [self addSubview:self.cardNameLab];
+    [self.cardNameLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(self);
+        make.left.equalTo(self.phoneNumLab.mas_right);
+        make.width.mas_equalTo(@85);
+    }];
+    
+    //payCountLab
+    self.payCountLab = [[UILabel alloc] init];
+    [self.payCountLab setFont:[UIFont systemFontOfSize:13]];
+    [self.payCountLab setTextAlignment:NSTextAlignmentCenter];
+    [self.payCountLab setTextColor:[UIColor colorWithHexString:@"#666666"]];
+    [self addSubview:self.payCountLab];
+    [self.payCountLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(self);
+        make.left.equalTo(self.cardNameLab.mas_right);
+        make.width.mas_equalTo(@84);
+    }];
+    
+    //timeLabel
+    self.timeLabel = [[UILabel alloc] init];
+    [self.timeLabel setFont:[UIFont systemFontOfSize:13]];
+    [self.timeLabel setTextAlignment:NSTextAlignmentCenter];
+    [self.timeLabel setTextColor:[UIColor colorWithHexString:@"#666666"]];
+    [self addSubview:self.timeLabel];
+    [self.timeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.centerY.equalTo(self);
+        make.left.equalTo(self.payCountLab.mas_right);
+        make.top.bottom.equalTo(self);
+        make.width.mas_equalTo(@84);
+        make.right.equalTo(self).offset(-15);
+    }];
+    
+    
+}
+
+
+
+
+
+
+
+
+
+@end
+
+
+
+
+
+
+
+
+
+
+
+

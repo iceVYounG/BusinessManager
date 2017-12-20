@@ -1,0 +1,41 @@
+//
+//  WZ_AddNewFloorVCViewController.h
+//  BusinessManager
+//
+//  Created by KL on 16/9/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanBaseController.h"
+#import "WeiZhanModel.h"
+
+typedef void(^AddNewFloorPopToSendFloorDataBlock)(PartModel *partModel);
+
+@interface WZ_AddNewFloorVCViewController : WeiZhanBaseController
+
+@property (weak, nonatomic) IBOutlet UITextField *floorNameTF;
+@property (weak, nonatomic) IBOutlet UICollectionView *floorCollectionView;
+@property (weak, nonatomic) IBOutlet UIButton *saveBtn;
+- (IBAction)saveBtnClick:(UIButton *)sender;
+
+//--------block-----------//
+@property (nonatomic, copy) AddNewFloorPopToSendFloorDataBlock addNewFloorPopToSendFloorDataBlock;
+
+//----楼层商品model---------//
+//@property (nonatomic, strong) PartModel *goodsModel;
+@property (nonatomic, strong) TemplateModel *goodsModel;
+///*楼层编码，不可重复*/
+@property (nonatomic, strong) NSString *floorCode;
+///*上一个楼层编码（若该楼层排序为第一，preCode传0，否则传上一楼层的楼层编码）*/
+@property (nonatomic, strong) NSString *preCode;
+/*模板类型*/
+@property (nonatomic, strong) NSString *templateNo;
+/*是否是体验账号*/
+@property (nonatomic, assign) BOOL isTioYanAccount;
+///*楼层名称*/
+//@property (nonatomic, strong) NSString *floorName;
+///*楼层包涵的商品（只需ID即可) 封装进 array*/
+//@property (nonatomic, strong) NSArray *gooodsItemsArray;
+
+
+@end

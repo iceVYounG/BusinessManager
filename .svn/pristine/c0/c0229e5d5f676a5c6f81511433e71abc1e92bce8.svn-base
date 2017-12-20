@@ -1,0 +1,43 @@
+//
+//  billTopCell.m
+//  BusinessManager
+//
+//  Created by 张心亮 on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "billTopCell.h"
+
+@implementation billTopCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    
+    
+    
+}
+
+
+//- (void)drawRect:(CGRect)rect{
+//    [super drawRect:rect];
+//    UIBezierPath *bezierPath = [UIBezierPath bezierPath];
+//    
+//    [bezierPath moveToPoint:CGPointMake(-500, 0.0)];
+//    [bezierPath addLineToPoint:CGPointMake(rect.size.width, .5)];
+//    [[UIColor colorWithHexString:@"#e5e5e5"] setStroke];
+//    [bezierPath setLineWidth:.5];
+//    [bezierPath stroke];
+//    
+//    
+//}
+
+
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+    
+    // Configure the view for the selected state
+}
+
+
+@end

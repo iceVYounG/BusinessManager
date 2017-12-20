@@ -1,0 +1,17 @@
+//
+//  WatchGhostMainCell.h
+//  BusinessManager
+//
+//  Created by KL on 16/7/27.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface WatchGhostMainCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UILabel *cameraID;
+@property (weak, nonatomic) IBOutlet UILabel *cameraNameLab;
+@property (weak, nonatomic) IBOutlet UILabel *cameraStatuLab;
+@property (weak, nonatomic) IBOutlet UIImageView *cameraArrow;
+
+@end

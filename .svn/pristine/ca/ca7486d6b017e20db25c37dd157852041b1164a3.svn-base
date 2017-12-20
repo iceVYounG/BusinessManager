@@ -1,0 +1,139 @@
+//
+//  NewLoginVC.m
+//  BusinessManager
+//
+//  Created by 张心亮 on 16/9/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "NewLoginVC.h"
+#import "LoginVC.h"
+#import "RegisterVC.h"
+#import "BaseNavigationController.h"
+@interface NewLoginVC ()
+{
+    NSString *username;
+    NSString *userpasswd;
+}
+
+@end
+
+@implementation NewLoginVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self initView];
+    self.backItemHiden=YES;
+    self.title=@"启动页";
+}
+
+-(void)initView{
+    self.loginBtn.layer.cornerRadius=20;
+    self.registBtn.layer.cornerRadius=20;
+    self.registBtn.layer.borderWidth=1;
+    self.registBtn.layer.borderColor=[UIColor colorWithHexString:@"#00aaee"].CGColor;
+
+
+}
+
+- (IBAction)tiyanVStation:(id)sender {
+    
+    
+}
+- (IBAction)gotoLogin:(id)sender {
+
+    
+    HomeController* homeVC = [[HomeController alloc]init];
+    LoginVC* loginVC = [[LoginVC alloc]initWithBlock:^{
+        
+        UIViewController *vc = [[BaseNavigationController alloc]initWithRootViewController:homeVC];
+        [self presentViewController:vc animated:YES completion:nil];
+    }];
+    [self.navigationController pushViewController:loginVC animated:YES];
+    
+}
+- (IBAction)gotoRegist:(id)sender {
+    
+    
+    WS(weakSelf);
+    RegisterVC *vc = [[RegisterVC alloc]initWithNibName:@"RegisterVC" bundle:nil];
+    vc.registerBlock = ^(NSString *phone,NSString *pwd){
+        
+        [weakSelf requestLogin:phone andPassword:pwd];
+
+        
+    };
+    [self.navigationController pushViewController:vc animated:YES];
+
+    
+    
+}
+
+
+
+-(void)requestLogin:(NSString *)userName andPassword:(NSString *)passWd{
+    
+    NSMutableDictionary *manger = [NSMutableDictionary dictionary];
+    username = userName;
+    userpasswd = [passWd md5];
+    
+    [manger setObject:username forKey:@"name"];
+    [manger setObject:userpasswd forKey:@"pwd"];
+    
+    //    [[MallNetworkEngine loginshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_LoginHost Params:manger CompletionHandler:^(MKNetworkOperation *completedOperation) {
+    
+    //登录改为测试地址以测试会员管理
+    [[MallNetworkEngine vipCardMGshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_LoginHost Params:manger CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        
+        NSDictionary *dic=[completedOperation responseDecodeToDic];
+        
+        if ([[dic objectForKey:@"code"] isEqualToString:@"00-00"])  {
+            
+            NSLog(@"登录成功");
+            NSDictionary *tempdic = [dic objectForKey:@"data"];
+            AccountInfo.storeId = [tempdic objectForKey:@"storeId"];
+            AccountInfo.storeName = [tempdic objectForKey:@"storeName"];
+            AccountInfo.linkPhone = [tempdic objectForKey:@"linkPhone"];
+            AccountInfo.b2cmsg = [tempdic objectForKey:@"b2cmsg"];
+            AccountInfo.b2cStoreId = [tempdic objectForKey:@"b2cStoreId"];
+            AccountInfo.isLogin = YES;
+            
+            
+            HomeController *vc = [[HomeController alloc]initWithNibName:@"HomeController" bundle:nil];
+            UIViewController *nvc=[[BaseNavigationController alloc]initWithRootViewController:vc];
+            [self presentViewController:nvc animated:NO completion:^{
+                
+            }];
+            
+        }
+        else{
+            
+            [OMGToast showWithText:[dic objectForKey:@"msg"]];
+        }
+        
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        
+        [OMGToast showWithText:@"服务器忙，请稍后再试！"];
+    }];
+    
+    
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

@@ -1,0 +1,261 @@
+//
+//  YuyueBaoYangVC.m
+//  BusinessManager
+//
+//  Created by 张心亮 on 16/9/5.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "YuyueBaoYangVC.h"
+#import "JMView.h"
+#import "YuyueDetailEditCell.h"
+#import "WeiZhanModel.h"
+
+@interface YuyueBaoYangVC ()<UITableViewDelegate,UITableViewDataSource,ShopEditCellDeledate>
+@property(nonatomic,strong)UITableView* tableView;
+@property (strong, nonatomic) IBOutletCollection(UIButton) NSArray *baoYangBtns;
+@end
+
+@implementation YuyueBaoYangVC
+
+-(instancetype)initWithBlock:(CallBack)block{
+    
+    if (self = [super init]) {
+        self.block = block;
+    }
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.view.backgroundColor = [UIColor colorWithHexString:@"#f6f5fa"];
+    
+    if (SCREEN_SIZE.width<330) {
+        for (UIButton *buttom in self.baoYangBtns) {
+            buttom.titleLabel.textAlignment=NSTextAlignmentRight;
+        }        
+    }
+    
+}
+
+-(void)setModel:(PartModel *)model{
+    _model = model;
+    
+    NSArray* keys = KeysArry;
+    [_model.templateModelnameDate.date enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        TemplateModel* model = (TemplateModel*)obj;
+        if (![keys containsObject:model.code]) {
+            
+            [self.datasArry addObject:obj];
+        }
+    }];
+    
+    if (self.datasArry.count==0) {
+        NSMutableArray *codeArr=[NSMutableArray arrayWithObjects:@"yyby1",@"yyby2",@"yyby3",@"yyby4",@"yyby5", nil];
+        NSMutableArray *valueArr=[NSMutableArray arrayWithObjects:@"联系人姓名",@"联系手人机号码",@"需要保养的车型",@"保养的时间",@"需要保养的项目",nil];
+        NSMutableArray *typeArr=[NSMutableArray arrayWithObjects:@"1",@"1",@"1",@"2",@"1", nil];
+        for (int i=0; i<5; i++) {
+            TemplateModel *model=[[TemplateModel alloc]init];
+            model.code=codeArr[i];
+            model.name=valueArr[i];
+            model.type=typeArr[i];
+            [self.datasArry addObject:model];
+        }
+    }
+
+    [self tableView];
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    
+    return self.datasArry.count-5;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    TemplateModel* mData = [self.datasArry objectAtIndex:indexPath.row+5];
+    
+    NSPredicate* predice = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",@"zdy[0-9]+"];
+    
+    if (![predice evaluateWithObject:mData.code]) {
+        NSString* idengfier=@"ShopServerCell_ident";
+        YuyueDetailEditCell *cell = [tableView dequeueReusableCellWithIdentifier:idengfier];
+        if (!cell) {
+            cell = [[[NSBundle mainBundle] loadNibNamed:@"ShopServerCell" owner:nil options:nil] objectAtIndex:0];
+        }
+        cell.selectionStyle = 0;
+        cell.model = mData;
+        
+        return cell;
+    }
+    NSString* idengfier=@"ShopServerEditCell_ident";
+    YuyueDetailCell *cell = [tableView dequeueReusableCellWithIdentifier:idengfier];
+    if (!cell) {
+        cell = [[YuyueDetailCell alloc]initWithStyle:0 reuseIdentifier:idengfier];
+    }
+    cell.selectionStyle = 0;
+    cell.model = mData;
+    cell.delegate = self;
+    
+    return cell;
+    
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    return 44;
+}
+
+
+-(void)requestUpload{
+    
+    
+    
+    for (TemplateModel* model in self.datasArry.copy) {
+        
+        if (model.name.length == 0) {
+            
+            for (TemplateModel* mod in self.datasArry) {
+                if ([mod.code isEqualToString:model.code]) {
+                    
+                    [self.datasArry removeObject:mod];
+                    break;
+                }
+            }
+        }else if (model.name.length > 0){
+            
+            //buchuli...
+        }else{
+            [OMGToast showWithText:@"请完善栏目信息"];
+            return;
+        }
+    }
+    
+    PartModel* model;
+    if (!self.model) {
+        model = [[PartModel alloc] init];
+        
+        model.storeId = NoNullStr(AccountInfo.storeId, @"");
+        model.templateModelname = @"预约保养";
+        model.templateModelnameCode = @"yyby";
+        model.id = self.model.id;
+        
+        TemplateModelData* data = [[TemplateModelData alloc] init];
+        data.date = self.datasArry.copy;
+        model.templateModelnameDate = data;
+        model.templateNo = SiSDian;
+        
+    }else{
+        self.model.templateModelnameDate.date = self.datasArry.copy;
+        model = self.model;
+    }
+    
+    NSArray* arr = @[model];
+    
+    __weak typeof(self) wSelf = self;
+    [self saveTemplte:arr.mutableCopy succeed:^(id responseObject) {
+        
+        wSelf.block(model,self.model?NO:YES);
+        [wSelf.navigationController popViewControllerAnimated:YES];
+        
+    } error:^(NSError *error) {
+        
+    }];
+    
+}
+#pragma mark - Delegate
+-(void)userDidDeleteTheCell:(TemplateModel *)model{
+    
+    for (TemplateModel* data in self.datasArry) {
+        
+        if ([data.code isEqualToString:model.code]) {
+            
+            [self.datasArry removeObject:data];
+            break;
+        }
+    }
+    [self.tableView reloadData];
+}
+
+
+#pragma mark - 初始化
+-(UITableView *)tableView{
+    
+    if (!_tableView) {
+        
+        _tableView = [[UITableView alloc]initWithFrame:CGRectMake(0, 210, KScreenWidth, KScreenHeight - NavigationH-210) style:0];
+        _tableView.delegate = self;
+        _tableView.dataSource = self;
+        _tableView.backgroundColor = [UIColor clearColor];
+        _tableView.separatorStyle = 0;
+        _tableView.tableFooterView = [self footView];
+        [self.view addSubview:_tableView];
+    }
+    return _tableView;
+}
+
+-(UIView*)footView{
+    __weak typeof(self) wSelf = self;
+    UIView* backView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 190)];
+    backView.backgroundColor = [UIColor clearColor];
+    
+    UIView* addBackView = [[UIView alloc]initWithFrame:CGRectMake(0, 15, KScreenWidth, 68)];
+    addBackView.backgroundColor = HexColor(@"#e8e8e8");
+    
+    UIImageView* imagev= [[UIImageView alloc]initWithFrame:CGRectMake((KScreenWidth-27)/2, 12, 27, 27)];
+    imagev.image = [UIImage imageNamed:@"addImage"];
+    UILabel* label = [[UILabel alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(imagev.frame)+3, KScreenWidth, 22)];
+    label.text = @"点击新增";
+    label.textAlignment = 1;
+    label.textColor = HexColor(@"#BBBBBB");
+    [addBackView addSubview:imagev];
+    [addBackView addSubview:label];
+    [backView addSubview:addBackView];
+    
+    UITapGestureRecognizer* tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(addAction)];
+    [addBackView addGestureRecognizer:tap];
+    
+    SaveView* saveView = [[SaveView alloc]initWithFrame:CGRectMake(0, 103, KScreenWidth, 90) tipHiden:YES block:^{
+        
+        [wSelf requestUpload];
+    }];
+    
+    [backView addSubview:saveView];
+    
+    return backView;
+}
+
+-(void)addAction{
+    
+    NSPredicate* predice = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",@"zdy[0-9]+"];
+    
+    TemplateModel* lastModel = [self.datasArry lastObject];
+    
+    TemplateModel* model = [[TemplateModel alloc]init];
+    
+    if (![predice evaluateWithObject:lastModel.code]) {
+        
+        model.code = @"zdy0";
+    }else{
+        
+        NSInteger num = [[lastModel.code substringFromIndex:3] integerValue];
+        
+        model.code = [NSString stringWithFormat:@"zdy%ld",num + 1];
+    }
+    //    model.key = @"";
+    model.name = @"";
+    model.type = @"1";
+    
+    [self.datasArry addObject:model];
+    [self.tableView reloadData];
+}
+
+-(NSMutableArray *)datasArry{
+    
+    if (!_datasArry) {
+        _datasArry = [NSMutableArray array];
+    }
+    return _datasArry;
+}
+
+
+@end

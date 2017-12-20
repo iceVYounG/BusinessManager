@@ -1,0 +1,457 @@
+//
+//  HZCaseDetailVC.m
+//  BusinessManager
+//
+//  Created by 牛志胜 on 16/8/26.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "EditFitmentPriceVC.h"
+#import "JMView.h"
+#import "ShopServerCell.h"
+#import "WeiZhanModel.h"
+#import "HZCaseDetailCell.h"
+#import "JMPickCollectView.h"
+#import "EditFitmentPriceCell.h"
+@interface  EditFitmentPriceVC()<UITableViewDelegate,UITableViewDataSource,ShopEditCellDeledate>
+{
+    NSMutableArray *_selectedPhotos;//选择的照片
+    NSMutableArray *_selectedAssets;
+    BOOL _isSelectOriginalPhoto;// 是否选择了原图
+    NSString *_imagePath;
+    
+    
+}
+@property(nonatomic,strong)UITableView* tableView;
+@property(nonatomic,assign)CGFloat cellHeight;
+@end
+
+@implementation EditFitmentPriceVC
+
+-(instancetype)initWithBlock:(CallBack)block{
+    
+    if (self = [super init]) {
+        
+        self.block = block;
+    }
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"装修报价详情编辑";
+    self.view.backgroundColor = [UIColor groupTableViewBackgroundColor];
+    
+    [self tableView];
+    
+}
+
+
+-(void)setModel:(PartModel *)model{
+    _model = model;
+    
+    NSArray* keys = KeysArry;
+    [_model.templateModelnameDate.date enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        TemplateModel* model = (TemplateModel*)obj;
+        if (![keys containsObject:model.code]) {
+            
+            [self.datasArry addObject:obj];
+        }
+    }];
+    [self tableView];
+}
+
+#pragma maek -UITableViewDelegate DateSource
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    
+    return self.datasArry.count;
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    EditFitmentPriceCell *cell = [[[NSBundle mainBundle] loadNibNamed:@"EditFitmentPriceCell" owner:nil options:nil] objectAtIndex:0];
+    
+    
+//    cell.model = self.datasArry[indexPath.row];
+//    switch (indexPath.row) {
+//        case 0:
+//            cell.caseNum.text = @"案例一:";
+//            break;
+//        case 1:
+//            cell.caseNum.text = @"案例二:";
+//            break;
+//        case 2:
+//            cell.caseNum.text = @"案例三:";
+//            break;
+//        case 3:
+//            cell.caseNum.text = @"案例四:";
+//            break;
+//        case 4:
+//            cell.caseNum.text = @"案例五:";
+//            break;
+//        case 5:
+//            cell.caseNum.text = @"案例六:";
+//            break;
+//        case 6:
+//            cell.caseNum.text = @"案例七:";
+//            break;
+//        case 7:
+//            cell.caseNum.text = @"案例八:";
+//            break;
+//            
+//        default:
+//            break;
+//    }
+//    [cell.iconImageBtn addTarget:self action:@selector(chooseImage:) forControlEvents:UIControlEventTouchUpInside];
+//    cell.iconImageBtn.tag = 800 + indexPath.row;
+//    [cell.deleteBtn addTarget:self action:@selector(deleteData:) forControlEvents:UIControlEventTouchUpInside];
+//    cell.deleteBtn.tag = 1000 + indexPath.row;
+    
+    return cell;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    TemplateModel *model= self.datasArry[indexPath.row];
+    NSInteger count = model.images.count + 1 ;
+    
+    if (count%4 == 0) {
+        return 410 + (count /4) * 115.f;
+    }else{
+        CGFloat H = 410 + (NSInteger)(count/4) * 115.f + 115.f;
+        return H;
+    }
+}
+
+-(void)requestUpload{
+    
+    for (TemplateModel* model in self.datasArry.copy) {
+        
+        if (model.key.length == 0 && model.value.length == 0) {
+            
+            for (TemplateModel* mod in self.datasArry) {
+                if ([mod.code isEqualToString:model.code]) {
+                    
+                    [self.datasArry removeObject:mod];
+                    break;
+                }
+            }
+        }else if (model.key.length > 0 && model.value.length > 0){
+            //buchuli...
+            
+        }else{
+            [OMGToast showWithText:@"请完善栏目信息"];
+            return;
+        }
+    }
+    PartModel* model;
+    if (!self.model) {
+        model = [[PartModel alloc] init];
+        
+        model.storeId = NoNullStr(AccountInfo.storeId, @"");
+        model.templateModelname = @"经典案例";
+        model.templateModelnameCode = JingDianCase;
+        model.id = self.model.id;
+        
+        TemplateModelData* data = [[TemplateModelData alloc] init];
+        data.date = self.datasArry.copy;
+        model.templateModelnameDate = data;
+        model.templateNo = JiaZhuang;
+        
+    }else{
+        self.model.templateModelnameDate.date = self.datasArry.copy;
+        model = self.model;
+    }
+    NSArray* arr = @[model];
+    __weak typeof(self) wSelf = self;
+    [self saveTemplte:arr.mutableCopy succeed:^(id responseObject) {
+        
+        wSelf.block(model,self.model?NO:YES);
+        
+        [wSelf.navigationController popViewControllerAnimated:YES];
+        
+    } error:^(NSError *error) {
+        
+    }];
+}
+#pragma mark ---cellBtn
+- (void)chooseImage:(UIButton *)sender{
+    
+    [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage) {
+        
+        [self uploadImage:mediaImage withIdx:sender.tag - 800];
+        
+        [sender setImage:mediaImage forState:UIControlStateNormal];
+        
+    }];
+    
+}
+- (void)chooseImages:(UIButton *)sender{
+    
+    //    UIImage *image = [UIImage imageNamed:@"jiahao"];
+    //    [_selectedPhotos addObject:image];
+    //
+    //    HZCaseDetailCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:sender.tag - 900 inSection:0]];
+    //
+    //    CGFloat margin = 15;
+    //    CGFloat imageWH = (KScreenWidth - 5 *margin)/4;
+    //
+    //    CGFloat y = CGRectGetMaxY(cell.contentTextV.frame);
+    //
+    //    for (int i = 0; i < _selectedPhotos.count; i++) {
+    //        int row=i/4;
+    //        int loc=i%4;
+    //        CGFloat appviewx=margin+(margin+imageWH)*loc;
+    //        CGFloat appviewy=margin+(margin+imageWH)*row;
+    //
+    //        HZCaseDetailImageView *imageV = [[HZCaseDetailImageView alloc]initWithFrame:CGRectMake(appviewx, appviewy +y, imageWH, imageWH)];
+    //
+    //        [imageV.attachment setImage:_selectedPhotos[i] forState:UIControlStateNormal];
+    //
+    //        imageV.backgroundColor = [UIColor redColor];
+    //
+    //        [cell.contentView addSubview:imageV];
+    //    }
+    //    NSInteger row = (_selectedPhotos.count+1)/4;
+    //    NSInteger loc = (_selectedPhotos.count+1)%4;
+    //    CGFloat addx = margin+(margin+imageWH)*loc;
+    //    CGFloat addY = margin+(margin+imageWH)*row;
+    //
+    //    cell.addImageBtn.frame = CGRectMake(addx, addY, 75, 100);
+    //
+    //    [self.tableView reloadData];
+    
+    
+    
+    
+    //    [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage) {
+    //
+    //        [self uploadImage:mediaImage withIdx:sender.tag - 900];
+    //
+    //        [_selectedPhotos addObject:mediaImage];
+    //        HZCaseDetailCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:sender.tag - 900 inSection:0]];
+    //
+    //        [cell.iconView.attachment setImage:mediaImage forState:UIControlStateNormal];
+    //
+    //        CGFloat margin = 15;
+    //        CGFloat imageWH = (KScreenWidth - 5 *margin)/4;
+    //
+    //        CGFloat y = CGRectGetMaxY(cell.contentTextV.frame);
+    //
+    //
+    //        for (int i = 0; i < _selectedPhotos.count; i++) {
+    //            int row=i/4;
+    //            int loc=i%4;
+    //            CGFloat appviewx=margin+(margin+imageWH)*loc;
+    //            CGFloat appviewy=margin+(margin+imageWH)*row;
+    //
+    //            HZCaseDetailImageView *imageV = [[HZCaseDetailImageView alloc]initWithFrame:CGRectMake(appviewx, appviewy +y, imageWH, imageWH)];
+    //
+    //            imageV.backgroundColor = [UIColor redColor];
+    //            [cell.contentView addSubview:imageV];
+    //
+    //            }
+    //        NSInteger row = (_selectedPhotos.count+1)/4;
+    //        NSInteger loc = (_selectedPhotos.count+1)%4;
+    //        CGFloat addx = margin+(margin+imageWH)*loc;
+    //        CGFloat addY = margin+(margin+imageWH)*row;
+    //
+    //        cell.addImageBtn.frame = CGRectMake(addx, addY, 75, 100);
+    //
+    //        [self.tableView reloadData];
+    //
+    //    }];
+    
+}
+
+- (void)uploadImage:(UIImage*)image withIdx:(NSInteger)idx{
+    // 上传图片
+    CGFloat offSet = 1;
+    if (image.size.height > 750) {
+        offSet = image.size.height / 750;
+    }
+    
+    NSData* imageData = UIImageJPEGRepresentation(UIImageScaleToSize(image, CGSizeMake(image.size.width/offSet,image.size.height/offSet)), 1.0);
+    
+    NSString* imageDataStr = [imageData base64EncodedString];
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    [params setObject:imageDataStr forKey:@"code"];
+    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [params setObject:@"png" forKey:@"suffix"];
+    
+    [[MallNetManager share] request:API_ImageUpload prams:params succeed:^(id responseObject)   {
+        
+        ImageUpLoadBackModel* rsp = [ImageUpLoadBackModel mj_objectWithKeyValues:responseObject];
+        
+        if (Succeed(rsp)) {
+            _imagePath = rsp.data.imgPath;
+            TemplateModel *model = self.datasArry[idx];
+            model.imgPath = _imagePath;
+        }
+        else{
+            [OMGToast showWithText:@"图片上传失败，请重新上传"];
+        }
+        
+    } showHUD:(YES)];
+}
+
+
+- (void)deleteData:(UIButton *)sender{
+    
+    [self.datasArry removeObjectAtIndex:sender.tag - 1000];
+    
+    [self.tableView reloadData];
+    
+}
+#pragma mark - Delegate
+
+-(void)userDidDeleteTheCell:(TemplateModel *)model{
+    
+    for (TemplateModel* data in self.datasArry) {
+        
+        if ([data.code isEqualToString:model.code]) {
+            
+            [self.datasArry removeObject:data];
+            break;
+        }
+    }
+    [self.tableView reloadData];
+}
+
+
+#pragma mark - 初始化
+-(UITableView *)tableView{
+    
+    if (!_tableView) {
+        
+        _tableView = [[UITableView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, KScreenHeight - NavigationH) style:0];
+        
+        _tableView.delegate = self;
+        _tableView.dataSource = self;
+        _tableView.backgroundColor = [UIColor clearColor];
+        _tableView.separatorStyle = 0;
+        
+        _tableView.tableFooterView = [self footView];
+        
+        [self.view addSubview:_tableView];
+    }
+    return _tableView;
+}
+
+-(UIView*)footView{
+    __weak typeof(self) wSelf = self;
+    UIView* backView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 190)];
+    backView.backgroundColor = [UIColor clearColor];
+    
+    UIView* addBackView = [[UIView alloc]initWithFrame:CGRectMake(0, 15, KScreenWidth, 68)];
+    addBackView.backgroundColor = HexColor(@"#e8e8e8");
+    
+    UIImageView* imagev= [[UIImageView alloc]initWithFrame:CGRectMake((KScreenWidth-27)/2, 12, 27, 27)];
+    imagev.image = [UIImage imageNamed:@"addImage"];
+    UILabel* label = [[UILabel alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(imagev.frame)+3, KScreenWidth, 22)];
+    label.text = @"点击新增";
+    label.textAlignment = 1;
+    label.textColor = HexColor(@"#BBBBBB");
+    [addBackView addSubview:imagev];
+    [addBackView addSubview:label];
+    [backView addSubview:addBackView];
+    
+    UITapGestureRecognizer* tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(addAction)];
+    [addBackView addGestureRecognizer:tap];
+    
+    SaveView* saveView = [[SaveView alloc]initWithFrame:CGRectMake(0, 103, KScreenWidth, 90) tipHiden:YES block:^{
+        
+        [wSelf requestUpload];
+        
+    }];
+    
+    [backView addSubview:saveView];
+    
+    return backView;
+}
+- (void)requestSaveWithImagePath:(NSString*)imagePath{
+    
+    
+    PartModel* model = [[PartModel alloc] init];
+    model.templateModelname = @"经典案例";
+    model.templateModelnameCode = JingDianCase;
+    model.storeId = NoNullStr(AccountInfo.storeId, @"");
+    
+    if (!self.model) {// 第一次创建
+        
+        TemplateModelData* data = [[TemplateModelData alloc] init];
+        
+        TemplateModel* temp = [[TemplateModel alloc] init];
+        temp.imgPath = imagePath;
+        data.date = @[temp];
+        model.templateModelnameDate = data;
+        
+    }else{
+        model.id = self.model.id;
+        TemplateModel* tModel = self.model.templateModelnameDate.date.lastObject;
+        tModel.imgPath = imagePath;
+        self.model.templateModelnameDate.date = @[tModel];
+        model = self.model;
+    }
+    NSArray* arr = @[model];
+    
+    __weak typeof(self) wSelf = self;
+    
+    [[MallNetManager share] request:API_TemplateSave parameters:[arr jm_ArryPrams] success:^(NSURLSessionDataTask *task, id responseObject) {
+        
+        if (Succeed(responseObject)) {
+            
+            SearPartData* rsp = [SearPartData mj_objectWithKeyValues:responseObject];
+            if (rsp) {
+            }
+            wSelf.block(model,self.model?NO:YES);
+            [self.navigationController popViewControllerAnimated:YES];
+        }else{
+            [OMGToast showWithText:responseObject[@"msg"]];
+        }
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        [OMGToast showWithText:@"服务器忙，请稍后再试！"];
+    }];
+    
+}
+
+#pragma mark --- 添加新的案例
+-(void)addAction{
+    
+    if (self.datasArry.count == 8) {
+        [OMGToast showWithText:@"最多添加8个"];
+        return;
+    }
+    
+    NSPredicate* predice = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",@"zdy[0-9]+"];
+    
+    TemplateModel* lastModel = [self.datasArry lastObject];
+    
+    TemplateModel* model = [[TemplateModel alloc]init];
+    
+    if (![predice evaluateWithObject:lastModel.code]) {
+        
+        model.code = @"zdy0";
+    }else{
+        
+        NSInteger num = [[lastModel.code substringFromIndex:3] integerValue];
+        
+        model.code = [NSString stringWithFormat:@"zdy%ld",num + 1];
+    }
+    model.key = @"";
+    model.value = @"";
+    model.type = @"1";
+    
+    [self.datasArry addObject:model];
+    
+    [self.tableView reloadData];
+}
+
+-(NSMutableArray *)datasArry{
+    
+    if (!_datasArry) {
+        _datasArry = [NSMutableArray array];
+    }
+    return _datasArry;
+}
+@end

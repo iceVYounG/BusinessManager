@@ -1,0 +1,161 @@
+//
+//  FlowerShopCell.m
+//  BusinessManager
+//
+//  Created by 王启明 on 16/9/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "FlowerShopCell.h"
+
+@implementation FlowerShopCell
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+        self.imageV=[[UIImageView alloc]init];
+        self.imageV.image=[UIImage imageNamed:@"dianshang-lunbo"];
+        [self.contentView addSubview:self.imageV];
+        [self.imageV mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.equalTo(self).insets(UIEdgeInsetsMake(0, 0, 0, 0));
+        }];
+        [self addEditingSender];
+    }
+    return self;
+}
+
+- (void)setModel:(PartModel *)model{
+    _model=model;
+    if (model) {
+        
+    }
+}
+
+-(void)addEditingSender{
+    CGFloat w = [JMView getWidth:@[@"更换门头"]];
+    self.view = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, (self.contentView.frame.size.height - JMViewH) * 0.5 + 16, w, JMViewH) btnNames:@[@"更换门头"]];
+    self.view.tag = 100;
+    [self.contentView addSubview:self.view];
+}
+@end
+
+@implementation FlowerShopSectionTwoCell
+
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+        [self refreshUI];
+    }
+    return self;
+}
+
+- (void)refreshUI{
+    self.backgroundColor=[UIColor whiteColor];
+    UILabel *nameLab=[UILabel new];
+    nameLab.text=@"商户名称:";
+    nameLab.font=[UIFont systemFontOfSize:13];
+    self.nameTF=[UITextField new];
+    self.nameTF.text=@"珍爱一生花店";
+    self.nameTF.borderStyle=UITextBorderStyleLine;
+    self.nameTF.font=[UIFont systemFontOfSize:13];
+    self.nameTF.delegate=self;
+    UILabel *phoneLab=[UILabel new];
+    phoneLab.text=@"联系电话:";
+    phoneLab.font=[UIFont systemFontOfSize:13];
+    self.phoneTF=[UITextField new];
+    self.phoneTF.text=@"123456789";
+    self.phoneTF.delegate=self;
+     self.phoneTF.borderStyle=UITextBorderStyleLine;
+     self.phoneTF.font=[UIFont systemFontOfSize:13];
+    self.phoneTF.keyboardType=UIKeyboardTypeNamePhonePad;
+    UILabel *addressLab=[UILabel new];
+    addressLab.text=@"商户地址:";
+    addressLab.font=[UIFont systemFontOfSize:13];
+    self.addressTF=[UITextField new];
+    self.addressTF.borderStyle=UITextBorderStyleLine;
+    self.addressTF.text=@"苏州市姑苏区干将西路1306号";
+     self.addressTF.font=[UIFont systemFontOfSize:13];
+    [self.contentView addSubview:nameLab];
+    [self.contentView addSubview:phoneLab];
+    [self.contentView addSubview:addressLab];
+    [self.contentView addSubview:self.nameTF];
+    [self.contentView addSubview:self.phoneTF];
+    [self.contentView addSubview:self.addressTF];
+    self.phoneTF.delegate=self;
+    [nameLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self).offset(15*kWidth_scale);
+        make.top.equalTo(self).offset(15);
+        make.width.equalTo(@(70*kWidth_scale));
+        make.height.equalTo(@40);
+    }];
+    [self.nameTF mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(nameLab);
+        make.left.equalTo(nameLab.mas_right).offset(10*kWidth_scale);
+        make.right.equalTo(self).offset(-15*kWidth_scale);
+        make.height.equalTo(@40);
+    }];
+    [phoneLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self).offset(15*kWidth_scale);
+        make.top.equalTo(nameLab.mas_bottom).offset(10);
+        make.width.equalTo(@(70*kWidth_scale));
+        make.height.equalTo(@40);
+    }];
+    [self.phoneTF mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(phoneLab);
+        make.left.equalTo(phoneLab.mas_right).offset(10*kWidth_scale);
+        make.right.equalTo(self).offset(-15*kWidth_scale);
+        make.height.equalTo(@40);
+    }];
+    [addressLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self).offset(15*kWidth_scale);
+        make.top.equalTo(phoneLab.mas_bottom).offset(10);
+        make.width.equalTo(@(70*kWidth_scale));
+        make.height.equalTo(@40);
+    }];
+    [self.addressTF mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(addressLab);
+        make.left.equalTo(addressLab.mas_right).offset(10*kWidth_scale);
+        make.right.equalTo(self).offset(-15*kWidth_scale);
+        make.height.equalTo(@40);
+    }];
+
+}
+
+
+- (void)setModel:(PartModel *)model{
+    _model=model;
+    if (model) {
+        
+    }
+}
+
+- (BOOL)textFieldShouldEndEditing:(UITextField *)textField{
+    if (![self.nameTF.text isEqualToString:@""]&&![self.nameTF.text isEqualToString:@""]&&![self.nameTF.text isEqualToString:@""]) {
+        self.block();
+    }
+    return YES;
+}
+
+@end
+
+@implementation FlowerShopLunBoCell
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+        self.myScro=[[SDCycleScrollView alloc]init];
+        [self.contentView addSubview:self.myScro];
+        [self.myScro mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.equalTo(self).insets(UIEdgeInsetsMake(0, 0, 0, 0));
+        }];
+        self.myScro.localizationImagesGroup=@[[UIImage imageNamed:@"dianshang-lunbo"]];
+        self.myScro.pageControlStyle=SDCycleScrollViewPageContolStyleClassic;
+    }
+    return self;
+}
+
+- (void)setModel:(PartModel *)model{
+    _model=model;
+    if (model) {
+        
+    }
+
+}
+
+
+@end

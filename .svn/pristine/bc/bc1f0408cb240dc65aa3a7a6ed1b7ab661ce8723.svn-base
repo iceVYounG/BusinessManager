@@ -1,0 +1,23 @@
+//
+//  ChangeDoorImageVC.h
+//  BusinessManager
+//
+//  Created by 张心亮 on 16/9/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+
+#import "WeiZhanBaseController.h"
+
+@class PartModel;
+typedef void(^CallBack)(PartModel* model, BOOL isNew);
+@interface ChangeDoorImageVC : WeiZhanBaseController
+
+-(instancetype)initWithBlock:(CallBack)block;
+
+@property(nonatomic,strong)PartModel* model;
+
+@property(nonatomic,strong)NSMutableArray* datasArry;
+@property(nonatomic,copy)CallBack block;
+
+@end

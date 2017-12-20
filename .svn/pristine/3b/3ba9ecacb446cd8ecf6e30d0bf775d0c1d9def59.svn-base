@@ -1,0 +1,35 @@
+//
+//  YuyueRecordCell.m
+//  BusinessManager
+//
+//  Created by 张心亮 on 16/8/23.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "YuyueRecordCell.h"
+
+@implementation YuyueRecordCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+}
+
+-(void)setModel:(YueyueDataModel *)model{
+    _model=model;
+    if (model) {
+        self.userName.text=model.userName;
+        self.phoneNumber.text=model.mobile;
+        self.baoyangTime.text=model.dateTime;
+        self.yuyueType.text=model.templateModelnameCode;
+    }
+}
+
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

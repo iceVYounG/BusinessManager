@@ -1,0 +1,127 @@
+//
+//  VipCardModel.h
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import "MJExtension.h"
+
+@interface VipCardModel : NSObject
+
+@property (nonatomic, strong) NSString *businessType;
+@property (nonatomic, strong) NSString *cardLevel;
+@property (nonatomic, strong) NSString *cardLevelValue;
+@property (nonatomic, strong) NSString *cardName;
+@property (nonatomic, strong) NSString *couponCardId;
+@property (nonatomic, strong) NSString *createTime;
+@property (nonatomic, strong) NSString *discount;
+@property (nonatomic, strong) NSString *vipCardId;
+@property (nonatomic, strong) NSString *initialAmount;
+@property (nonatomic, strong) NSString *number;
+@property (nonatomic, strong) NSString *pinitialAmount;
+@property (nonatomic, strong) NSString *remarks;
+@property (nonatomic, strong) NSString *state;
+@property (nonatomic, strong) NSString *storeId;
+@property (nonatomic, strong) NSString *validityTime;
+
+- (id)initWithDic:(NSDictionary *)dic;
+
+@end
+//zyc
+//-------------创建电子会员卡--------------------//
+@interface NewVipCardManagerVC_VipCard_Model : BaseModel
+@property (nonatomic, strong) NSString *storeId;
+@property (nonatomic, strong) NSString *ID;
+@property (nonatomic, strong) NSString *businessType;
+@property (nonatomic, strong) NSString *cardName;
+@property (nonatomic, strong) NSString *cardLevel;
+@property (nonatomic, strong) NSString *discount;
+@property (nonatomic, strong) NSString *validityTime;
+@property (nonatomic, strong) NSString *initialAmount;
+@property (nonatomic, strong) NSString *cardLevelValue;
+@property (nonatomic, strong) NSString *remarks;
+
++(NewVipCardManagerVC_VipCard_Model *)returnModelWithDic:(NSDictionary *)dic;
+@end
+//-------------会员列表数据--------------------//
+@interface VipCardVipListModel : BaseModel
+
+@property (nonatomic, strong) NSString *BUSINESS_TYPE;
+@property (nonatomic, strong) NSString *CARD_LEVEL;
+@property (nonatomic, strong) NSString *CARD_NAME;
+@property (nonatomic, strong) NSString *CARD_NUM;
+@property (nonatomic, strong) NSString *CONSUME_MONEY;
+@property (nonatomic, strong) NSString *CONSUME_NUM;
+@property (nonatomic, strong) NSString *DISCOUNT;
+@property (nonatomic, strong) NSString *MEMBER_ID;
+@property (nonatomic, strong) NSString *USER_MOBILE;
+
+@end
+
+//------------会员详情-------------------------//
+@class VipCardVipUserDetail_VipCard_Model;
+@class VipCardVipUserDetail_VipUser_Model;
+
+@interface VipCardVipUserDetailModel : BaseModel
+
+@property (nonatomic, strong) NSString *balance;
+@property (nonatomic, strong) NSString *consume_money;
+@property (nonatomic, strong) NSString *consume_num;
+@property (nonatomic, strong) NSString *validDay;
+@property (nonatomic, strong) VipCardVipUserDetail_VipCard_Model *vipCard;
+@property (nonatomic, strong) VipCardVipUserDetail_VipUser_Model *vipUser;
+
+@end
+
+@interface VipCardVipUserDetail_VipCard_Model : NSObject
+
+@property (nonatomic, strong) NSString *businessType;
+@property (nonatomic, strong) NSString *cardLevel;
+@property (nonatomic, strong) NSString *cardLevelValue;
+@property (nonatomic, strong) NSString *cardName;
+@property (nonatomic, strong) NSString *couponCardId;
+@property (nonatomic, strong) NSString *createTime;
+@property (nonatomic, strong) NSString *discount;
+@property (nonatomic, strong) NSString *ID;
+@property (nonatomic, strong) NSString *initialAmount;
+@property (nonatomic, strong) NSString *number;
+@property (nonatomic, strong) NSString *pinitialAmount;
+@property (nonatomic, strong) NSString *remarks;
+@property (nonatomic, strong) NSString *state;
+@property (nonatomic, strong) NSString *storeId;
+@property (nonatomic, strong) NSString *validityTime;
+
+@end
+
+
+@interface VipCardVipUserDetail_VipUser_Model : NSObject
+
+@property (nonatomic, strong) NSString *cardNum;
+@property (nonatomic, strong) NSString *createTime;
+@property (nonatomic, strong) NSString *ID;
+@property (nonatomic, strong) NSString *membercardId;
+@property (nonatomic, strong) NSString *qrcImagePath;
+@property (nonatomic, strong) NSString *state;
+@property (nonatomic, strong) NSString *userMobile;
+
+@end
+
+//-------------会员卡级别列表-------------------//
+@interface VipCardLevelListModel : BaseModel
+
+@property (nonatomic, strong) NSArray *data;
+
+@end
+
+//------------会员卡级别Item-------------------//
+@interface VipCardLevelItemModel : NSObject
+
+@property (nonatomic, strong) NSString *ID;         //卡级别id
+@property (nonatomic, strong) NSString *storeId;    //商户id
+@property (nonatomic, strong) NSString *levelName;  //卡级别名称
+@property (nonatomic, assign) BOOL isSelectedItem;  // 记录是否被选中
+
+@end

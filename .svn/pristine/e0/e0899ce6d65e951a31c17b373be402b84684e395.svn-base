@@ -1,0 +1,224 @@
+//
+//  BedroomCameraVC.m
+//  CMCCMall
+//
+//  Created by spring on 16/9/5.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "HVMonitorCameraVC.h"
+#import "CloseliApiManager.h"
+#import "FileManager.h"
+
+@interface HVMonitorCameraVC ()
+
+@property (strong, nonatomic) NSTimer *currentDateUpdateTimer;
+@property (assign, nonatomic) NSInteger retryToPlayCount;
+@property (assign, nonatomic) BOOL speakInProgress;
+@property (strong, nonatomic) NSString *shotsPath;
+
+@end
+
+@implementation HVMonitorCameraVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    self.title = _curDevice.name;
+    
+    UIBarButtonItem *spaceBtn = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
+    UIBarButtonItem *rightBtn = [[UIBarButtonItem alloc]initWithImage:[UIImage imageNamed:@"hv_fullScreen"] style:UIBarButtonItemStylePlain target:self action:@selector(rightBtnAction:)];
+    self.navigationItem.rightBarButtonItems = @[spaceBtn,rightBtn];
+    
+    if (!_currentDateUpdateTimer) {
+        _currentDateUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:1.f
+                                                                   target:self
+                                                                 selector:@selector(currentDateUpdateDispose:)
+                                                                 userInfo:nil
+                                                                  repeats:YES];
+    }
+    
+    UILongPressGestureRecognizer *longpress = [[UILongPressGestureRecognizer alloc]initWithTarget:self action:@selector(speakClickAction:)];
+    longpress.minimumPressDuration = 0.5;
+    [_speakBtn addGestureRecognizer:longpress];
+    
+    
+    CloseliCameraExtraSettings *settings  = [[CloseliApiManager share].mySDK getCameraSettingsWithCamera:_curDevice error:nil];
+    
+    //    NSString *prePath = [[[FileManager getDocumentsPath]stringByAppendingString:@"/HMScreenShots/"]stringByAppendingString:settings.deviceType];
+    
+    NSString *prePath = [[FileManager getDocumentsPath]stringByAppendingPathComponent:@"HMScreenShots"];
+    
+    if (![FileManager fileExistsAtPath:prePath]) {
+        
+        [FileManager createAllDirectoryWithPath:prePath dictionary:YES];
+    }
+    _shotsPath = [prePath stringByAppendingPathComponent:settings.deviceType];
+    
+    if (![FileManager fileExistsAtPath:_shotsPath]) {
+        
+        [FileManager createAllDirectoryWithPath:_shotsPath dictionary:YES];
+    }
+    
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(playerStatusChanged:)
+                                                 name:CameraPlayerStatusChangedNotification
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(playerStoppedDispose:)
+                                                 name:CameraPlayerStoppedNotification
+                                               object:nil];
+    [self prepareToPlayItem];
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    
+    //    [[NSNotificationCenter defaultCenter]removeObserver:self];
+    //    [[CloseliApiManager share].mySDK destoryPlayer];
+    //    [SVProgressHUD dismiss];
+}
+
+- (void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
+    
+    if (_currentDateUpdateTimer.valid) {
+        [_currentDateUpdateTimer invalidate];
+        _currentDateUpdateTimer = nil;
+    }
+    
+    
+}
+
+- (void)prepareToPlayItem
+{
+    [[CloseliApiManager share].mySDK preparetoLivePreview:_curDevice withUI:_contentImageView];
+}
+
+- (void)currentDateUpdateDispose:(NSTimer *)timer
+{
+    double currentTime = [[CloseliApiManager share].mySDK playerCurrentTime];
+    NSDate *currentDate = [NSDate dateWithTimeIntervalSince1970: currentTime];
+    
+    NSDateFormatter *inputFormatter = [[NSDateFormatter alloc] init];
+    [inputFormatter setDateFormat:@"yy/M/d HH:mm:ss"];
+    
+    self.currentTimeLabel.text = [inputFormatter stringFromDate:currentDate];
+}
+
+- (void)playerStatusChanged:(NSNotification*)notification
+{
+    BOOL bWaiting = [[[notification userInfo] valueForKey:NSLocalizedDescriptionKey] boolValue];
+    
+    WS(weakSelf);
+    __weak CloseliSDK *sdk = [CloseliApiManager share].mySDK;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        if (bWaiting) {
+            [SVProgressHUD show];
+        }
+        else {
+            weakSelf.retryToPlayCount = 0; // play started, reset retry count.
+            [SVProgressHUD dismiss];
+            double currentTime = [sdk playerCurrentTime];
+            NSDate *currentDate = [NSDate dateWithTimeIntervalSince1970:currentTime];
+            NSDateFormatter *inputFormatter = [[NSDateFormatter alloc]init];
+            [inputFormatter setDateFormat:@"yy/M/d HH:mm:ss"];
+            weakSelf.currentTimeLabel.text = [inputFormatter stringFromDate:currentDate];
+        }
+        
+    });
+}
+
+- (void)playerStoppedDispose:(NSNotification *)notification
+{
+    NSInteger returnCode = [[[notification userInfo] valueForKey:NSLocalizedFailureReasonErrorKey] intValue];
+    WS(weakSelf);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        __typeof(weakSelf) strongSelf = weakSelf;
+        if (returnCode && strongSelf && strongSelf.retryToPlayCount < 40) { //If returnCode not zero, we have to replay.
+            strongSelf.retryToPlayCount++;
+            [strongSelf performSelector:@selector(prepareToPlayItem) withObject:nil afterDelay:2.];
+        }
+    });
+}
+
+#pragma mark - 全屏按钮点击事件 -
+- (void)rightBtnAction:(UIBarButtonItem *)sender{
+    
+    //    HVMonitorLangVC *vc = [[HVMonitorLangVC alloc]initWithNibName:@"HVMonitorLangVC" bundle:nil];
+    //    vc.contentImageView = self.contentImageView;
+    //    vc.curDevice = _curDevice;
+    //    [self presentViewController:vc animated:NO completion:nil];
+}
+
+//静音
+- (IBAction)muteClickAction:(UIButton *)sender
+{
+    sender.selected = !sender.selected;
+    [[CloseliApiManager share].mySDK playerMute:sender.selected];
+    
+}
+
+//说话
+- (void)speakClickAction:(UILongPressGestureRecognizer *)gesture
+{
+    NSError *error = nil;
+    
+    if(gesture.state==UIGestureRecognizerStateBegan){
+        
+        [self.speakBtn setImage:[UIImage imageNamed:@"hv_pressSpeak_selected"] forState:UIControlStateNormal];
+        [[CloseliApiManager share].mySDK startAudioTalkDuringLive:&error];
+    }
+    else if (gesture.state==UIGestureRecognizerStateEnded || gesture.state==UIGestureRecognizerStateCancelled){
+        
+        [self.speakBtn setImage:[UIImage imageNamed:@"hv_pressSpeak"] forState:UIControlStateNormal];
+        [[CloseliApiManager share].mySDK stopAudioTalkDuringLive:&error];
+    }
+    else{
+        [self.speakBtn setImage:[UIImage imageNamed:@"hv_pressSpeak_selected"] forState:UIControlStateNormal];
+    }
+    
+}
+
+//截图
+- (IBAction)screenShotClickAction:(UIButton *)sender
+{
+    //UIImage转换为NSData
+    if (_contentImageView.image) {
+        
+        NSData *imageData = UIImagePNGRepresentation(_contentImageView.image);
+        
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat:@"yyyyMMddHHmmss"];
+        NSString *name = [formatter stringFromDate:[NSDate date]];
+        
+        [FileManager saveToDirectory:_shotsPath data:imageData name:name];
+        
+        [OMGToast showWithText:@"截图成功"];
+        
+    }
+    
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter]removeObserver:self];
+    [[CloseliApiManager share].mySDK destoryPlayer];
+    [SVProgressHUD dismiss];
+}
+
+@end

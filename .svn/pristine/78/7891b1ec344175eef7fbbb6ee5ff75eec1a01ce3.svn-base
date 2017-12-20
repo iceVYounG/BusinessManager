@@ -1,0 +1,34 @@
+//
+//  FlowerShopCell.h
+//  BusinessManager
+//
+//  Created by 王启明 on 16/9/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "Masonry.h"
+#import "WeiZhanModel.h"
+#import "JMView.h"
+#import "SDCycleScrollView.h"
+#define kWidth_scale [UIScreen mainScreen].bounds.size.width/375.0
+@interface FlowerShopCell : UICollectionViewCell
+@property (nonatomic,strong)PartModel *model;
+@property (nonatomic,strong)UIImageView *imageV;
+@property (nonatomic,strong)JMView *view;
+@end
+
+@interface FlowerShopSectionTwoCell : UICollectionViewCell<UITextFieldDelegate>
+@property (nonatomic,strong)PartModel *model;
+@property (nonatomic,strong)UITextField *nameTF;
+@property (nonatomic,strong)UITextField *phoneTF;
+@property (nonatomic,strong)UITextField *addressTF;
+@property (nonatomic,strong)dispatch_block_t block;
+@end
+
+@interface FlowerShopLunBoCell : UICollectionViewCell
+@property (nonatomic,strong)SDCycleScrollView *myScro;
+@property (nonatomic,strong)PartModel *model;
+@property (nonatomic,strong)JMView *view;
+@end
+

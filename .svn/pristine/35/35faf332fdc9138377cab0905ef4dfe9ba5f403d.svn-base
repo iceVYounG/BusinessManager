@@ -1,0 +1,288 @@
+//
+//  BannerEditVC.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "BannerEditVC.h"
+#import "WeiZhanModel.h"
+#import "BaseModel.h"
+#import "BannerCell.h"
+#import "JMView.h"
+#import "JMPickCollectView.h"
+
+@interface BannerEditVC () <UITableViewDataSource,UITableViewDelegate,UITextFieldDelegate,bannerCellDelegate>
+{
+    NSMutableArray *_selectedPhotos;//选择的照片
+    NSMutableArray *_selectedAssets;
+    BOOL _isSelectOriginalPhoto;// 是否选择了原图
+    NSString *_imagePath;
+
+}
+@property (weak, nonatomic) IBOutlet UIView *headView;
+@property (weak, nonatomic) IBOutlet UITextField *shopNameTextField;
+@property (weak, nonatomic) IBOutlet UITextField *phoneTextField;
+
+@property (nonatomic, strong) NSIndexPath *currentIndexPath;
+@property (nonatomic, assign) NSInteger ID;
+
+
+@property (nonatomic, strong) UITableView* tableView;
+
+@end
+
+@implementation BannerEditVC
+
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil block:(bannerBlock)block{
+    if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+        
+        self.block = block;
+    }
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    [self setSubViews];
+}
+
+
+- (void)setSubViews{
+    
+    self.title = @"banner编辑";
+    
+    [self tableView];
+}
+
+
+#pragma mark - tableView dataSource
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return 1;
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    NSString *indetify = self.isBig ? @"BannerCell1" : @"BannerCell";
+    BannerCell *cell = [tableView dequeueReusableCellWithIdentifier:indetify];
+    if (!cell) {
+        
+        if (self.isBig) {
+            cell = [[[NSBundle mainBundle] loadNibNamed:NSStringFromClass([BannerCell class]) owner:nil options:nil] objectAtIndex:1];
+        }else{
+            
+            cell = [[[NSBundle mainBundle] loadNibNamed:NSStringFromClass([BannerCell class]) owner:nil options:nil] firstObject];
+        }
+    }
+    self.currentIndexPath = indexPath;
+    cell.model = self.model;
+    
+    cell.delegate = self;
+    cell.telephoneField.delegate = self;
+    cell.shopNameField.delegate = self;
+    return cell;
+}
+
+#pragma mark - tableView delegate
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (self.isBig) {
+        return KBigCellH;
+    }
+    return KBannerCellH;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 15.f;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    return 0.1f;
+}
+- (UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    
+    return nil;
+}
+- (UIView*)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
+    return nil;
+}
+
+
+#pragma mark - bannerDelegate
+- (void)imageSelectWithButton:(UIButton *)imageSender cell:(id)cell{
+    
+    BannerCell* bannerCell = (BannerCell*)cell;
+    switch (imageSender.tag) {
+        case 2010:
+        {
+            [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage) {
+                
+                [self uploadImage:mediaImage];
+           
+                [imageSender setImage:mediaImage forState:UIControlStateNormal];
+                [_selectedPhotos addObject:mediaImage];
+                bannerCell.bannerLabel.hidden = YES;
+                bannerCell.icon.hidden = YES;
+                bannerCell.updateSender.hidden = NO;
+            }];
+            
+        }
+            break;
+        case 2011:
+        {
+            [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage) {
+                bannerCell.bannerLabel.hidden = YES;
+                bannerCell.icon.hidden = YES;
+                bannerCell.updateSender.hidden = NO;
+                [_selectedPhotos addObject:mediaImage];
+
+            [imageSender setImage:mediaImage forState:UIControlStateNormal];
+            
+                NSLog(@">><<%@",mediaImage);
+            
+            }];
+
+            
+        }
+            break;
+        default:
+            break;
+    }
+}
+#pragma mark - netWork request
+
+- (void)uploadImage:(UIImage*)image{
+
+    // 上传图片
+    CGFloat offSet = 1;
+    if (image.size.height > 750) {
+        offSet = image.size.height / 750;
+    }
+    
+    NSData* imageData = UIImageJPEGRepresentation(UIImageScaleToSize(image, CGSizeMake(image.size.width/offSet,image.size.height/offSet)), 1.0);
+    
+    NSString* imageDataStr = [imageData base64EncodedString];
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    [params setObject:imageDataStr forKey:@"code"];
+    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [params setObject:@"png" forKey:@"suffix"];
+    
+    [[MallNetManager share] request:API_ImageUpload prams:params succeed:^(id responseObject)   {
+        
+        ImageUpLoadBackModel* rsp = [ImageUpLoadBackModel mj_objectWithKeyValues:responseObject];
+        
+        if (Succeed(rsp)) {
+            _imagePath = rsp.data.imgPath;
+
+        }
+        
+        else{
+            [OMGToast showWithText:@"图片上传失败，请重新上传"];
+        
+        }
+        
+    } showHUD:(YES)];
+}
+
+#pragma mark - 
+
+- (void)requestSaveWithImagePath:(NSString*)imagePath{
+    
+    BannerCell* bannerCell = [self.tableView cellForRowAtIndexPath:self.currentIndexPath];
+    
+    UITextField* shopField = (UITextField*)[bannerCell viewWithTag:2015];
+    UITextField* phoneField = (UITextField*)[bannerCell viewWithTag:2014];
+    
+    if (shopField.text.length == 0 || [phoneField.text isEqualToString:@""]) {
+        [OMGToast showWithText:@"请确认您的输入是否完整！"];
+        return;
+    }
+    
+    PartModel* model = [[PartModel alloc] init];
+    model.templateModelname = @"Banner图";
+    model.templateModelnameCode = @"dpdt";
+    model.templateNo = CanYin;
+    model.storeId = NoNullStr(AccountInfo.storeId, @"");
+
+    
+    if (!self.model) {// 第一次创建
+      
+        
+        TemplateModelData* data = [[TemplateModelData alloc] init];
+        
+        TemplateModel* temp = [[TemplateModel alloc] init];
+        temp.imgPath = imagePath;
+        temp.name = shopField.text;
+        temp.type = phoneField.text;
+        
+        data.date = @[temp];
+        model.templateModelnameDate = data;
+        
+
+    }else{
+        model.id = self.model.id;
+        
+        TemplateModel* tModel = self.model.templateModelnameDate.date.lastObject;
+        tModel.name = shopField.text;
+        tModel.type = phoneField.text;
+        
+        tModel.imgPath = imagePath;
+        self.model.templateModelnameDate.date = @[tModel];
+        
+        model = self.model;
+        
+    }
+    
+    NSArray* arr = @[model];
+
+    __weak typeof(self) wSelf = self;
+
+    [[MallNetManager share] request:API_TemplateSave parameters:[arr jm_ArryPrams] success:^(NSURLSessionDataTask *task, id responseObject) {
+        
+        if (Succeed(responseObject)) {
+            
+            SearPartData* rsp = [SearPartData mj_objectWithKeyValues:responseObject];
+            if (rsp) {
+                
+                
+            }
+            
+            wSelf.block(model,self.model?NO:YES);
+            [self.navigationController popViewControllerAnimated:YES];
+            
+        }else{
+            [OMGToast showWithText:responseObject[@"msg"]];
+            
+        }
+        
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        
+        [OMGToast showWithText:@"服务器忙，请稍后再试！"];
+    }];
+    
+}
+
+@synthesize tableView = _tableView;
+
+- (UITableView *)tableView{
+    
+    if (!_tableView) {
+        _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, KScreenWidth, KScreenHeight - NavigationH) style:UITableViewStyleGrouped];
+        _tableView.backgroundColor=[UIColor colorWithHexString:@"#f6f5fa"];
+        _tableView.delegate = self;
+        _tableView.dataSource = self;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        
+        _tableView.tableFooterView = [[SaveView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 60) tipHiden:YES block:^{
+            
+            [self requestSaveWithImagePath:_imagePath];
+        }];
+        
+        [self.view addSubview:_tableView];
+    }
+    return _tableView;
+}
+@end

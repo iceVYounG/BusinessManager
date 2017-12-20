@@ -1,0 +1,144 @@
+//
+//  WinportToolsVC.m
+//  BusinessManager
+//
+//  Created by 周迎春 on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WinportToolsVC.h"
+#import "DrawActivityManageVC.h"
+#import "MessagePushMainVC.h"
+#import "HomeVideoMainVC.h"
+#import "CloseliLoginViewController.h"
+#import "WebViewController.h"
+
+
+@interface WinportToolsVC ()<UIAlertViewDelegate>
+
+@end
+
+@implementation WinportToolsVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"旺铺工具";
+}
+- (IBAction)pushLuckyDraw:(id)sender {
+        DrawActivityManageVC *dvc = [[DrawActivityManageVC alloc]initWithNibName:@"DrawActivityManageVC" bundle:nil];
+        dvc.FromVC = 1;
+        [self.navigationController pushViewController:dvc animated:YES];
+}
+- (IBAction)pushMessagePush:(id)sender {
+
+//    MessagePushMainVC *mainVC = [[MessagePushMainVC alloc] initWithNibName:@"MessagePushMainVC" bundle:nil];
+//    [self.navigationController pushViewController:mainVC animated:YES];
+    [OMGToast showWithText:@"功能即将开放,敬请期待"];
+}
+
+- (IBAction)watchGhostClick:(UIButton *)sender {
+    [self requestUserRegistered];
+}
+
+-(void)requestUserRegistered{
+  
+    NSMutableDictionary *paramDic = [NSMutableDictionary dictionary];
+    [paramDic setObject:NoNullStr(AccountInfo.linkPhone, @"")  forKey:@"storeMobile"];
+    [paramDic setObject:NoNullStr(AccountInfo.storeId, @"")  forKey:@"storeId"];
+    [paramDic setObject:@"1"  forKey:@"type"];//1：商户宝2：12580
+
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setMinimumDismissTimeInterval:2.0];
+    [SVProgressHUD showWithStatus:@"数据请求中..."];
+    [[MallNetworkEngine vipCardMGshare]requestNotEncodeWithDate:self.requestDate requestWithPath:API_userBindingSearch Params:paramDic CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        
+        NSString *code = [dic objectForKey:@"code"];
+        NSString *msg = [dic objectForKey:@"msg"];
+        
+        if ([code isEqualToString:@"00-00"]) {
+            
+            NSDictionary *data = [dic objectForKey:@"data"];
+            if ([data isKindOfClass:[NSDictionary class]]) {
+                NSString *shopviewMobile = [data objectForKey:@"shopviewMobile"];
+                if (shopviewMobile.length>0) {
+                    NSError *error = nil;
+                    CloudUserInfo *loginInfo;
+                    NSString *shopviewPassword = [data objectForKey:@"shopviewPassword"];
+                    
+                    //            loginInfo = [[CloseliApiManager share] loginWithEmail:@"13862169965" withPassword:@"hm12345678" error:&error];
+                    
+                    loginInfo = [[CloseliApiManager share] loginWithEmail:shopviewMobile withPassword:shopviewPassword error:&error];
+                    
+                    if (loginInfo) {
+                        CloseliLoginViewController *login = [[CloseliLoginViewController alloc] init];
+                        NSMutableArray *vcs =  [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
+                        HomeVideoMainVC *vc = [[HomeVideoMainVC alloc] initWithNibName:@"HomeVideoMainVC" bundle:nil];
+                        [vcs addObject:login];
+                        [vcs addObject:vc];
+                        self.navigationController.viewControllers = vcs;
+                        
+                    }else{
+                        [SVProgressHUD dismiss];
+                        [[CloseliApiManager share] showAlertOfError:error];
+                        
+                        UIAlertView *view = [[UIAlertView alloc] initWithTitle:@"提示" message:@"您尚未在商户宝中使用过手机看店功能，你可以进行下列操作" delegate:self cancelButtonTitle:@"去登录" otherButtonTitles:@"去开通", nil];
+                        [view show];
+                        
+                    }
+                    
+                }else{
+                    UIAlertView *view = [[UIAlertView alloc] initWithTitle:@"提示" message:@"您尚未在商户宝中使用过手机看店功能，你可以进行下列操作" delegate:self cancelButtonTitle:@"去登录" otherButtonTitles:@"去开通", nil];
+                    [view show];
+                    
+                    
+                }
+            }else{
+                [SVProgressHUD dismiss];
+                UIAlertView *view = [[UIAlertView alloc] initWithTitle:@"提示" message:@"您尚未在商户宝中使用过手机看店功能，你可以进行下列操作" delegate:self cancelButtonTitle:@"去登录" otherButtonTitles:@"去开通", nil];
+                [view show];
+            }
+           
+        }else{
+            [SVProgressHUD showInfoWithStatus:msg];
+
+        }
+        
+      
+        NSLog(@"%@",dic);
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        [SVProgressHUD showInfoWithStatus:@"数据请求失败"];
+    }];
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    if (buttonIndex == alertView.cancelButtonIndex) {
+        CloseliLoginViewController *login = [[CloseliLoginViewController alloc] init];
+        [self.navigationController pushViewController:login animated:YES];
+
+    }else{
+        WebViewController *web = [[WebViewController alloc] initWithUrl:@"http://183.207.110.93:8085/bfsh-ws-inter/static/html/FAQ/about-monitor-open.html"];
+        web.needHeader = YES;
+        
+        [self.navigationController pushViewController:web animated:YES];
+    }
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

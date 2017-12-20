@@ -1,0 +1,23 @@
+//
+//  PushTableViewCell.h
+//  BusinessManager
+//
+//  Created by 周迎春 on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "MsgPushModel.h"
+typedef void (^cellBlock)(UIButton *btn);
+@interface PushTableViewCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UILabel *numberLB;
+@property (weak, nonatomic) IBOutlet UILabel *titleLB;
+@property (weak, nonatomic) IBOutlet UILabel *statuLB;
+@property (weak, nonatomic) IBOutlet UILabel *timeLB;
+@property (weak, nonatomic) IBOutlet UIImageView *rightImage;
+
+@property (weak, nonatomic) IBOutlet UIButton *pushBtn;
+
+@property (nonatomic, strong) MsgPushManagerList *model;
+@property (nonatomic, copy) cellBlock block;
+@end

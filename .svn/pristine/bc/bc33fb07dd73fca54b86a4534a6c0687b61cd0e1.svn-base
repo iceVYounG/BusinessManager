@@ -1,0 +1,195 @@
+//
+//  GiveVipCardViewController.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/26.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "GiveVipCardViewController.h"
+#import "GiveVipCardChildView.h"
+#import "ChooseVipCardTypeView.h"
+#import "ChooseVipLevelView.h"
+#import "VipCardModel.h"
+
+//typedef NS_ENUM(NSUInteger, CardType) {
+//    CardType_ChuZhiKa = 1,  //储值卡
+//    CardType_YouHuiKa       //优惠卡
+//};
+
+@interface GiveVipCardViewController ()<GiveVipCardChildViewDelegate, ChooseVipCardTypeViewDelegate, ChooseVipLevelViewDelegate>
+
+@property (nonatomic, assign) CardType chooseCardType; //选择卡类型； 储值卡 or 优惠卡
+@property (nonatomic, strong) GiveVipCardChildView *GiveVip;
+
+@property (nonatomic, strong) NSMutableArray *dataArry; //数据源
+@property (nonatomic, strong) NSString *choosedCard;    //选择的卡
+
+@end
+
+@implementation GiveVipCardViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"发放会员卡";
+    self.GiveVip = [[GiveVipCardChildView alloc]init];
+    self.GiveVip.giveVipDelegate = self;
+    [self.view addSubview:self.GiveVip];
+    [self.GiveVip mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.bottom.equalTo(self.view);
+    }];
+    //
+    self.chooseCardType = 0;
+}
+
+#pragma mark - giveVipdelegate
+//选择哪张卡
+- (void)GiveVipCardToChooseWhichVipCard {
+    if (self.chooseCardType <= 0 || self.chooseCardType > 3) {
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD showErrorWithStatus:@"请选择卡类型！"];
+        return;
+    }
+    
+    if (self.dataArry && self.dataArry.count > 0) {
+        [self setUpChooseView];
+        return;
+    }
+    //请求
+    [self requestCardListData];
+
+}
+//选择哪个类型的卡 储值卡 or 优惠卡
+- (void)GiveVipCardToChooseCardType {
+    ChooseVipCardTypeView *chooseVipCardTypeView = [[ChooseVipCardTypeView alloc]initWtihTypeStr:nil];
+    chooseVipCardTypeView.delegate = self;
+    [self.view addSubview:chooseVipCardTypeView];
+    chooseVipCardTypeView.selectedStr = nil;
+    [chooseVipCardTypeView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.left.bottom.top.equalTo(self.view);
+    }];
+    
+}
+
+- (void)GiveVipCardToSaveDataWithCardId:(NSString *)cardId mobile:(NSString *)mobile andCardType:(CardType)cardType {
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:@"900000000077" forKey:@"storeId"];
+    [params setObject:AccountInfo.storeName forKey:@"storeName"];
+    [params setObject:cardId forKey:@"cardId"];
+    [params setObject:mobile forKey:@"mobile"];
+    [params setObject:@(cardType) forKey:@"cardType"];
+    
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeGradient];
+    [SVProgressHUD showWithStatus:@"请稍等..."];
+    
+    [[MallNetworkEngine vipCardMGshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_VipCardManger_Release Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        if (Succeed(dic)) {
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+            [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+            [SVProgressHUD showSuccessWithStatus:@"发放成功！"];
+        }else {
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+            [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+            [SVProgressHUD showSuccessWithStatus:[NSString stringWithFormat:@"%@", [dic objectForKey:@"msg"]]];
+        }
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD showSuccessWithStatus:@"服务器繁忙，请稍后再试！"];
+        
+    }];
+    
+    
+}
+
+#pragma mark - ChooseVipCardTypeViewDelegate
+
+- (void)didClickTheButton:(NSString *)buttonTitle {
+//    self.GiveVip.chooseCardType = buttonTitle;
+    if ([buttonTitle isEqualToString:@"储值会员卡"]) {
+        self.GiveVip.choosedCardType = CardType_ChuZhiKa;
+        self.chooseCardType = CardType_ChuZhiKa;
+    }else if ([buttonTitle isEqualToString:@"优惠会员卡"]) {
+        self.GiveVip.choosedCardType = CardType_YouHuiKa;
+        self.chooseCardType = CardType_YouHuiKa;
+    }
+}
+
+#pragma mark - 请求
+- (void)requestCardListData {
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    NSString *storeId = AccountInfo.storeId;
+    [params setObject:@"900000000077" forKey:@"storeId"];
+//    [params setObject:@"30" forKey:@"pageSize"];
+    [params setObject:@(self.chooseCardType) forKey:@"businessType"];
+    
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeGradient];
+    [SVProgressHUD showWithStatus:@"请稍等..."];
+    
+    [[MallNetworkEngine vipCardMGshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_VipCardManger_VipCardList Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        [SVProgressHUD dismiss];
+        
+        if (Succeed(dic)) {
+            NSArray *arr = [dic objectForKey:@"data"];
+            self.dataArry = [NSMutableArray array];
+            
+            for (NSDictionary *data in arr) {
+                VipCardListModel *model = [VipCardListModel mj_objectWithKeyValues:data];
+                [self.dataArry addObject:model];
+            }
+            //弹出chooseView
+            [self setUpChooseView];
+        }
+        
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        
+        [SVProgressHUD showErrorWithStatus:@"服务器繁忙，请稍后再试！"];
+        
+    }];
+    
+}
+
+#pragma mark - setUpChooseView
+- (void)setUpChooseView {
+//    ChooseVipLevelView *chooseView = [[ChooseVipLevelView alloc] initWithVipLevelNameArray:self.dataArry btnName:self.choosedCard];
+    ChooseVipLevelView *chooseView = [[ChooseVipLevelView alloc] initWithVipLevelNameArray:self.dataArry btnName:self.choosedCard title:@"请选择电子会员卡"];
+    chooseView.delegate = self;
+    [self.view addSubview:chooseView];
+    [chooseView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.bottom.equalTo(self.view);
+    }];
+}
+
+
+#pragma mark - ChooseCardDelegate
+//- (void)didClickCardLevel:(NSString *)str {
+//    self.choosedCard = str;
+//    [self.GiveVip.vipCardButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+//    [self.GiveVip.vipCardButton setTitle:str forState:UIControlStateNormal];
+//}
+
+- (void)chooseVipCardWithModel:(VipCardListModel *)listModel {
+    self.choosedCard = listModel.cardName;
+    self.GiveVip.listModel = listModel;
+    [self.GiveVip.vipCardButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [self.GiveVip.vipCardButton setTitle:listModel.cardName forState:UIControlStateNormal];
+    
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+
+
+@end

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="8191" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <development version="7000" identifier="xcode"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="RechargeDetailVC">
+            <connections>
+                <outlet property="rechargeDetailTableView" destination="qWd-8T-meV" id="T93-fm-RZC"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="none" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="qWd-8T-meV">
+                    <rect key="frame" x="0.0" y="15" width="375" height="652"/>
+                    <animations/>
+                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                    <connections>
+                        <outlet property="dataSource" destination="-1" id="cFu-nN-dEa"/>
+                        <outlet property="delegate" destination="-1" id="bJW-4h-vzr"/>
+                    </connections>
+                </tableView>
+            </subviews>
+            <animations/>
+            <color key="backgroundColor" red="0.96470588235294119" green="0.96470588235294119" blue="0.97647058823529409" alpha="1" colorSpace="calibratedRGB"/>
+            <constraints>
+                <constraint firstItem="qWd-8T-meV" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="15" id="D2Z-e4-btB"/>
+                <constraint firstAttribute="trailing" secondItem="qWd-8T-meV" secondAttribute="trailing" id="QJN-Wu-vEq"/>
+                <constraint firstAttribute="bottom" secondItem="qWd-8T-meV" secondAttribute="bottom" id="lBq-gp-GGz"/>
+                <constraint firstItem="qWd-8T-meV" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="x6G-MR-dTg"/>
+            </constraints>
+            <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
+            <point key="canvasLocation" x="299" y="269"/>
+        </view>
+    </objects>
+</document>

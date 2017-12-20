@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9532" systemVersion="15G1004" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="HouseWeiZhanVC">
+            <connections>
+                <outlet property="scrollView" destination="lTO-gS-z5j" id="4KE-VP-YeS"/>
+                <outlet property="scrollViewHeight" destination="2RX-XI-jMj" id="f1L-oM-b5l"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="AdU-CL-otq">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lTO-gS-z5j">
+                            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="375" id="Jpz-xA-F64"/>
+                                <constraint firstAttribute="height" constant="667" id="Sp3-42-tpA"/>
+                                <constraint firstAttribute="height" constant="667" id="zYY-gX-bmf"/>
+                            </constraints>
+                            <variation key="default">
+                                <mask key="constraints">
+                                    <exclude reference="Sp3-42-tpA"/>
+                                </mask>
+                            </variation>
+                        </view>
+                    </subviews>
+                    <constraints>
+                        <constraint firstItem="lTO-gS-z5j" firstAttribute="height" secondItem="AdU-CL-otq" secondAttribute="height" id="2RX-XI-jMj"/>
+                        <constraint firstItem="lTO-gS-z5j" firstAttribute="centerX" secondItem="AdU-CL-otq" secondAttribute="centerX" id="FLu-ix-0EP"/>
+                        <constraint firstAttribute="trailing" secondItem="lTO-gS-z5j" secondAttribute="trailing" id="Sgz-E4-gBc"/>
+                        <constraint firstItem="lTO-gS-z5j" firstAttribute="top" secondItem="AdU-CL-otq" secondAttribute="top" id="gPv-VE-jtb"/>
+                        <constraint firstItem="lTO-gS-z5j" firstAttribute="leading" secondItem="AdU-CL-otq" secondAttribute="leading" id="qsG-k2-Lri"/>
+                        <constraint firstAttribute="bottom" secondItem="lTO-gS-z5j" secondAttribute="bottom" id="sl9-gm-TZ2"/>
+                    </constraints>
+                </scrollView>
+            </subviews>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstItem="AdU-CL-otq" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="0Is-dv-tIU"/>
+                <constraint firstAttribute="trailing" secondItem="AdU-CL-otq" secondAttribute="trailing" id="9Pj-tQ-ROk"/>
+                <constraint firstAttribute="bottom" secondItem="AdU-CL-otq" secondAttribute="bottom" id="EXo-zS-8xb"/>
+                <constraint firstItem="AdU-CL-otq" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="YRZ-c4-xy4"/>
+            </constraints>
+            <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
+            <point key="canvasLocation" x="241.5" y="254.5"/>
+        </view>
+    </objects>
+</document>

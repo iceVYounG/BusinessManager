@@ -1,0 +1,264 @@
+//
+//  QuestionListVC.m
+//  BusinessManager
+//
+//  Created by 朕 on 16/9/5.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "QuestionListVC.h"
+#import "QuestionListCell.h"
+#import "QuestionListBottomcell.h"
+
+
+@interface QuestionListVC ()<UITableViewDelegate,UITableViewDataSource>
+@property (weak, nonatomic) IBOutlet UIScrollView *mainScrollView;
+@property(nonatomic,strong)UITableView *mainTableView;
+@property(nonatomic,strong)NSMutableArray *dataArr;
+
+@property(nonatomic,assign)NSInteger sectionNum;
+
+@end
+
+@implementation QuestionListVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    
+    NSLog(@"%@",[self.model.templateModelnameDate.date lastObject]);
+    
+    self.title = @"调查问卷详情编辑";
+    
+    _sectionNum = 2;
+    UIView *lineView = [[UIView alloc]initWithFrame:CGRectMake(0, 14.5, SCREEN_SIZE.width, 0.5)];
+    lineView.backgroundColor = [UIColor colorWithHexString:@"#dadada"];
+    [self.mainScrollView addSubview:lineView];
+    
+    self.mainTableView = [[UITableView alloc]initWithFrame:CGRectMake(0, 15, SCREEN_SIZE.width, 414*_sectionNum - 40)];
+    self.mainTableView.delegate = self;
+    self.mainTableView.dataSource = self;
+    
+    self.mainTableView.separatorStyle =  UITableViewCellSeparatorStyleNone;
+    
+    [self.mainScrollView addSubview:self.mainTableView];
+    [self.mainTableView registerNib:[UINib nibWithNibName:@"QuestionListCell" bundle:nil] forCellReuseIdentifier:@"QuestionListCell"];
+    [self.mainTableView registerNib:[UINib nibWithNibName:@"QuestionListBottomcell" bundle:nil] forCellReuseIdentifier:@"QuestionListBottomcell"];
+    NSMutableArray *lastArr = [[self.model.templateModelnameDate.date lastObject] tabs];
+    NSMutableArray *firstArr = [NSMutableArray array];
+    if ([self.model.templateModelnameDate.date count]>0) {
+        TemplateModel *model = self.model.templateModelnameDate.date[0];
+        NSLog(@"%ld",(long)model.id);
+        _sectionNum = [self.model.templateModelnameDate.date count]+1;
+        for (int i = 0;i<[self.model.templateModelnameDate.date count] ; i++) {
+            
+            NSDictionary *firstDic = @{@"text":[self.model.templateModelnameDate.date[i] title],
+                                       @"id":@([(PartModel*)self.model.templateModelnameDate.date[i] id]),
+                                       @"A":[lastArr[0] title],
+                                       @"B":[lastArr[1] title],
+                                       @"C":[lastArr[2] title],
+                                       @"D":[lastArr[3] title],
+                                       @"E":[lastArr[4] title],
+                                       @"F":[lastArr[5] title]};
+            [firstArr addObject:firstDic];
+        }
+    }
+    else
+    {
+        NSDictionary *firstDic = @{@"text":@"",
+                                   @"id":@"",
+                                   @"A":@"",
+                                   @"B":@"",
+                                   @"C":@"",
+                                   @"D":@"",
+                                   @"E":@"",
+                                   @"F":@""};
+        [firstArr addObject:firstDic];
+
+    }
+    
+    
+    [[NSUserDefaults standardUserDefaults]setObject:firstArr forKey:@"QuestionListArr"];
+    
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return _sectionNum;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    
+    return 1;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section == _sectionNum - 1) {
+        return 374;
+    }
+    return 414;
+}
+
+- (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    if (indexPath.section == _sectionNum - 1) {
+        static NSString*ID=@"QuestionListBottomcell";
+        QuestionListBottomcell *cell=[tableView dequeueReusableCellWithIdentifier:ID];
+        if (!cell) {
+            cell=[[QuestionListBottomcell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+        }
+        [cell.addBtn addTarget:self action:@selector(deleteOrAddClick:) forControlEvents:UIControlEventTouchUpInside];
+        [cell.saveBtn addTarget:self action:@selector(saveBtnClick) forControlEvents:UIControlEventTouchUpInside];
+        self.mainScrollView.contentSize = CGSizeMake(SCREEN_SIZE.width, CGRectGetMaxY(_mainTableView.frame));
+        
+        return cell;
+    }
+    else
+    {
+        static NSString*ID=@"QuestionListCell";
+        QuestionListCell *cell=[tableView dequeueReusableCellWithIdentifier:ID];
+        if (!cell) {
+            cell=[[QuestionListCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+        }
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell.deleteBtn.tag = indexPath.section;
+        [cell initCellContentWithIndex:indexPath.section];
+        [cell.deleteBtn addTarget:self action:@selector(deleteOrAddClick:) forControlEvents:UIControlEventTouchUpInside];
+        return cell;
+    }
+ 
+}
+
+- (void)deleteOrAddClick:(UIButton*)btn
+{
+    if (btn.tag == -1) {
+        
+        self.sectionNum++;
+        [self saveData];
+    }else if(_sectionNum == 2)
+    {
+        [OMGToast showWithText:@"只剩下一个问题了！"];
+    }
+    else
+    {
+        [[[UIApplication sharedApplication] keyWindow] endEditing:YES];
+        NSArray *oldArr = [[NSUserDefaults standardUserDefaults]objectForKey:@"QuestionListArr"];
+        NSMutableArray *newArr = [NSMutableArray arrayWithArray:oldArr];
+        [newArr removeObjectAtIndex:btn.tag];
+        [[NSUserDefaults standardUserDefaults]setObject:newArr forKey:@"QuestionListArr"];
+        self.sectionNum--;
+    }
+    self.mainTableView.frame = CGRectMake(0, 15, SCREEN_SIZE.width, 414*_sectionNum - 40);
+    [self.mainTableView reloadData];
+}
+
+
+//问卷数据持久化
+- (void)saveData
+{
+    NSArray *oldArr = [[NSUserDefaults standardUserDefaults]objectForKey:@"QuestionListArr"];
+    NSMutableArray *newArr = [NSMutableArray arrayWithArray:oldArr];
+    NSDictionary *addDic = @{@"text":@"",
+                             @"id":@"",
+                               @"A":@"",
+                               @"B":@"",
+                               @"C":@"",
+                               @"D":@"",
+                               @"E":@"",
+                               @"F":@""};
+    [newArr addObject:addDic];
+
+    [[NSUserDefaults standardUserDefaults]setObject:newArr forKey:@"QuestionListArr"];
+}
+
+- (void)saveBtnClick
+{
+   [[[UIApplication sharedApplication] keyWindow] endEditing:YES];
+    NSArray *oldArr = [[NSUserDefaults standardUserDefaults]objectForKey:@"QuestionListArr"];
+//
+    NSArray *keyArr = @[@"A",@"B",@"C",@"D",@"E",@"F"];
+
+    PartModel* model = [[PartModel alloc] init];
+    NSMutableArray *dateArray=[[NSMutableArray alloc]init];
+    if (!self.model) {
+        model.templateModelname = @"调查报告";
+        model.id=0;
+        model.templateModelnameCode = DiaochaWJ;
+        model.templateNo = SiSDian;
+        model.storeId = NoNullStr(AccountInfo.storeId, @"");
+        TemplateModelData* data = [[TemplateModelData alloc] init];
+        
+        NSMutableArray *optionArr = [NSMutableArray array];
+        TemplateModel *dateModel = [[TemplateModel alloc]init];
+        for (NSDictionary *dateDic in oldArr) {
+            dateModel.title = [dateDic objectForKey:@"text"];
+            dateModel.id = 0;
+            
+            TemplateModel *titleModel = [[TemplateModel alloc]init];
+            for (int i = 0; i < 6; i++) {
+                titleModel.title = [dateDic objectForKey:keyArr[i]];
+                [optionArr addObject:titleModel];
+            }
+            
+            
+            
+            dateModel.tabs = [optionArr copy];
+            [dateArray addObject:dateModel];
+        }
+
+        data.date = [dateArray copy];
+        model.templateModelnameDate = data;
+    }
+    else{
+      
+       
+        
+        for (NSDictionary *dateDic in oldArr) {
+             NSMutableArray *optionArr = [NSMutableArray array];
+            TemplateModel *dateModel = [[TemplateModel alloc]init];
+            dateModel.title = [dateDic objectForKey:@"text"];
+            dateModel.id = [dateDic objectForKey:@"id"];
+            
+            for (int i = 0; i < 6; i++) {
+                TemplateModel *titleModel = [[TemplateModel alloc]init];
+                titleModel.title = [dateDic objectForKey:keyArr[i]];
+                NSLog(@"%@",[dateDic objectForKey:keyArr[i]]);
+                [optionArr addObject:titleModel];
+            }
+            
+            
+            
+            dateModel.tabs = [optionArr copy];
+            [dateArray addObject:dateModel];
+//            [optionArr removeAllObjects];
+        }
+        self.model.templateModelnameDate.date = dateArray;
+        model = self.model;
+    }
+    
+    NSArray *modelArr = @[model];
+    [SVProgressHUD showWithStatus:@"数据处理中..."];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeGradient];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    
+    [[MallNetManager share] request:API_TemplateSave parameters:[modelArr jm_ArryPrams] success:^(NSURLSessionDataTask *task, id responseObject) {
+        [SVProgressHUD dismiss];
+        
+        if (Succeed(responseObject)) {
+           [self.navigationController popViewControllerAnimated:YES];
+           [OMGToast showWithText:responseObject[@"msg"]];
+        }else{
+            
+            [OMGToast showWithText:responseObject[@"msg"]];
+        }
+        
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        [SVProgressHUD dismiss];
+       
+    }];
+}
+
+@end

@@ -1,0 +1,24 @@
+//
+//  EaditDrawCell.m
+//  BusinessManager
+//
+//  Created by The Only on 16/7/27.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "EaditDrawCell.h"
+
+@implementation EaditDrawCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

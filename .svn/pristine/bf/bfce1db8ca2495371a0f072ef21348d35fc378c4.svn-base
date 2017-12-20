@@ -1,0 +1,16 @@
+//
+//  BedroomCameraVC.h
+//  CMCCMall
+//
+//  Created by spring on 16/9/5.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "BaseController.h"
+
+@interface HVMonitorCameraVC : BaseController
+@property (strong, nonatomic) CloseliCameraDevice *curDevice;
+@property (weak, nonatomic) IBOutlet UIImageView *contentImageView;
+@property (weak, nonatomic) IBOutlet UILabel *currentTimeLabel;
+@property (weak, nonatomic) IBOutlet UIButton *speakBtn;
+@end

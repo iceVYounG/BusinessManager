@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10117" systemVersion="15C50" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="PrizeTypeView"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view tag="301" contentMode="scaleToFill" id="mTc-iL-nGu" customClass="PrizeTypeView">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="194"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vU4-hM-YJB">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="194"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DEc-na-iYU">
+                            <rect key="frame" x="0.0" y="0.0" width="375" height="0.5"/>
+                            <color key="backgroundColor" red="0.85490196080000003" green="0.85490196080000003" blue="0.85490196080000003" alpha="1" colorSpace="calibratedRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="0.5" id="BE9-X5-IXG"/>
+                            </constraints>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QWl-ht-OGo">
+                            <rect key="frame" x="0.0" y="49" width="375" height="1"/>
+                            <color key="backgroundColor" red="0.85490196080000003" green="0.85490196080000003" blue="0.85490196080000003" alpha="1" colorSpace="calibratedRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="0.5" id="Vql-M2-A70"/>
+                            </constraints>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ACH-FJ-OdS">
+                            <rect key="frame" x="0.0" y="146" width="375" height="1"/>
+                            <color key="backgroundColor" red="0.85490196080000003" green="0.85490196080000003" blue="0.85490196080000003" alpha="1" colorSpace="calibratedRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="0.5" id="eYM-K4-7Zf"/>
+                            </constraints>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="T0o-Io-1CB">
+                            <rect key="frame" x="0.0" y="97" width="375" height="1"/>
+                            <color key="backgroundColor" red="0.85490196080000003" green="0.85490196080000003" blue="0.85490196080000003" alpha="1" colorSpace="calibratedRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="0.5" id="bQb-h7-p5I"/>
+                            </constraints>
+                        </view>
+                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请输入奖品名称" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="o9d-Sf-XdB">
+                            <rect key="frame" x="15" y="1" width="360" height="48"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="48" id="drE-FI-rfW"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                            <textInputTraits key="textInputTraits"/>
+                        </textField>
+                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请输入奖品数量" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="hTf-sf-d8e">
+                            <rect key="frame" x="15" y="49" width="360" height="48"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="48" id="euK-8B-NSS"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                            <textInputTraits key="textInputTraits"/>
+                        </textField>
+                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请输入每个人的中奖概率，0.5即为%5" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="9pC-fh-jwD">
+                            <rect key="frame" x="15" y="98" width="360" height="48"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="48" id="bJM-b5-d9t"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                            <textInputTraits key="textInputTraits"/>
+                        </textField>
+                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请输入每个人限制中奖次数" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="mIA-gb-UXg">
+                            <rect key="frame" x="15" y="146" width="360" height="48"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="48" id="FAf-MA-dP7"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                            <textInputTraits key="textInputTraits"/>
+                        </textField>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="CV3-Oz-stb">
+                            <rect key="frame" x="0.0" y="194" width="375" height="1"/>
+                            <color key="backgroundColor" red="0.85490196080000003" green="0.85490196080000003" blue="0.85490196080000003" alpha="1" colorSpace="calibratedRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="0.5" id="WpN-nK-pHK"/>
+                            </constraints>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="trailing" secondItem="T0o-Io-1CB" secondAttribute="trailing" id="0w7-bb-he6"/>
+                        <constraint firstItem="o9d-Sf-XdB" firstAttribute="leading" secondItem="vU4-hM-YJB" secondAttribute="leading" constant="15" id="1g3-PF-akz"/>
+                        <constraint firstAttribute="height" constant="194" id="47H-c4-xaq"/>
+                        <constraint firstItem="9pC-fh-jwD" firstAttribute="top" secondItem="T0o-Io-1CB" secondAttribute="bottom" id="Chf-g9-q7z"/>
+                        <constraint firstItem="CV3-Oz-stb" firstAttribute="top" secondItem="mIA-gb-UXg" secondAttribute="bottom" id="GD3-qs-zwR"/>
+                        <constraint firstItem="DEc-na-iYU" firstAttribute="leading" secondItem="vU4-hM-YJB" secondAttribute="leading" id="Jit-3T-ocB"/>
+                        <constraint firstItem="T0o-Io-1CB" firstAttribute="top" secondItem="hTf-sf-d8e" secondAttribute="bottom" id="OFr-ml-qV7"/>
+                        <constraint firstAttribute="trailing" secondItem="hTf-sf-d8e" secondAttribute="trailing" id="OyO-9v-CPv"/>
+                        <constraint firstItem="QWl-ht-OGo" firstAttribute="top" secondItem="o9d-Sf-XdB" secondAttribute="bottom" id="QYY-o4-bNr"/>
+                        <constraint firstItem="mIA-gb-UXg" firstAttribute="top" secondItem="9pC-fh-jwD" secondAttribute="bottom" id="TFP-Xs-g3L"/>
+                        <constraint firstItem="CV3-Oz-stb" firstAttribute="leading" secondItem="vU4-hM-YJB" secondAttribute="leading" id="WcR-JX-APj"/>
+                        <constraint firstAttribute="trailing" secondItem="QWl-ht-OGo" secondAttribute="trailing" id="bGY-0H-z3v"/>
+                        <constraint firstItem="T0o-Io-1CB" firstAttribute="leading" secondItem="vU4-hM-YJB" secondAttribute="leading" id="cRQ-8d-cOT"/>
+                        <constraint firstAttribute="trailing" secondItem="DEc-na-iYU" secondAttribute="trailing" id="ccp-nV-7yW"/>
+                        <constraint firstItem="9pC-fh-jwD" firstAttribute="leading" secondItem="vU4-hM-YJB" secondAttribute="leading" constant="15" id="dx4-un-QRi"/>
+                        <constraint firstItem="ACH-FJ-OdS" firstAttribute="top" secondItem="9pC-fh-jwD" secondAttribute="bottom" id="gih-YV-6e5"/>
+                        <constraint firstItem="o9d-Sf-XdB" firstAttribute="top" secondItem="vU4-hM-YJB" secondAttribute="top" constant="1" id="hbt-oH-laH"/>
+                        <constraint firstItem="hTf-sf-d8e" firstAttribute="leading" secondItem="vU4-hM-YJB" secondAttribute="leading" constant="15" id="i5Y-hZ-pmW"/>
+                        <constraint firstItem="mIA-gb-UXg" firstAttribute="leading" secondItem="vU4-hM-YJB" secondAttribute="leading" constant="15" id="iSN-KJ-AKv"/>
+                        <constraint firstAttribute="trailing" secondItem="ACH-FJ-OdS" secondAttribute="trailing" id="iUB-fj-zHs"/>
+                        <constraint firstItem="hTf-sf-d8e" firstAttribute="top" secondItem="o9d-Sf-XdB" secondAttribute="bottom" id="idQ-Qq-P5z"/>
+                        <constraint firstItem="QWl-ht-OGo" firstAttribute="leading" secondItem="vU4-hM-YJB" secondAttribute="leading" id="ktN-IK-FbH"/>
+                        <constraint firstItem="DEc-na-iYU" firstAttribute="top" secondItem="mIA-gb-UXg" secondAttribute="bottom" constant="-194" id="m1r-pA-nAz"/>
+                        <constraint firstAttribute="trailing" secondItem="o9d-Sf-XdB" secondAttribute="trailing" id="mCL-Oa-QnD"/>
+                        <constraint firstAttribute="trailing" secondItem="9pC-fh-jwD" secondAttribute="trailing" id="nl1-gi-Ice"/>
+                        <constraint firstItem="ACH-FJ-OdS" firstAttribute="leading" secondItem="vU4-hM-YJB" secondAttribute="leading" id="vKS-64-Mr9"/>
+                        <constraint firstAttribute="trailing" secondItem="mIA-gb-UXg" secondAttribute="trailing" id="x8n-7H-apj"/>
+                        <constraint firstAttribute="trailing" secondItem="CV3-Oz-stb" secondAttribute="trailing" id="yA4-HE-71f"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstItem="vU4-hM-YJB" firstAttribute="leading" secondItem="mTc-iL-nGu" secondAttribute="leading" id="WCv-ZS-0bN"/>
+                <constraint firstItem="vU4-hM-YJB" firstAttribute="top" secondItem="mTc-iL-nGu" secondAttribute="top" id="Y8D-3z-kS7"/>
+                <constraint firstAttribute="trailing" secondItem="vU4-hM-YJB" secondAttribute="trailing" id="twb-MA-3yQ"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="prizeChance" destination="9pC-fh-jwD" id="tVD-Ok-tB7"/>
+                <outlet property="prizeCount" destination="hTf-sf-d8e" id="7nF-77-8kx"/>
+                <outlet property="prizeName" destination="o9d-Sf-XdB" id="u4s-kw-0tP"/>
+                <outlet property="prizeNumber" destination="mIA-gb-UXg" id="7wY-6s-v9C"/>
+                <outlet property="prizeTypeView" destination="vU4-hM-YJB" id="swW-Zg-61N"/>
+            </connections>
+            <point key="canvasLocation" x="362.5" y="176"/>
+        </view>
+    </objects>
+</document>

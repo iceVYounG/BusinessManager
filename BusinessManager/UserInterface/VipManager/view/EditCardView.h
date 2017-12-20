@@ -1,0 +1,33 @@
+//
+//  EditCardView.h
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+@class VipCardModel;
+
+@protocol EditCardViewDeleagte <NSObject>
+
+- (void)didClickChooseVipLevelBtn:(NSString *)btnName;
+- (void)didClickAddVipLevelBtn;
+- (void)didClickSaveBtnWithModel:(VipCardModel *)model;
+- (void)didClickDeleteBtn;
+
+@end
+
+typedef NS_ENUM(NSInteger,VipCard){
+    VipCardSaving,
+    VipCardCoupon
+};
+
+@interface EditCardView : UIScrollView<UITextViewDelegate>
+
+@property (nonatomic, strong) UIButton *vipCardLevel;
+@property (nonatomic, weak) id<EditCardViewDeleagte> delegate;
+@property (nonatomic, strong) VipCardModel *model;
+- (id)initWithType:(VipCard)type Bymodel:(VipCardModel *)model;
+
+@end

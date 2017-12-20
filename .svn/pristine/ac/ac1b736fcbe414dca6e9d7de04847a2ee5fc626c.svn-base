@@ -1,0 +1,29 @@
+//
+//  VipDetailView.h
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@protocol VipDetailViewDelegate <NSObject>
+
+- (void)didClickPrepaidButton;
+- (void)didClickDeleteButton;
+
+@end
+
+typedef NS_ENUM(NSInteger,VipCard){
+    VipCardSaving,
+    VipCardCoupon
+};
+
+@interface VipDetailView : UIView
+
+@property (nonatomic, strong) id<VipDetailViewDelegate> delegate;
+
+- (id)initWithType:(VipCard)type;
+
+@end

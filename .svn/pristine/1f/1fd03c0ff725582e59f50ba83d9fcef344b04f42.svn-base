@@ -1,0 +1,309 @@
+//
+//  JMLoopView.m
+//  ScrollLoopView
+//
+//  Created by apple on 15/9/17.
+//  Copyright (c) 2015年 apple-Mac-ZJH. All rights reserved.
+//
+
+#import "JMLoopView.h"
+#import "UIImageView+WebCache.h"
+
+
+@implementation JMLoopView
+{
+    UIScrollView* _scrollView;
+    UIPageControl* _pageControl;
+    NSTimer *timer;
+    
+}
+
+- (void)setImageNames:(NSArray *)imageNames
+{
+   
+    if (imageNames.count == 0) {
+        
+        UIImageView* imagev = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, self.height)];
+        imagev.image = [UIImage imageNamed:@"canyin-banner"];
+        imagev.contentMode = UIViewContentModeScaleAspectFill;
+        imagev.tag = 1025;
+        [self addSubview:imagev];
+
+        for (UIView* view in self.subviews) {
+            if (view.tag == 1025) {
+                return;
+            }
+        }
+        return;
+    }
+    else{
+        
+       [self judgeNewArry:imageNames];
+    }
+    _imageNames = imageNames;
+    
+    if (_scrollView == nil) {
+        
+        [self creatSubviews];
+        
+        [self creatTap];
+    }
+  
+    if (imageNames.count == 1)
+    {
+        _scrollView.scrollEnabled = NO;
+    }else
+    {
+        _scrollView.scrollEnabled = YES;
+
+    }
+}
+
+- (void)awakeFromNib
+{
+    
+    [self creatSubviews];
+    
+    [self creatTap];
+    [self addTimerAction];
+
+
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(closeTimer) name:@"runLoopCloseTimer" object:nil];
+    
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(openTimer) name:@"runLoopOpenTimer" object:nil];
+}
+-(void)dealloc{
+    [[NSNotificationCenter defaultCenter]removeObserver:self];
+
+}
+-(void)addTimerAction{
+    
+    timer=[NSTimer scheduledTimerWithTimeInterval:2.5 target:self selector:@selector(pagedo) userInfo:nil repeats:YES];
+    [[NSRunLoop mainRunLoop]addTimer:timer forMode:NSRunLoopCommonModes];
+}
+
+
+-(void)closeTimer{
+    [timer setFireDate:[NSDate distantFuture]];
+    
+}
+-(void)openTimer{
+    [timer setFireDate:[NSDate distantPast]];
+    
+}
+#pragma mark - 创建子视图
+-(void)creatSubviews{
+    
+    _scrollView = [[UIScrollView alloc]initWithFrame:self.bounds];
+    _scrollView.delegate = self;
+    _scrollView.showsHorizontalScrollIndicator = NO;
+    _scrollView.showsVerticalScrollIndicator = NO;
+    _scrollView.userInteractionEnabled = YES;
+
+    
+    //每个图片的尺寸
+    CGSize cellSize = self.frame.size;
+    
+    for (int i = 0; i < self.imageNames.count; i++) {
+        
+        UIImageView* imagev = [[UIImageView alloc]init];
+        imagev.userInteractionEnabled = YES;
+        
+        
+        [imagev sd_setImageWithURL:self.imageNames[i] placeholderImage:[UIImage imageNamed:@"angle-mask"]];
+        
+
+        if ([self.imageNames[i] hasPrefix:@"http"]) {//网络图片
+                [imagev sd_setImageWithURL:self.imageNames[i] placeholderImage:[UIImage imageNamed:@"angle-mask"]];
+        }else{//本地图片
+            
+                imagev.image = [UIImage imageNamed:self.imageNames[i]];
+        }
+
+        
+        
+        
+        imagev.frame = CGRectMake(cellSize.width*(i), 0, cellSize.width, cellSize.height);
+
+        
+        [_scrollView addSubview:imagev];
+    }
+    
+    //内容尺寸
+    _scrollView.contentSize = CGSizeMake((self.imageNames.count)*cellSize.width, cellSize.height);
+    
+    _scrollView.pagingEnabled = YES;
+    
+    //初始偏移量
+//    _scrollView.contentOffset = CGPointMake(cellSize.width, 0);
+    
+    [self addSubview:_scrollView];
+    
+    //page control
+    _pageControl = [[UIPageControl alloc]initWithFrame:CGRectMake(cellSize.width * 0.5 - 50, cellSize.height-15, 100, 15)];
+    _pageControl.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+    _pageControl.currentPage = 0;
+    _pageControl.numberOfPages = self.imageNames.count;
+    
+    [_pageControl addTarget:self action:@selector(pageAction:) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self addSubview:_pageControl];
+
+}
+
+#pragma mark - scrollView代理方法
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+//
+  NSInteger num = scrollView.contentOffset.x/SCREEN_SIZE.width;
+        _pageControl.currentPage=num;
+}
+//开始拖拽时暂停定时器
+-(void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
+    [timer invalidate];
+    
+    
+}
+
+
+//结束拖拽时 延迟6秒调用开始定时器
+-(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
+    [self addTimerAction];
+    
+    
+}
+
+
+
+-(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
+    
+    double page=scrollView.contentOffset.x/scrollView.bounds.size.width;
+    _pageControl.currentPage=page;
+}
+
+
+
+ #pragma mark - 实现无限滑动
+- (void)LoopView:(NSInteger)num scrollView:(UIScrollView *)scrollView {
+    //如果偏移量为0调到最后一页
+    if (num == 0) {
+        
+        scrollView.contentOffset = CGPointMake(self.frame.size.width*(self.imageNames.count+.5), 0);
+        
+        _pageControl.currentPage = self.imageNames.count;
+    }
+    //如果偏移量为最后一张 调到第一张
+    else if (num == self.imageNames.count+1) {
+        
+        scrollView.contentOffset = CGPointMake(self.frame.size.width , 0);
+        
+        _pageControl.currentPage = 0;
+    }
+    
+    else{
+        _pageControl.currentPage = num-1;
+    }
+}
+
+
+
+#pragma mark - pageAction
+-(void)pageAction:(UIPageControl *)pageControl{
+//    
+//    CGFloat x=(pageControl.currentPage)*_scrollView.bounds.size.width;
+//    
+//    [_scrollView setContentOffset:CGPointMake(x, 0) animated:YES];
+    
+    
+}
+
+#pragma mark - 定时器Action
+-(void)pagedo{
+
+    if (self.imageNames.count==0) {
+        return;
+    }
+    NSInteger page=(_pageControl.currentPage+1)%self.imageNames.count;
+    _pageControl.currentPage=page;
+    [self pageChaged:_pageControl];
+    
+}
+
+-(void)pageChaged:(UIPageControl *)pageControl{
+    CGFloat x=(pageControl.currentPage)*_scrollView.bounds.size.width;
+    
+    [UIView animateWithDuration:1 animations:^{
+        [_scrollView setContentOffset:CGPointMake(x, 0) animated:YES];
+    }];
+    
+    
+    
+}
+
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+
+    [self.deletate userDidSelectAtIndex:index];
+}
+
+#pragma mark - 单击手势
+-(void)creatTap{
+
+    UITapGestureRecognizer* tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(tapAction:)];
+
+    tap.numberOfTouchesRequired = 1;
+    tap.numberOfTapsRequired = 1;
+  
+    [self addGestureRecognizer:tap];
+}
+    
+-(void)tapAction:(UITapGestureRecognizer*)tap{
+
+  [self.deletate userDidSelectAtIndex:_pageControl.currentPage];
+
+}
+
+-(void)judgeNewArry:(NSArray*)newArry{
+    
+    if (![self judgeNewArryisEqualOldArry:newArry]) {
+        
+        if (_scrollView) {
+            [_scrollView removeFromSuperview];
+            [_pageControl removeFromSuperview];
+            _scrollView = nil;
+            _pageControl = nil;
+        }
+    }
+}
+
+-(BOOL)judgeNewArryisEqualOldArry:(NSArray*)newArry{
+
+    if (newArry.count != self.imageNames.count) {
+        
+        return NO;
+    }
+    NSArray* arry1 = self.imageNames.copy;
+    NSArray* arry2 = newArry.copy;
+    
+    NSSortDescriptor* desort = [NSSortDescriptor sortDescriptorWithKey:@"" ascending:YES];
+    NSArray* newArr1 = [arry1 sortedArrayUsingDescriptors:@[desort]];
+    NSArray* newArr2 = [arry2 sortedArrayUsingDescriptors:@[desort]];
+    
+    BOOL isEqual = YES;
+    for (int i = 0; i < newArry.count; i++) {
+        
+        if (![newArry[i] isKindOfClass:[NSString class]]) {
+            isEqual = NO;
+            break;
+        }
+       
+        if (![newArr1[i] isEqualToString:newArr2[i]]) {
+            isEqual = NO;
+            break;
+        }
+    }
+    return isEqual;
+}
+
+
+
+@end

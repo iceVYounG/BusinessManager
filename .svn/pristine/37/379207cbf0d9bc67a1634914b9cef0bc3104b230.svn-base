@@ -1,0 +1,17 @@
+//
+//  MyWeiZhanVC.h
+//  BusinessManager
+//
+//  Created by zhaojh on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanBaseController.h"
+
+
+@interface MyWeiZhanVC : WeiZhanBaseController <UITableViewDelegate,UITableViewDataSource>
+
+
+@property(nonatomic,strong)NSMutableArray* datasArry;
+
+@end

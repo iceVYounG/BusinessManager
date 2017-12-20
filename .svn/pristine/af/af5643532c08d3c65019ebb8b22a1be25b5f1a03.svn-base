@@ -1,0 +1,151 @@
+//
+//  FoodDetailEditVC.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "FoodDetailEditVC.h"
+#import "ADCollectionViewCell.h"
+#import "JMPickCollectView.h"
+
+@interface FoodDetailEditVC () <UICollectionViewDataSource,UICollectionViewDelegate,ImageSenderDelegate>
+
+@property (nonatomic, strong) UICollectionView* collectionView;
+@property (nonatomic, strong) UIButton *saveSender;
+@property (nonatomic, strong) NSMutableArray* datasArray;
+@property (nonatomic, strong) NSMutableArray *originImages;
+@end
+
+@implementation FoodDetailEditVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    
+    [self setUpSubView];
+}
+
+- (void)setUpSubView{
+    
+    self.title = @"菜单详情编辑";
+
+    [self.view addSubview:self.saveSender];
+    [self.collectionView registerNib:[UINib nibWithNibName:@"ADCollectionViewCell" bundle:nil] forCellWithReuseIdentifier:@"ADCollectionViewCell"];
+
+}
+
+#pragma mark - colloctionView dataSource
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
+    
+    return self.datasArray.count + 1;
+}
+
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
+    static NSString* identify = @"ADCollectionViewCell";
+    
+    ADCollectionViewCell* cell = [collectionView dequeueReusableCellWithReuseIdentifier:identify forIndexPath:indexPath];
+    
+    if (indexPath.row == self.datasArray.count) {
+        [cell.imageSender setImage:[UIImage imageNamed:@"uploadImage"] forState:UIControlStateNormal];
+        cell.deleteSender.hidden = YES;
+        
+    }else{
+        [cell.imageSender setImage:self.datasArray[indexPath.row] forState:UIControlStateNormal];
+        cell.deleteSender.hidden = NO;
+    }
+    cell.deleteSender.tag = indexPath.row;
+
+    cell.delegate = self;
+    return cell;
+}
+
+#pragma mark - collectionView delegate
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+}
+
+#pragma mark - UICollectionViewDelegateFlowLayout
+//定义每个UICollectionView 的大小
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+    return CGSizeMake(KCollectionCellW, KCollectionCellH);
+}
+//定义每个UICollectionView 的 margin
+-(UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section{
+    return UIEdgeInsetsMake(32, 12, 12, 12);
+}
+#pragma mark - imageSenderDelegate
+- (void)jump2ImagePickerVCsender:(UIButton *)sender{
+    
+    [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage) {
+        
+        [self.originImages addObject:mediaImage];
+        [self.datasArray addObject:mediaImage];
+        [self.collectionView reloadData];
+    }];
+}
+
+- (void)deleteImageCell:(UIButton *)sender{
+    
+    [self.datasArray removeObjectAtIndex:sender.tag];
+    [self.originImages removeObjectAtIndex:sender.tag];
+    
+    [self.collectionView performBatchUpdates:^{
+        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:sender.tag inSection:0];
+        [self.collectionView deleteItemsAtIndexPaths:@[indexPath]];
+    } completion:^(BOOL finished) {
+        [self.collectionView reloadData];
+    }];
+}
+
+@synthesize collectionView  = _collectionView,datasArray = _datasArray,originImages = _originImages,saveSender = _saveSender;
+
+- (UICollectionView *)collectionView{
+    if (!_collectionView) {
+        UICollectionViewFlowLayout* flowLayout = [[UICollectionViewFlowLayout alloc] init];
+        flowLayout.itemSize = CGSizeMake(KCollectionCellW, KCollectionCellH);
+        flowLayout.minimumLineSpacing = 8.f;
+        
+        _collectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, KScreenWidth, KScreenHeight - NavigationH - 55) collectionViewLayout:flowLayout];
+        _collectionView.delegate = self;
+        _collectionView.dataSource = self;
+        _collectionView.backgroundColor = [UIColor groupTableViewBackgroundColor];
+        [self.view addSubview:_collectionView];
+    }
+    return _collectionView;
+}
+
+- (NSMutableArray *)datasArray{
+    if (!_datasArray) {
+        _datasArray = [NSMutableArray array];
+    }
+    return _datasArray;
+}
+
+- (NSMutableArray *)originImages{
+    
+    if (_originImages) {
+        _originImages = [NSMutableArray array];
+    }
+    return _originImages;
+}
+
+- (UIButton *)saveSender{
+    if (!_saveSender) {
+        _saveSender = [UIButton buttonWithType:UIButtonTypeCustom];
+        _saveSender.frame = CGRectMake(15, KScreenHeight - 55 - NavigationH, KScreenWidth - 15 * 2, 40);
+        [_saveSender setTitle:@"保存" forState:UIControlStateNormal];
+        
+        [_saveSender setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        _saveSender.backgroundColor = [UIColor blueColor];
+        _saveSender.clipsToBounds = YES;
+        _saveSender.layer.cornerRadius = 5.f;
+        
+    }
+    return _saveSender;
+}
+@end

@@ -1,0 +1,402 @@
+//
+//  FlowerShopCell.m
+//  BusinessManager
+//
+//  Created by 王启明 on 16/9/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "FlowerShopCell.h"
+#import "WeiZhanBaseController.h"
+@implementation FlowerShopCell
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+        self.imageV=[[UIImageView alloc]init];
+        self.imageV.image=[UIImage imageNamed:@"dianshang-lunbo"];
+        [self.contentView addSubview:self.imageV];
+        [self.imageV mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.equalTo(self).insets(UIEdgeInsetsMake(0, 0, 0, 0));
+        }];
+        [self addEditingSender];
+    }
+    return self;
+}
+
+- (void)setModel:(PartModel *)model{
+    _model=model;
+    if (model) {
+        TemplateModel *templeModel=[model.templateModelnameDate.date lastObject];
+        NSString * imgStr=templeModel.imgPath;
+        [self.imageV sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",ImagePre,imgStr]] placeholderImage:[UIImage imageNamed:@"dianshang-lunbo"]];
+        NSLog(@">>%@",imgStr);
+        
+    }
+
+}
+
+-(void)addEditingSender{
+    CGFloat w = [JMView getWidth:@[@"更换门头"]];
+    self.view = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, (self.contentView.frame.size.height - JMViewH) * 0.5 + 16, w, JMViewH) btnNames:@[@"更换门头"]];
+    self.view.tag = 100;
+    [self.contentView addSubview:self.view];
+}
+@end
+
+@implementation FlowerShopSectionTwoCell
+
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+        [self refreshUI];
+        [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(adress:) name:@"flowerAdressSelect" object:nil];
+        [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(addressChange:) name:UITextFieldTextDidChangeNotification object:nil];
+        self.nameTF.tag=1;
+        self.phoneTF.tag=2;
+        self.addressTF.tag=3;
+    }
+    return self;
+}
+
+-(void)adress:(NSNotification *)noti{
+    
+    self.addressTF.text=noti.object;
+    self.temModel.address.name= self.addressTF.text;
+    self.block(self.temModel);
+    
+}
+
+-(void)textFieldDidEndEditing:(UITextField *)textField{
+    
+    if (textField.tag==2) {
+        if ([self.delegate respondsToSelector:@selector(judgeIsInputRight:)]) {
+            [self.delegate judgeIsInputRight:self.phoneTF.text];
+        }
+    }
+
+}
+
+-(void)addressChange:(NSNotification *)sender{
+    
+    UITextField *textFiled=sender.object;    
+    if (textFiled.tag==3) {
+        if ([self.delegate respondsToSelector:@selector(getTheAdressPt:)]) {
+            [self.delegate getTheAdressPt:self.addressTF.text];
+        }
+    }
+    
+}
+
+- (void)refreshUI{
+    self.temModel= [[FlowerAddressModel alloc]init];
+    if (!self.temModel.address) {
+        self.temModel.address=[[TemplateModel alloc]init];
+    }
+    self.backgroundColor=[UIColor whiteColor];
+    UILabel *nameLab=[UILabel new];
+    nameLab.text=@"店铺名称:";
+    nameLab.font=[UIFont systemFontOfSize:13];
+    self.nameTF=[UITextField new];
+    self.nameTF.borderStyle=UITextBorderStyleNone;
+    self.nameTF.font=[UIFont systemFontOfSize:13];
+    self.nameTF.placeholder=@"请输入您的店铺名称";
+    [self.nameTF addTarget:self action:@selector(valueChange:) forControlEvents:UIControlEventAllEditingEvents];
+    UIView *downLine=[[UIView alloc]init];
+    downLine.backgroundColor=[UIColor colorWithHexString:@"dadada"];
+    UIView *downLine2=[[UIView alloc]init];
+    downLine2.backgroundColor=[UIColor colorWithHexString:@"dadada"];
+    UIView *downLine3=[[UIView alloc]init];
+    downLine3.backgroundColor=[UIColor colorWithHexString:@"dadada"];
+    
+    
+    UILabel *phoneLab=[UILabel new];
+    phoneLab.text=@"联系电话:";
+    phoneLab.font=[UIFont systemFontOfSize:13];
+    self.phoneTF=[UITextField new];
+    self.phoneTF.placeholder=@"请输入您的联系电话";
+     self.phoneTF.borderStyle=UITextBorderStyleNone;
+     self.phoneTF.font=[UIFont systemFontOfSize:13];
+    self.phoneTF.delegate=self;
+    self.phoneTF.keyboardType=UIKeyboardTypeNamePhonePad;
+     [self.phoneTF addTarget:self action:@selector(valueChange:) forControlEvents:UIControlEventAllEditingEvents];
+    UILabel *addressLab=[UILabel new];
+    addressLab.text=@"店铺地址:";
+    addressLab.font=[UIFont systemFontOfSize:13];
+    self.addressTF=[UITextField new];
+    self.addressTF.borderStyle=UITextBorderStyleNone;
+    self.addressTF.placeholder=@"请输入您的店铺地址";
+     self.addressTF.font=[UIFont systemFontOfSize:13];
+     [self.addressTF addTarget:self action:@selector(valueChange:) forControlEvents:UIControlEventAllEditingEvents];
+    [self.contentView addSubview:nameLab];
+    [self.contentView addSubview:phoneLab];
+    [self.contentView addSubview:addressLab];
+    [self.contentView addSubview:downLine];
+    [self.contentView addSubview:downLine2];
+    [self.contentView addSubview:downLine3];
+    [self.contentView addSubview:self.nameTF];
+    [self.contentView addSubview:self.phoneTF];
+    [self.contentView addSubview:self.addressTF];
+    [nameLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self).offset(15*kWidth_scale);
+        make.top.equalTo(self).offset(15);
+        make.width.equalTo(@(70*kWidth_scale));
+        make.height.equalTo(@40);
+    }];
+    
+    [self.nameTF mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(nameLab);
+        make.left.equalTo(nameLab.mas_right).offset(10*kWidth_scale);
+        make.right.equalTo(self).offset(-15*kWidth_scale);
+        make.height.equalTo(@40);
+    }];
+    
+    [downLine mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(nameLab.mas_right).offset(10*kWidth_scale);
+        make.right.equalTo(self).offset(-15*kWidth_scale);
+        make.top.equalTo(self.nameTF.mas_bottom).offset(-5);
+        make.height.equalTo(@1);
+    }];
+    
+    [phoneLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self).offset(15*kWidth_scale);
+        make.top.equalTo(nameLab.mas_bottom).offset(10);
+        make.width.equalTo(@(70*kWidth_scale));
+        make.height.equalTo(@40);
+    }];
+    [self.phoneTF mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(phoneLab);
+        make.left.equalTo(phoneLab.mas_right).offset(10*kWidth_scale);
+        make.right.equalTo(self).offset(-15*kWidth_scale);
+        make.height.equalTo(@40);
+    }];
+    
+    [downLine2 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(nameLab.mas_right).offset(10*kWidth_scale);
+        make.right.equalTo(self).offset(-15*kWidth_scale);
+        make.top.equalTo(self.phoneTF.mas_bottom).offset(-5);
+        make.height.equalTo(@1);
+    }];
+    [addressLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self).offset(15*kWidth_scale);
+        make.top.equalTo(phoneLab.mas_bottom).offset(10);
+        make.width.equalTo(@(70*kWidth_scale));
+        make.height.equalTo(@40);
+    }];
+    [self.addressTF mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(addressLab);
+        make.left.equalTo(addressLab.mas_right).offset(10*kWidth_scale);
+        make.right.equalTo(self).offset(-15*kWidth_scale);
+        make.height.equalTo(@40);
+    }];
+    
+    [downLine3 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(nameLab.mas_right).offset(10*kWidth_scale);
+        make.right.equalTo(self).offset(-15*kWidth_scale);
+        make.top.equalTo(self.addressTF.mas_bottom).offset(-5);
+        make.height.equalTo(@1);
+    }];
+
+}
+
+
+- (void)setModel:(FlowerAddressModel *)model{
+    _model=model;
+    if (model) {
+        self.addressTF.text=model.address.name;
+        self.phoneTF.text=model.shopPhone;
+        self.nameTF.text=model.name;
+        self.temModel=model;
+        self.block(model);
+        
+    }
+}
+
+- (void)valueChange:(UITextField *)textField{
+    if (textField ==self.phoneTF) {
+        self.temModel.shopPhone=textField.text;
+    }
+    if (textField==self.nameTF) {
+        if (textField.text.length>20) {
+            textField.text=[textField.text substringToIndex:20];
+             [OMGToast showWithText:@"店铺名称不能超过20位"];
+        }
+        self.temModel.name=textField.text;
+    }
+    if (textField==self.addressTF) {
+        self.temModel.address.name=textField.text;
+    }
+    self.block(self.temModel);
+
+}
+
+
+@end
+
+@implementation FlowerShopLunBoCell
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+        self.myScro=[[SDCycleScrollView alloc]init];
+        [self.contentView addSubview:self.myScro];
+        [self addeditingSender];
+        [self.myScro mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.equalTo(self).insets(UIEdgeInsetsMake(0, 0, 0, 0));
+        }];
+        self.myScro.localizationImagesGroup=@[[UIImage imageNamed:@"dianshang-lunbo"]];
+        self.myScro.pageControlStyle=SDCycleScrollViewPageContolStyleClassic;
+    }
+    return self;
+}
+
+- (void)setModel:(PartModel *)model{
+    _model=model;
+    if (model) {
+        NSMutableArray *imgeArr=[model.templateModelnameDate.date mutableCopy];
+        if (imgeArr&&imgeArr.count>0) {
+            NSMutableArray *imgPathArray=[[NSMutableArray alloc]init];
+            [imgeArr enumerateObjectsUsingBlock:^(TemplateModel *obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                NSString *oldImagePath=obj.imgPath;
+                NSString *imagePath=[NSString stringWithFormat:@"%@%@",ImagePre,oldImagePath];
+                [imgPathArray addObject:imagePath];
+            }];
+                self.myScro.imageURLStringsGroup=imgPathArray;
+        }
+        else{
+        
+        self.myScro.localizationImagesGroup=@[[UIImage imageNamed:@"dianshang-lunbo"]];
+        }
+    }
+
+}
+
+- (void)addeditingSender{
+    CGFloat w = [JMView getWidth:@[@"编辑",@"新增活动"]];
+    self.view = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, (self.contentView.frame.size.height - JMViewH) * 0.5 + 16, w, JMViewH) btnNames:@[@"编辑",@"新增活动"]];
+    self.view.tag = 102;
+    [self.contentView addSubview:self.view];
+}
+
+@end
+
+@implementation FlowerHongBaoCell
+-(instancetype)initWithFrame:(CGRect)frame{
+    
+    if (self = [super initWithFrame:frame]) {
+        
+        self.backgroundColor = [UIColor groupTableViewBackgroundColor];
+        
+        [self addEditingSender1];
+    }
+    return self;
+}
+
+-(void)setModel:(PartModel *)model{
+    _model = model;
+    
+    
+    NSString* path = [(TemplateModel*)_model.templateModelnameDate.date.lastObject imgPath];
+    
+    UIImage* placeHoldImage;
+    if ([_model.templateModelnameCode isEqualToString:QiangHB]) {
+        
+        placeHoldImage = [UIImage imageNamed:@"hongbao"];
+        
+    }else if ([_model.templateModelnameCode isEqualToString:DaZP]){
+        
+        placeHoldImage = [UIImage imageNamed:@"canyin-banner"];
+    }else{
+        
+        placeHoldImage = [UIImage imageNamed:@"dianshang-lunbo"];
+    }
+    
+    [_imagev sd_setImageWithURL:[NSURL URLWithString:[ImagePre stringByAppendingPathComponent:path]] placeholderImage:placeHoldImage];
+    
+    [self editViewHiden];
+}
+
+-(void)editViewHiden{
+    
+    self.jView.prams = _model;
+    
+    if (_model) {
+        TemplateModel *temp = (TemplateModel *)self.model.templateModelnameDate.date.lastObject;
+        
+        self.jView.hidden = ![temp.status boolValue];//NO 不隐藏  YES隐藏
+        self.imagev.hidden = ![temp.status boolValue];
+        
+    }
+}
+-(void)addEditingSender1{
+    
+    _imagev = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, kHongBaoCellH)];
+    _imagev.image = [UIImage imageNamed:@"hongbao"];
+    [self.contentView addSubview:_imagev];
+    
+    CGFloat w = [JMView getWidth:@[@"编辑",@"删除"]];
+    self.jView = [[JMView alloc]initWithFrame:CGRectMake(KScreenWidth - w, (kHongBaoCellH - JMViewH)/2, w, JMViewH) btnNames:@[@"编辑",@"删除"]];
+    
+    [self.contentView addSubview: self.jView];
+}
+
+@end
+
+@implementation FlowerCell
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self=[super initWithFrame:frame]) {
+        [self refreshUI];
+    }
+    return self;
+}
+
+- (void)refreshUI{
+    UIImageView *imageV=[UIImageView new];
+    imageV.image=[UIImage imageNamed:@"img"];
+    [self.contentView addSubview:imageV];
+    [imageV mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.equalTo(self);
+        make.height.equalTo(@(125));
+    }];
+    self.imgV=imageV;
+    UILabel *tLab=[UILabel new];
+    tLab.text=@"三只松鼠_小贱牛肉粒100克";
+    tLab.font=[UIFont systemFontOfSize:13];
+    tLab.backgroundColor=[UIColor whiteColor];
+    tLab.textColor=[UIColor colorWithHexString:@"#333333"];
+    [self.contentView addSubview:tLab];
+    [tLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(imageV.mas_bottom).offset(0);
+        make.left.equalTo(self).offset(15*kWidth_scale);
+        make.height.equalTo(@(28));
+        make.right.equalTo(self.mas_right).offset(0);
+    }];
+    self.detailLab=tLab;
+    UILabel *pLab=[UILabel new];
+    pLab.font=[UIFont systemFontOfSize:13];
+    pLab.attributedText=[self creatPriceStr:@"¥ 15.9"];
+    pLab.backgroundColor=[UIColor whiteColor];
+    pLab.textColor=[UIColor colorWithHexString:@"#F1594B"];
+    [self.contentView addSubview:pLab];
+    [pLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(tLab.mas_bottom);
+        make.left.equalTo(self).offset(15*kWidth_scale);
+        make.height.equalTo(@(16));
+    }];
+    self.priceLab=pLab;
+}
+
+- (void)setModel:(TemplateModel *)model{
+    _model=model;
+    if (model) {
+        [self.imgV sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",ImagePre,model.imgPath]] placeholderImage:[UIImage imageNamed:@"img"]];
+        NSString *priceStr=[NSString stringWithFormat:@"¥ %@",[NSString transformMoneyFormatter:model.price andTransformDirection:YES]];
+        self.priceLab.attributedText=[self creatPriceStr:priceStr];
+        self.detailLab.text=model.name;
+    }
+}
+
+- (NSMutableAttributedString *)creatPriceStr:(NSString *)priceStr{
+    NSMutableAttributedString *str=[[NSMutableAttributedString alloc]initWithString:priceStr];
+    [str addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:10]} range:NSMakeRange(0, 1)];
+    return str;
+    
+}
+
+
+@end

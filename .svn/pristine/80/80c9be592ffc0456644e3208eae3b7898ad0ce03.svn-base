@@ -1,0 +1,87 @@
+//
+//  HZCaseDetailCell.m
+//  BusinessManager
+//
+//  Created by niuzs on 16/8/26.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+
+#import "HZCaseDetailCell.h"
+#import "UIButton+WebCache.h"
+#import "MJExtension.h"
+#define GAP 15
+@implementation HZCaseDetailCell
+
+- (void)awakeFromNib {
+
+    self.selectionStyle = UITableViewCellSeparatorStyleNone;
+    
+    self.height = CGRectGetMaxY(_addBtn.frame);
+
+    
+}
+- (BOOL)textViewShouldEndEditing:(UITextView *)textView{
+    
+    if ([self.contentTextV.text isEqualToString:@""]|!self.contentTextV.text) {
+        self.placeholderLab.text = @"输入文字介绍 , 如果没有图片可不上传图片";
+    }
+    return YES;
+}
+- (void)textViewDidBeginEditing:(UITextView *)textView{
+    self.placeholderLab.text = @"";
+}
+- (void)setModel:(TemplateModel *)model{
+    
+    _model = model;
+    [self.iconImageBtn sd_setBackgroundImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",ImagePre,model.imgPath]] forState:UIControlStateNormal];
+    self.iconNameTextF.text = model.name;
+    self.contentTextV.text = model.content;
+    
+//    CGFloat y = CGRectGetMaxY(_contentTextV.frame);
+//    CGFloat margin = 15;
+//    CGFloat imageWH = (KScreenWidth - 5 *margin)/4;
+//    for (int i = 0; i < model.images.count; i++) {
+//            int row=i/4;
+//            int loc=i%4;
+//            CGFloat appviewx=margin+(margin+imageWH)*loc;
+//            CGFloat appviewy=margin+(margin+imageWH)*row;
+//            
+//            _iconView = [[HZCaseDetailImageView alloc]initWithFrame:CGRectMake(appviewx, appviewy +y, imageWH, imageWH)];
+//            _iconView.backgroundColor = [UIColor redColor];
+//            [self.contentView addSubview:_iconView];
+//    }
+    
+    
+}
+@end
+
+
+
+@implementation HZCaseDetailImageView
+
+- (instancetype)initWithFrame:(CGRect)frame{
+    self = [super initWithFrame:frame];
+    if (self) {
+        
+        _backView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height + 30)];
+        [self addSubview:_backView];
+        
+        self.attachment = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.attachment.frame = CGRectMake(0, 0, self.frame.size.width,self.frame.size.height - 30);
+        self.attachment.backgroundColor = [UIColor redColor];
+        [_backView addSubview:self.attachment];
+        
+        self.deleteSender = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.deleteSender.frame = CGRectMake(CGRectGetWidth(self.frame)-15, 0, 15, 15);
+        [self.deleteSender setBackgroundImage:[UIImage imageNamed:@"VipCardManager_CancelImage"] forState:UIControlStateNormal];
+        [_backView addSubview:self.deleteSender];
+        
+        self.label = [[UILabel alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(_attachment.frame), self.frame.size.width, 30)];
+        self.label.text = @"上传图片";
+        [_backView addSubview:_label];
+    }
+    return self;
+}
+
+@end

@@ -1,0 +1,496 @@
+//
+//  FoodWeiZhanVC.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "FoodWeiZhanVC.h"
+#import "WeiZhanModel.h"
+#import "ADViewCell.h"
+#import "JMView.h"
+#import "BannerEditVC.h"
+#import "WZ_TextViewPhotoVC.h"
+#import "FoodDetailEditVC.h"
+#import "WZ_EditActivitiesVC.h"
+#import "WZ_LoopVC.h"
+#import "GenealWeiZhanCell.h"
+#import "EditHongBaoVC.h"
+@interface FoodWeiZhanVC () <UITableViewDataSource,UITableViewDelegate,LoopViewDeledate,JMViewDelegate>
+{
+    BOOL _hongBaoHiden;
+}
+
+@property (nonatomic, strong) UITableView* tableView;
+@property (nonatomic, strong) NSMutableArray *imageArray;
+@property (nonatomic, strong) NSMutableArray *dataArrays;
+@property (nonatomic, strong) NSArray *keyPathArray;
+@property (nonatomic, strong) SearPartData* dataSource;
+
+@end
+
+@implementation FoodWeiZhanVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    [self setUpSubView];
+}
+
+- (void)setUpSubView{
+    
+    self.leftTitle = @"餐饮微站配置";
+    
+    _keyPathArray = @[
+                     @[ShopName],
+                     @[FoodMenu,About,Activity,WeiNDH],
+                     @[QiangHB,DaZP,GuaGK],
+                     @[HotFood],
+                     @[YiJFK]
+                     ];
+
+
+    [self requestWeiZhanDetail];
+    
+    [self.tableView reloadData];
+}
+
+#pragma mark - tableView dataSource
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return 5;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return 1;
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    switch (indexPath.section) {
+        case 0:
+        {
+            NSString* idengfier=@"ADTitleViewCell";
+            ADTitleViewCell *cell = [tableView dequeueReusableCellWithIdentifier:idengfier];
+            if (!cell) {
+                cell = [[[NSBundle mainBundle] loadNibNamed:@"ADViewCell" owner:nil options:nil] objectAtIndex:2];
+            }
+            
+            for (PartModel* model in self.dataArrays) {
+                if ([model.templateModelnameCode isEqualToString:ShopName] && model.templateModelnameDate) {
+                    
+                    cell.model = [model.templateModelnameDate.date lastObject];
+
+                }
+            }
+            
+            cell.jView.delegate = self;
+            return cell;
+        }
+            break;
+        case 1:
+        {
+            static NSString *indetify = @"ADImageCell";
+
+            ADImageCell* cell = [tableView dequeueReusableCellWithIdentifier:indetify];
+            
+            if (!cell) {
+
+                cell = [[[NSBundle mainBundle] loadNibNamed:NSStringFromClass([ADViewCell class]) owner:nil options:nil] objectAtIndex:3
+                        ];
+            }
+
+            ADImageModel* model = [[ADImageModel alloc] init];
+            model.titles = @[@"菜单",@"关于我们",@"活动信息",@"为你导航"];
+            model.images = @[@"louce01",@"louce02",@"louce03",@"louce04"];
+            model.isEdit = YES;
+
+            cell.model = model;
+            cell.jView.delegate = self;
+
+            return cell;
+            
+        }
+            break;
+            
+        case 2:
+        {
+            NSString* idengfier=@"HongBaoCell_ident";
+            HongBaoCell *cell = [tableView dequeueReusableCellWithIdentifier:idengfier];
+            if (!cell) {
+                cell = [[HongBaoCell alloc]initWithStyle:0 reuseIdentifier:idengfier];
+                cell.contentView.layer.contents = (__bridge id _Nullable)([UIImage imageNamed:@"hongbao"].CGImage);
+            }
+            cell.cellType = HongBaoHongDong;
+            cell.jView.tag = cell.cellType + 110;
+            cell.jView.delegate = self;
+            cell.selectionStyle = 0;
+            cell.cellHiden = _hongBaoHiden;
+            return cell;
+            
+        }
+            break;
+            
+        case 3:
+        {
+            static NSString *indetify = @"ADViweCell";
+            
+            ADViewCell* cell = [tableView dequeueReusableCellWithIdentifier:indetify];
+            
+            if (!cell) {
+                cell = [[[NSBundle mainBundle] loadNibNamed:NSStringFromClass([ADViewCell class]) owner:nil options:nil] objectAtIndex:1];
+            }
+            cell.jView.delegate = self;
+
+            cell.loopView.deletate = self;
+
+            [cell setAdImageWithArray:self.imageArray];
+
+            return cell;
+        }
+            break;
+        case 4:
+        {
+            static NSString *indetify = @"ADButtonCell";
+            
+            ADButtonCell* cell = [tableView dequeueReusableCellWithIdentifier:indetify];
+         
+
+            if (!cell) {
+                cell = [[[NSBundle mainBundle] loadNibNamed:NSStringFromClass([ADViewCell class]) owner:nil options:nil] objectAtIndex:5];
+            }
+            cell.jView.delegate = self;
+            return cell;
+        }
+            break;
+            
+        default:
+        {
+            return nil;
+        }
+            break;
+    }
+}
+
+#pragma mark - tableView delegate
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    
+    
+    
+    
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    switch (indexPath.section) {
+        case 0:
+        {
+            return KADTitleViewCellH;
+        }
+            break;
+            
+        case 1:
+        {
+            return KADImageCellH;
+        }
+            break;
+            
+        case 2:
+        {
+            return _hongBaoHiden == NO ? kHongBaoCellH:0;
+        }
+            break;
+
+            
+        case 3:
+        {
+            return KADViewCellH;
+        }
+            break;
+            
+        case 4:
+        {
+            return KADButtonCellH;
+        }
+            break;
+            
+        default:
+        {
+            return 0;
+        }
+            break;
+    }
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    
+    switch (section) {
+        case 2:{
+            return _hongBaoHiden == NO ? 10:JMViewH;
+        }
+            break;
+            
+        default:
+            break;
+    }
+    return .1f;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    switch (section) {
+        case 1:
+        {
+            return _hongBaoHiden == NO ? 20:.1f;
+        }
+            break;
+        case 3:
+        {
+            return .1f;
+        }
+            break;
+    
+        default:
+        {
+            return 20;
+        }
+            break;
+    }
+}
+- (UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    
+    switch (section) {
+        case 0:{
+            return nil;
+        }
+            break;
+        case 2:{
+            if (!_hongBaoHiden) {
+                UIView* spaceView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 10)];
+                spaceView.backgroundColor = [UIColor groupTableViewBackgroundColor];
+                return spaceView;
+            }
+            UIView* spaceView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, JMViewH)];
+            spaceView.backgroundColor = [UIColor groupTableViewBackgroundColor];
+            CGFloat w = [JMView getWidth:OneBtnsShow];
+            JMView* editView = [[JMView alloc]initWithFrame:CGRectMake(KScreenWidth - w, 0, w, JMViewH) btnNames:OneBtnsShow];
+            editView.delegate = self;
+            editView.tag = 666;
+            [spaceView addSubview:editView];
+            return spaceView;
+        }
+            break;
+        default:{
+            UIView* spaceView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 10)];
+            spaceView.backgroundColor = [UIColor groupTableViewBackgroundColor];
+            return spaceView;
+        }
+            break;
+    }
+
+}
+#pragma mark - loopView delegate
+- (void)userDidSelectAtIndex:(NSInteger)index{
+    
+    
+}
+
+#pragma mark - JMView delegate
+
+-(void)userDidSelectTitle:(NSString*)title atIndex:(NSInteger)index inView:(UIView*)view{
+    __weak typeof(self) wSelf = self;
+    switch (view.tag) {
+        case KADTitleViewTag:
+        {
+            BannerEditVC* vc = [[BannerEditVC alloc] initWithNibName:@"BannerEditVC" bundle:nil block:^(PartModel *model, BOOL isNewData) {
+                [wSelf setTempleData:@[model] isNew:isNewData];
+                [wSelf.tableView reloadData];
+
+            }];
+            vc.isBig = NO;
+            vc.model = [[self getTempleData:ShopNameStatus] lastObject];
+            
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case KADImageTag:
+        {
+            WZ_EditActivitiesVC* vc = [[WZ_EditActivitiesVC alloc] init];
+            
+            vc.status = FourButtonStatus;
+            [self.navigationController pushViewController:vc animated:YES];
+            
+        }
+            break;
+        case KADButtonTag:
+        {
+            FoodDetailEditVC* vc = [[FoodDetailEditVC alloc] init];
+            
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case 112:
+        {
+            switch (index) {
+                case 0:{
+                    _hongBaoHiden = !_hongBaoHiden;
+                    [self.tableView reloadData];
+                }
+                    break;
+                default:{
+                    EditHongBaoVC* vc = [[EditHongBaoVC alloc]init];
+                    [self.navigationController pushViewController:vc animated:YES];
+                }
+                    break;
+            }
+        }
+            break;
+        case KADViewTag:
+        {
+            WZ_LoopVC* vc = [[WZ_LoopVC alloc] initWithCoder:nil block:^(PartModel *model, BOOL isNewData) {
+                [wSelf setTempleData:@[model] isNew:isNewData];
+                [wSelf.tableView reloadData];
+            }];
+            
+            vc.model = [[self getTempleData:HotFoodStatus] lastObject];
+            
+            [self.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+            
+        case 666:{
+            _hongBaoHiden = !_hongBaoHiden;
+            [self.tableView reloadData];
+        }
+            break;
+            
+        default:
+            break;
+    }
+}
+
+-(void)setTempleData:(NSArray*)tArrData isNew:(BOOL)isNew{
+    
+    if (!isNew) {
+        for (PartModel*model1 in self.dataSource.data) {
+            
+            for (PartModel*model2 in tArrData) {
+                
+                if ([model1.templateModelnameCode isEqualToString:model2.templateModelnameCode]) {
+                    
+                    model1.templateModelnameDate = model2.templateModelnameDate;
+                }
+            }
+        }
+        return;
+    }
+    
+    NSMutableArray* tempArr = [NSMutableArray array];
+    [tempArr addObjectsFromArray:self.dataSource.data];
+    [tempArr addObjectsFromArray:tArrData];
+    
+    self.dataSource.data = tempArr.copy;
+}
+
+-(NSMutableArray*)getTempleData:(FoodWeiZhanStatus)type{
+    
+    NSMutableArray* targetArr = [NSMutableArray array];
+    
+    NSArray* tArr = [_keyPathArray objectAtIndex:type];
+    
+    for (PartModel*model in self.dataSource.data) {
+        
+        if ([tArr containsObject:model.templateModelnameCode]) {
+            
+            [targetArr addObject:model];
+        }
+    }
+    return targetArr;
+}
+#pragma mark - netWork request
+
+- (void)requestWeiZhanDetail{
+    
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+//    AccountInfo.storeId @"900000000056"
+    [params setObject:AccountInfo.storeId forKey:@"storeId"];
+    [params setObject:CanYin forKey:@"templateNo"];
+    
+    [[MallNetManager share] request:API_Storecenter_TemplateSearch prams:params succeed:^(id responseObject) {
+
+        self.dataSource = [SearPartData mj_objectWithKeyValues:responseObject];
+
+        
+        
+        for (PartModel* model in self.dataSource.data) {
+            
+            if (model.templateModelnameDate) {
+                TemplateModelData* data = [TemplateModelData mj_objectWithKeyValues:model.templateModelnameDate];
+                
+                model.templateModelnameDate = data;
+                
+            }
+            [self.dataArrays addObject:model];
+            
+        }
+
+        [self.tableView reloadData];
+    
+    } showHUD:YES];
+
+}
+
+-(void)requestSave{
+    
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    [prams setObject:AccountInfo.storeId forKey:@"storeId"];
+    [prams setObject:CanYin forKey:@"templateNo"];
+    
+    [[MallNetManager share] request:API_storeTemplateSave prams:prams succeed:^(id responseObject) {
+        
+        
+        
+    } showHUD:YES];
+    
+}
+#pragma mark - setter、getter
+@synthesize tableView = _tableView,imageArray = _imageArray,dataArrays = _dataArrays,dataSource = _dataSource;
+
+- (UITableView *)tableView{
+    if (!_tableView) {
+        _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, KScreenWidth, KScreenHeight - NavigationH) style:UITableViewStyleGrouped];
+        _tableView.delegate = self;
+        _tableView.dataSource = self;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        
+        _tableView.tableFooterView = [[SaveView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 90) tipHiden:NO block:^{
+            
+            NSLog(@"保存Action...");
+        }];
+
+        [self.view addSubview:_tableView];
+    }
+    return _tableView;
+}
+
+- (NSMutableArray *)imageArray{
+    if (!_imageArray) {
+        _imageArray = [NSMutableArray array];
+        
+    }
+    return _imageArray;
+}
+
+- (NSMutableArray *)dataArrays{
+    
+    if (!_dataArrays) {
+        _dataArrays = [NSMutableArray array];
+    }
+    return _dataArrays;
+}
+
+- (SearPartData *)dataSource{
+    
+    if (!_dataSource) {
+        _dataSource = [[SearPartData alloc] init];
+    }
+    
+    return _dataSource;
+}
+@end

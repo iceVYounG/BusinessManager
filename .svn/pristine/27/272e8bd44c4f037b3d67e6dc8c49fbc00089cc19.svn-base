@@ -1,0 +1,120 @@
+//
+//  WinportToolsVC.m
+//  BusinessManager
+//
+//  Created by 周迎春 on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WinportToolsVC.h"
+#import "DrawActivityManageVC.h"
+#import "MessagePushMainVC.h"
+#import "HomeVideoMainVC.h"
+#import "CloseliLoginViewController.h"
+#import "WebViewController.h"
+
+
+@interface WinportToolsVC ()<UIAlertViewDelegate>
+
+@end
+
+@implementation WinportToolsVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"旺铺工具";
+}
+- (IBAction)pushLuckyDraw:(id)sender {
+        DrawActivityManageVC *dvc = [[DrawActivityManageVC alloc]initWithNibName:@"DrawActivityManageVC" bundle:nil];
+        dvc.FromVC = 1;
+        [self.navigationController pushViewController:dvc animated:YES];
+}
+- (IBAction)pushMessagePush:(id)sender {
+
+    MessagePushMainVC *mainVC = [[MessagePushMainVC alloc] initWithNibName:@"MessagePushMainVC" bundle:nil];
+    [self.navigationController pushViewController:mainVC animated:YES];
+}
+
+- (IBAction)watchGhostClick:(UIButton *)sender {
+    [OMGToast showWithText:@"暂未开放"];
+    return;
+//    [self requestUserRegistered];
+}
+
+-(void)requestUserRegistered{
+  
+    NSMutableDictionary *paramDic = [NSMutableDictionary dictionary];
+    [paramDic setObject:NoNullStr(AccountInfo.linkPhone, @"")  forKey:@"storeMobile"];
+    [paramDic setObject:NoNullStr(AccountInfo.storeId, @"")  forKey:@"storeId"];
+    [paramDic setObject:@"1"  forKey:@"type"];//1：商户宝2：12580
+
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setMinimumDismissTimeInterval:2.0];
+    [SVProgressHUD showWithStatus:@"数据请求中..."];
+    [[MallNetworkEngine vipCardMGshare]requestNotEncodeWithDate:self.requestDate requestWithPath:API_userBindingSearch Params:paramDic CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        [SVProgressHUD dismiss];
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSDictionary *data = [dic objectForKey:@"data"];
+        NSString *shopviewMobile = [data objectForKey:@"shopviewMobile"];
+        if (shopviewMobile.length>0) {
+            NSError *error = nil;
+            CloudUserInfo *loginInfo;
+            NSString *shopviewPassword = [data objectForKey:@"shopviewPassword"];
+
+            loginInfo = [[CloseliApiManager share] loginWithEmail:shopviewMobile withPassword:shopviewPassword error:&error];
+            if (loginInfo) {
+                CloseliLoginViewController *login = [[CloseliLoginViewController alloc] init];
+                NSMutableArray *vcs =  [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
+                HomeVideoMainVC *vc = [[HomeVideoMainVC alloc] initWithNibName:@"HomeVideoMainVC" bundle:nil];
+                [vcs addObject:login];
+                [vcs addObject:vc];
+                self.navigationController.viewControllers = vcs;
+                
+            }else{
+                
+                [[CloseliApiManager share] showAlertOfError:error];
+            }
+            
+        }else{
+            UIAlertView *view = [[UIAlertView alloc] initWithTitle:@"" message:@"" delegate:self cancelButtonTitle:@"去登录" otherButtonTitles:@"去开通", nil];
+            [view show];
+            
+           
+            
+
+        }
+        NSLog(@"%@",dic);
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        [SVProgressHUD showInfoWithStatus:@"数据请求失败"];
+    }];
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    if (buttonIndex == alertView.cancelButtonIndex) {
+        WebViewController *web = [[WebViewController alloc] init];
+        web.needHeader = YES;
+        [self.navigationController pushViewController:web animated:YES];
+    }else{
+        CloseliLoginViewController *login = [[CloseliLoginViewController alloc] init];
+        [self.navigationController pushViewController:login animated:YES];
+    }
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

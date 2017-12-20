@@ -1,0 +1,17 @@
+//
+//  EC_TitleEdtitng.h
+//  BusinessManager
+//
+//  Created by 王启明 on 16/8/16.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanBaseController.h"
+#import "WeiZhanModel.h"
+
+typedef void(^dataBackBlock)(NSString *str,PartModel *model,BOOL isNewData);
+
+@interface EC_TitleEdtitng : WeiZhanBaseController
+@property (nonatomic,strong)dataBackBlock dataBack;
+@property (nonatomic,strong)PartModel *dataSource;
+@end

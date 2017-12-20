@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11201" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="284" id="KGk-i7-Jjw" customClass="AddDrawCell">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="284"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <frame key="frameInset" width="375" height="283"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1gm-8f-wEc">
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="VipManager_DownArrow" translatesAutoresizingMaskIntoConstraints="NO" id="xgK-7c-Ikd">
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="18" id="BFV-7p-pgp"/>
+                                    <constraint firstAttribute="width" constant="18" id="ZGC-ie-n7d"/>
+                                </constraints>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vha-Qh-9uZ">
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="hyp-58-OxX"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <state key="normal" title="请选择奖品类型">
+                                    <color key="titleColor" red="0.82745098039215681" green="0.82745098039215681" blue="0.82745098039215681" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="chooseTypePresentAction:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="YhY-Ej-HpZ"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="xgK-7c-Ikd" secondAttribute="trailing" constant="16" id="EGn-bz-iQc"/>
+                            <constraint firstAttribute="height" constant="44" id="Mcn-6e-AMk"/>
+                            <constraint firstItem="vha-Qh-9uZ" firstAttribute="top" secondItem="1gm-8f-wEc" secondAttribute="top" id="kQC-Mb-G7a"/>
+                            <constraint firstItem="xgK-7c-Ikd" firstAttribute="top" secondItem="1gm-8f-wEc" secondAttribute="top" constant="13" id="lTN-sZ-kEV"/>
+                            <constraint firstAttribute="trailing" secondItem="vha-Qh-9uZ" secondAttribute="trailing" id="qGN-Ht-fES"/>
+                            <constraint firstItem="vha-Qh-9uZ" firstAttribute="leading" secondItem="1gm-8f-wEc" secondAttribute="leading" constant="15" id="wxs-O4-1bi"/>
+                        </constraints>
+                    </view>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ibL-mY-iQo">
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="r9w-E4-AR4">
+                                <color key="backgroundColor" red="0.85490196080000003" green="0.85490196080000003" blue="0.85490196080000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="1" id="6nk-E4-HM8"/>
+                                </constraints>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nlH-cW-3Fj">
+                                <color key="backgroundColor" red="0.85490196080000003" green="0.85490196080000003" blue="0.85490196080000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="1" id="IBG-It-PA1"/>
+                                </constraints>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Avf-h8-WHx">
+                                <color key="backgroundColor" red="0.85490196080000003" green="0.85490196080000003" blue="0.85490196080000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="1" id="heY-LD-iUI"/>
+                                </constraints>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3fv-Df-Rsw">
+                                <color key="backgroundColor" red="0.85490196080000003" green="0.85490196080000003" blue="0.85490196080000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="1" id="CJo-bY-OLy"/>
+                                </constraints>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="q4b-A7-HBv">
+                                <color key="backgroundColor" red="0.85490196080000003" green="0.85490196080000003" blue="0.85490196080000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="1" id="BvJ-Qh-1Sw"/>
+                                </constraints>
+                            </view>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请输入奖品数量" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="BXJ-nc-zM4">
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="Luw-yu-tGc"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <textInputTraits key="textInputTraits" keyboardType="numberPad"/>
+                                <connections>
+                                    <outlet property="delegate" destination="-1" id="5MO-Nc-v4Q"/>
+                                </connections>
+                            </textField>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请输入单个奖品金额" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="nC4-Hp-evZ">
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="hxc-Sr-Vb9"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
+                                <connections>
+                                    <outlet property="delegate" destination="-1" id="uyT-WK-I9w"/>
+                                </connections>
+                            </textField>
+                            <textField opaque="NO" clipsSubviews="YES" tag="2" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请输入每个人的中奖概率，0.5即为50%" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="4g0-UJ-SKo">
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="cXc-x0-TaU"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
+                                <connections>
+                                    <outlet property="delegate" destination="-1" id="gy5-Tx-Nhh"/>
+                                </connections>
+                            </textField>
+                            <textField opaque="NO" clipsSubviews="YES" tag="3" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请输入每个人限制中奖次数" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="0ph-9n-8rV">
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="Slb-Ff-YFd"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <textInputTraits key="textInputTraits" keyboardType="numberPad"/>
+                                <connections>
+                                    <outlet property="delegate" destination="-1" id="imy-ct-wnL"/>
+                                </connections>
+                            </textField>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="B9A-JW-MxR">
+                                <color key="backgroundColor" red="0.85490196080000003" green="0.85490196080000003" blue="0.85490196080000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="1" id="4C7-EE-f0w"/>
+                                </constraints>
+                            </view>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请输入奖品名称" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="qba-c7-TRp">
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="Dg3-nW-G3T"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <outlet property="delegate" destination="-1" id="UNz-Eg-8yY"/>
+                                </connections>
+                            </textField>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="nC4-Hp-evZ" firstAttribute="top" secondItem="BXJ-nc-zM4" secondAttribute="bottom" id="1eP-4d-Nkz"/>
+                            <constraint firstAttribute="height" constant="240" id="4jf-CQ-BgB"/>
+                            <constraint firstAttribute="trailing" secondItem="r9w-E4-AR4" secondAttribute="trailing" id="5Tn-cX-UwT"/>
+                            <constraint firstItem="4g0-UJ-SKo" firstAttribute="top" secondItem="nC4-Hp-evZ" secondAttribute="bottom" id="72V-ik-IT1"/>
+                            <constraint firstItem="0ph-9n-8rV" firstAttribute="leading" secondItem="ibL-mY-iQo" secondAttribute="leading" constant="15" id="7x5-od-5Oe"/>
+                            <constraint firstItem="BXJ-nc-zM4" firstAttribute="leading" secondItem="ibL-mY-iQo" secondAttribute="leading" constant="15" id="8sk-Nq-UFA"/>
+                            <constraint firstAttribute="trailing" secondItem="B9A-JW-MxR" secondAttribute="trailing" id="D0r-kE-ofc"/>
+                            <constraint firstItem="r9w-E4-AR4" firstAttribute="top" secondItem="qba-c7-TRp" secondAttribute="bottom" id="D13-eG-bri"/>
+                            <constraint firstItem="3fv-Df-Rsw" firstAttribute="top" secondItem="nC4-Hp-evZ" secondAttribute="bottom" id="F61-iP-Rb5"/>
+                            <constraint firstItem="nlH-cW-3Fj" firstAttribute="leading" secondItem="ibL-mY-iQo" secondAttribute="leading" id="FRQ-Fy-WKp"/>
+                            <constraint firstAttribute="trailing" secondItem="4g0-UJ-SKo" secondAttribute="trailing" id="GYb-qZ-cFM"/>
+                            <constraint firstAttribute="trailing" secondItem="nlH-cW-3Fj" secondAttribute="trailing" id="GzQ-au-vWn"/>
+                            <constraint firstAttribute="trailing" secondItem="q4b-A7-HBv" secondAttribute="trailing" id="HrW-cI-gB7"/>
+                            <constraint firstAttribute="trailing" secondItem="3fv-Df-Rsw" secondAttribute="trailing" id="Jgf-Bd-GcY"/>
+                            <constraint firstItem="3fv-Df-Rsw" firstAttribute="leading" secondItem="ibL-mY-iQo" secondAttribute="leading" id="Pm8-D3-Iu2"/>
+                            <constraint firstItem="nlH-cW-3Fj" firstAttribute="top" secondItem="BXJ-nc-zM4" secondAttribute="bottom" id="PsV-wF-bRL"/>
+                            <constraint firstItem="BXJ-nc-zM4" firstAttribute="top" secondItem="qba-c7-TRp" secondAttribute="bottom" id="RJ5-Ze-eYp"/>
+                            <constraint firstItem="4g0-UJ-SKo" firstAttribute="leading" secondItem="ibL-mY-iQo" secondAttribute="leading" constant="15" id="RbV-YQ-XfJ"/>
+                            <constraint firstItem="0ph-9n-8rV" firstAttribute="top" secondItem="4g0-UJ-SKo" secondAttribute="bottom" id="VCC-Bb-Tuk"/>
+                            <constraint firstItem="qba-c7-TRp" firstAttribute="top" secondItem="ibL-mY-iQo" secondAttribute="top" id="YaL-SY-5Yv"/>
+                            <constraint firstAttribute="trailing" secondItem="Avf-h8-WHx" secondAttribute="trailing" id="ZGs-tM-dWM"/>
+                            <constraint firstAttribute="trailing" secondItem="BXJ-nc-zM4" secondAttribute="trailing" id="aqy-iJ-WFB"/>
+                            <constraint firstAttribute="trailing" secondItem="qba-c7-TRp" secondAttribute="trailing" id="cq3-Bo-KZX"/>
+                            <constraint firstItem="nC4-Hp-evZ" firstAttribute="leading" secondItem="ibL-mY-iQo" secondAttribute="leading" constant="15" id="dcr-By-PZ7"/>
+                            <constraint firstAttribute="trailing" secondItem="0ph-9n-8rV" secondAttribute="trailing" id="fQp-01-vcd"/>
+                            <constraint firstItem="r9w-E4-AR4" firstAttribute="leading" secondItem="ibL-mY-iQo" secondAttribute="leading" id="ifr-gu-kgF"/>
+                            <constraint firstItem="Avf-h8-WHx" firstAttribute="top" secondItem="4g0-UJ-SKo" secondAttribute="bottom" id="jbI-u5-4Fk"/>
+                            <constraint firstItem="B9A-JW-MxR" firstAttribute="top" secondItem="0ph-9n-8rV" secondAttribute="bottom" constant="-1" id="jmw-wa-YAL"/>
+                            <constraint firstAttribute="trailing" secondItem="nC4-Hp-evZ" secondAttribute="trailing" id="mEx-Bg-wcY"/>
+                            <constraint firstItem="Avf-h8-WHx" firstAttribute="leading" secondItem="ibL-mY-iQo" secondAttribute="leading" id="nvV-SI-gFC"/>
+                            <constraint firstItem="q4b-A7-HBv" firstAttribute="top" secondItem="ibL-mY-iQo" secondAttribute="top" id="tZr-tm-CbZ"/>
+                            <constraint firstItem="q4b-A7-HBv" firstAttribute="leading" secondItem="ibL-mY-iQo" secondAttribute="leading" id="xo7-wg-92j"/>
+                            <constraint firstItem="B9A-JW-MxR" firstAttribute="leading" secondItem="ibL-mY-iQo" secondAttribute="leading" id="y6I-em-sJu"/>
+                            <constraint firstItem="qba-c7-TRp" firstAttribute="leading" secondItem="ibL-mY-iQo" secondAttribute="leading" constant="15" id="zzO-uY-Tbg"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="trailing" secondItem="1gm-8f-wEc" secondAttribute="trailing" id="Doe-nf-nEn"/>
+                    <constraint firstItem="ibL-mY-iQo" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="ESr-tR-ThW"/>
+                    <constraint firstItem="ibL-mY-iQo" firstAttribute="top" secondItem="1gm-8f-wEc" secondAttribute="bottom" id="Xb6-JI-ew6"/>
+                    <constraint firstItem="1gm-8f-wEc" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="kUi-4U-iHw"/>
+                    <constraint firstAttribute="trailing" secondItem="ibL-mY-iQo" secondAttribute="trailing" id="qnH-Kz-h2Z"/>
+                    <constraint firstItem="1gm-8f-wEc" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="soY-NE-Dec"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="heightInfoPrestent" destination="4jf-CQ-BgB" id="7v1-Ha-4lC"/>
+                <outlet property="prizeChance" destination="4g0-UJ-SKo" id="rAe-JM-QEd"/>
+                <outlet property="prizeCount" destination="BXJ-nc-zM4" id="ArO-fs-AKX"/>
+                <outlet property="prizeNameTF" destination="qba-c7-TRp" id="SKI-Sz-0k9"/>
+                <outlet property="prizeNumber" destination="0ph-9n-8rV" id="GEW-Gh-tPm"/>
+                <outlet property="prizeSingeMoneyTF" destination="nC4-Hp-evZ" id="gpX-FK-bzU"/>
+                <outlet property="prizeTypeView" destination="ibL-mY-iQo" id="K83-P9-YoQ"/>
+                <outlet property="redBagBtn" destination="vha-Qh-9uZ" id="GAM-6f-HlU"/>
+                <outlet property="singleMoneyHeight" destination="hxc-Sr-Vb9" id="xFm-Ix-5xw"/>
+                <outlet property="singleMoneyLineView" destination="3fv-Df-Rsw" id="nBa-rp-zGG"/>
+            </connections>
+            <point key="canvasLocation" x="178.5" y="-80"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="VipManager_DownArrow" width="18" height="18"/>
+    </resources>
+</document>

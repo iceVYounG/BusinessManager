@@ -1,0 +1,18 @@
+[SERVERINFO]
+#####Stage#####
+server_name=arcsoft.com
+xmpp_server_ip=xmpp.stg.closeli.com.cn
+relay_server_ip=relaycn.arcsoftcloud.com
+###### LeCam Purchase Server Configuration #######
+lecam_purchase_server_ip = esd.stg.closeli.com.cn
+argus_server_ip = argus.stg.closeli.com.cn
+auto_update_server_ip = update.stg.closeli.com.cn
+camera_setting_server_ip = esd.stg.closeli.com.cn
+uDesKey = dy5Oy+HMIpybN8HXcCbnx9yCVr53/+CAiZ55J6M3rvO20j7XYaZxy6fDBsdXo24WwrUu/4Y++Bx0YEYbbnGOvwAA
+##interface_type = 1
+###### UPNS Server Configuration ######
+upns_pnserver =  upns.stg.closeli.com.cn
+upns_xmpp_name = arcsoft.com
+upns_xmpp_ip =  xmpp.stg.closeli.com.cn
+stun_server_ip = stun.closeli.cn
+##

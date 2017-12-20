@@ -1,0 +1,163 @@
+//
+//  VipDetailViewController.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "VipDetailViewController.h"
+#import "VipDetailView.h"
+#import "PrepaidSavingCardViewController.h"
+
+//businessType:非必传（卡类型，1：储值卡 2：优惠卡）
+#define VipCardType_chuzhika @"1"
+#define VipCardType_youhuika @"2"
+
+@interface VipDetailViewController ()<VipDetailViewDelegate, UIScrollViewDelegate, UIAlertViewDelegate, prepaidSavingCardVCDelegate>
+
+@property (nonatomic, strong) VipCardVipUserDetailModel *detailModel;
+@property (nonatomic, strong) VipDetailView *vipDetailView;//详情View
+
+@end
+
+@implementation VipDetailViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"会员详情";
+    self.view.backgroundColor = [UIColor whiteColor];
+    [self requestDetailData:self.model];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
+}
+
+#pragma mark - 初始化View
+
+- (void)setUpViews {
+
+    //储值卡
+    if ([self.model.BUSINESS_TYPE isEqualToString:VipCardType_chuzhika]) {
+        self.vipDetailView = [[VipDetailView alloc]initWithType:VipCardSaving andModel:self.model];
+    }else {//优惠卡
+        self.vipDetailView = [[VipDetailView alloc]initWithType:VipCardCoupon andModel:self.model];
+    }
+    
+    self.vipDetailView.delegate = self;
+    self.vipDetailView.viewDelegate = self;
+    self.vipDetailView.scrollEnabled = YES;
+   self. vipDetailView.frame = CGRectMake(0, 0, SCREEN_SIZE.width, SCREEN_SIZE.height);
+    //向下偏移12
+    self.vipDetailView.contentOffset = CGPointMake(0, -12);
+    self.vipDetailView.contentInset = UIEdgeInsetsMake(12, 0, 0, 0);
+    
+    self.vipDetailView.model = self.detailModel;
+    //    vipDetailView.contentSize = CGSizeMake(KScreenWidth, 700);
+    
+    [self.view addSubview:self.vipDetailView];
+    
+}
+
+
+#pragma mark - ViewDelegate
+//充值
+- (void)didClickPrepaidButton{
+    PrepaidSavingCardViewController *vc = [[PrepaidSavingCardViewController alloc]init];
+    vc.vipUserID = self.model.MEMBER_ID;
+    vc.balance = self.detailModel.balance;
+    vc.prepaidSavingDelegate = self;
+    [self.navigationController pushViewController:vc animated:YES];
+}
+//删除
+- (void)didClickDeleteButton {
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil message:@"确认删除此会员吗？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确认", nil];
+    alert.delegate = self;
+    [alert show];
+}
+
+
+#pragma mark - UIAlertViewDelegate
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == 1) {
+        [self sentRequestToDeleteVip];
+    }
+}
+
+#pragma mark - 请求
+
+- (void)sentRequestToDeleteVip {
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+//    [params setObject:@"900000000069" forKey:@"storeId"];
+    [params setObject:self.model.MEMBER_ID forKey:@"cardId"];  //会员ID
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+    [SVProgressHUD showWithStatus:@"数据请求中..."];
+    
+    [[MallNetworkEngine vipCardMGshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_VipCardManger_VIPUserDelete Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+
+        if (Succeed(dic)) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"VIPCARD_REFRESHMEMBERLIST" object:nil];
+            [SVProgressHUD showSuccessWithStatus:@"删除成功！"];
+            [self.navigationController popViewControllerAnimated:YES];
+        }else {
+            NSString *msg = [NSString stringWithFormat:@"%@",[dic objectForKey:@"msg"]];
+            [SVProgressHUD showErrorWithStatus:msg];
+        }
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        [SVProgressHUD showErrorWithStatus:@"服务器忙,请稍后再试！"];
+    }];
+    
+}
+
+
+#pragma mark - detail请求
+- (void)requestDetailData:(VipCardVipListModel *)model {
+    NSString *cardId = model.MEMBER_ID;
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+//    [params setObject:@"900000000069" forKey:@"storeId"];
+    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [params setObject:cardId forKey:@"cardId"];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+    [SVProgressHUD showWithStatus:@"数据请求中..."];
+    
+    [[MallNetworkEngine vipCardMGshare] requestNotEncodeWithDate:nil requestWithPath:API_VipCardManger_view Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        if (Succeed(dic)) {
+            [SVProgressHUD dismiss];
+            VipCardVipUserDetailModel *model = [VipCardVipUserDetailModel mj_objectWithKeyValues:[dic objectForKey:@"data"]];
+            self.detailModel = model;
+            //初始化页面
+            [self setUpViews];
+        }else {
+            [SVProgressHUD showErrorWithStatus:@"服务器忙,请稍后再试！"];
+        }
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        [SVProgressHUD showErrorWithStatus:@"服务器忙,请稍后再试！"];
+    }];
+    
+}
+
+#pragma mark - prepaidSavingCardVCDelegate
+//下一页面修改此页面的余额值
+- (void)prepaidSavingCardVCRefreshTheBalance:(NSString *)balance {
+    self.vipDetailView.balance = balance;
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+@end

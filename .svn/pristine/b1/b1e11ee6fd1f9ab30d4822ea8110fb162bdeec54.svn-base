@@ -1,0 +1,384 @@
+//
+//  BannerEditVC.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "BannerEditVC.h"
+#import "WeiZhanModel.h"
+#import "BaseModel.h"
+#import "BannerCell.h"
+#import "JMView.h"
+#import "JMPickCollectView.h"
+#import "STPhotoKitController.h"
+#import "CLImageEditor.h"
+@interface BannerEditVC () <UITableViewDataSource,UITableViewDelegate,UITextFieldDelegate,bannerCellDelegate,STPhotoKitDelegate,CLImageEditorDelegate>
+{
+    NSMutableArray *_selectedPhotos;//选择的照片
+    NSMutableArray *_selectedAssets;
+    BOOL _isSelectOriginalPhoto;// 是否选择了原图
+    NSString *_imagePath;
+
+}
+@property (weak, nonatomic) IBOutlet UIView *headView;
+@property (weak, nonatomic) IBOutlet UITextField *shopNameTextField;
+@property (weak, nonatomic) IBOutlet UITextField *phoneTextField;
+
+@property (nonatomic, strong) NSIndexPath *currentIndexPath;
+@property (nonatomic, assign) NSInteger ID;
+@property (nonatomic,strong)UIButton *imageBtn;
+
+@property (nonatomic, strong) UITableView* tableView;
+
+@end
+
+@implementation BannerEditVC
+
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil block:(bannerBlock)block{
+    if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+        
+        self.block = block;
+    }
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    [self setSubViews];
+}
+
+
+- (void)setSubViews{
+    
+    self.title = @"banner编辑";
+    
+    [self tableView];
+}
+
+
+#pragma mark - tableView dataSource
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return 1;
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    NSString *indetify = self.isBig ? @"BannerCell1" : @"BannerCell";
+    BannerCell *cell = [tableView dequeueReusableCellWithIdentifier:indetify];
+    if (!cell) {
+        
+        if (self.isBig) {
+            cell = [[[NSBundle mainBundle] loadNibNamed:NSStringFromClass([BannerCell class]) owner:nil options:nil] objectAtIndex:1];
+        }else{
+            
+            cell = [[[NSBundle mainBundle] loadNibNamed:NSStringFromClass([BannerCell class]) owner:nil options:nil] firstObject];
+        }
+    }
+    self.currentIndexPath = indexPath;
+    cell.model = self.model;
+    
+    cell.delegate = self;
+    cell.telephoneField.delegate = self;
+    cell.shopNameField.delegate = self;
+    return cell;
+}
+
+#pragma mark - tableView delegate
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (self.isBig) {
+        return KBigCellH;
+    }
+    return KBannerCellH;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 15.f;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    return 0.1f;
+}
+- (UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    
+    return nil;
+}
+- (UIView*)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
+    return nil;
+}
+
+
+#pragma mark- CLImageEditor delegate
+
+- (void)imageEditor:(CLImageEditor *)editor didFinishEdittingWithImage:(UIImage *)image
+{
+     [editor dismissViewControllerAnimated:YES completion:nil];
+    [self.imageBtn setImage:image forState:UIControlStateNormal];
+    [self uploadImage:image];
+
+
+}
+
+
+
+//#pragma mark - 1.STPhotoKitDelegate的委托
+//
+//- (void)photoKitController:(STPhotoKitController *)photoKitController resultImage:(UIImage *)resultImage
+//{
+//    [self.imageBtn setImage:resultImage forState:UIControlStateNormal];
+//    [self uploadImage:resultImage];
+//}
+
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+    [picker dismissViewControllerAnimated:YES completion:^(){
+    }];
+}
+
+
+
+#pragma mark - bannerDelegate
+- (void)imageSelectWithButton:(UIButton *)imageSender cell:(id)cell{
+    self.imageBtn=imageSender;
+    
+    BannerCell* bannerCell = (BannerCell*)cell;
+    
+    switch (imageSender.tag) {
+        case 2010:
+        {
+            [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage) {
+               
+                
+                bannerCell.bannerLabel.hidden = YES;
+                bannerCell.icon.hidden = YES;
+                bannerCell.updateSender.hidden = NO;                
+                
+                CLImageEditor *editor = [[CLImageEditor alloc] initWithImage:originImage delegate:self];
+                 CLImageToolInfo *tool = [editor.toolInfo subToolInfoWithToolName:@"CLToneCurveTool" recursive:NO];
+                tool.available = NO;
+                
+                tool = [editor.toolInfo subToolInfoWithToolName:@"CLRotateTool" recursive:YES];
+                tool.available = NO;
+                
+                tool = [editor.toolInfo subToolInfoWithToolName:@"CLHueEffect" recursive:YES];
+                tool.available = NO;
+                
+                tool = [editor.toolInfo subToolInfoWithToolName:@"CLAdjustmentTool" recursive:YES];
+                tool.available = NO;
+                
+                tool = [editor.toolInfo subToolInfoWithToolName:@"CLBlurTool" recursive:YES];
+                tool.available = NO;
+                
+                tool = [editor.toolInfo subToolInfoWithToolName:@"CLDrawTool" recursive:YES];
+                tool.available = NO;
+                
+                tool = [editor.toolInfo subToolInfoWithToolName:@"CLEffectTool" recursive:YES];
+                tool.available = NO;
+                
+                tool = [editor.toolInfo subToolInfoWithToolName:@"CLFilterTool" recursive:YES];
+                tool.available = NO;
+                
+                [self presentViewController:editor animated:YES completion:nil];
+            }];
+            
+        }
+            break;
+        case 2011:
+        {
+            [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage) {
+                bannerCell.bannerLabel.hidden = YES;
+                bannerCell.icon.hidden = YES;
+                bannerCell.updateSender.hidden = NO;
+                
+                CLImageEditor *editor = [[CLImageEditor alloc] initWithImage:originImage delegate:self];
+                CLImageToolInfo *tool = [editor.toolInfo subToolInfoWithToolName:@"CLToneCurveTool" recursive:NO];
+                tool.available = NO;
+                
+                tool = [editor.toolInfo subToolInfoWithToolName:@"CLRotateTool" recursive:YES];
+                tool.available = NO;
+                
+                tool = [editor.toolInfo subToolInfoWithToolName:@"CLHueEffect" recursive:YES];
+                tool.available = NO;
+                
+                tool = [editor.toolInfo subToolInfoWithToolName:@"CLAdjustmentTool" recursive:YES];
+                tool.available = NO;
+                
+                tool = [editor.toolInfo subToolInfoWithToolName:@"CLBlurTool" recursive:YES];
+                tool.available = NO;
+                
+                tool = [editor.toolInfo subToolInfoWithToolName:@"CLDrawTool" recursive:YES];
+                tool.available = NO;
+                
+                tool = [editor.toolInfo subToolInfoWithToolName:@"CLEffectTool" recursive:YES];
+                tool.available = NO;
+                
+                tool = [editor.toolInfo subToolInfoWithToolName:@"CLFilterTool" recursive:YES];
+                tool.available = NO;
+                
+                [self presentViewController:editor animated:YES completion:nil];
+
+            }];
+        }
+            break;
+        default:
+            break;
+    }
+}
+
+#pragma mark - netWork request
+
+- (void)uploadImage:(UIImage*)image{
+    NSData* imageData = UIImagePNGRepresentation(image);
+    if (imageData.length>=600*1024)
+    {
+        imageData=UIImageJPEGRepresentation(image, 1.0);
+        NSLog(@"__befor___%lu",(unsigned long)imageData.length/1024);
+        
+        if (imageData.length>=600*1024)
+        {
+            
+            imageData=UIImageJPEGRepresentation(image, .5);
+            
+        }
+       
+    }
+    NSLog(@"%ld",imageData.length/1024);
+    
+    NSString* imageDataStr = [imageData base64EncodedString];
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    [params setObject:NoNullStr(imageDataStr, @"") forKey:@"code"];
+    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [params setObject:@"png" forKey:@"suffix"];
+    
+    [[MallNetManager share] request:API_ImageUpload prams:params succeed:^(id responseObject)   {
+        
+        ImageUpLoadBackModel* rsp = [ImageUpLoadBackModel mj_objectWithKeyValues:responseObject];
+        
+        if (Succeed(rsp)) {
+            _imagePath = rsp.data.imgPath;
+
+        }
+        
+        else{
+            [OMGToast showWithText:@"图片上传失败，请重新上传"];
+        
+        }
+        
+    } showHUD:(YES)];
+}
+
+#pragma mark - 
+
+- (void)requestSaveWithImagePath:(NSString*)imagePath{
+    
+    BannerCell* bannerCell = [self.tableView cellForRowAtIndexPath:self.currentIndexPath];
+    
+    UITextField* shopField = (UITextField*)[bannerCell viewWithTag:2015];
+    UITextField* phoneField = (UITextField*)[bannerCell viewWithTag:2014];
+    
+    if (shopField.text.length == 0 || [phoneField.text isEqualToString:@""]) {
+        [OMGToast showWithText:@"请确认您的输入是否完整！"];
+        return;
+    }
+    NSLog(@"%@",imagePath);
+    TemplateModel* templeModel = self.model.templateModelnameDate.date.lastObject;
+    
+    if (imagePath.length==0&&templeModel.imgPath.length==0) {
+        [OMGToast showWithText:@"请上传图片后保存！"];
+        return;
+    }
+    
+    PartModel* model = [[PartModel alloc] init];
+    model.templateModelname = @"店铺名称";
+    model.templateModelnameCode = ShopName;
+    model.templateNo=self.templateNo;
+    model.storeId = NoNullStr(AccountInfo.storeId, @"");
+
+    if (self.isBig) {
+        model.templateNo = FangChan;
+    }
+    if (self.isDianShang) {
+         model.templateModelnameCode =BannerPic ;
+    }
+    if (!self.model) {// 第一次创建
+        
+        TemplateModelData* data = [[TemplateModelData alloc] init];
+        
+        TemplateModel* temp = [[TemplateModel alloc] init];
+        temp.imgPath = imagePath;
+        temp.name = shopField.text;
+        temp.type = phoneField.text;
+        
+        data.date = @[temp];
+        model.templateModelnameDate = data;
+        
+
+    }else{
+        model.id = self.model.id;
+        
+        TemplateModel* tModel = self.model.templateModelnameDate.date.lastObject;
+        tModel.name = shopField.text;
+        tModel.type = phoneField.text;
+        if (imagePath.length!=0) {
+            tModel.imgPath=imagePath;
+        }
+
+        self.model.templateModelnameDate.date = @[tModel];
+        
+        model = self.model;
+        
+    }
+    
+    NSArray* arr = @[model];
+
+    __weak typeof(self) wSelf = self;
+
+    [[MallNetManager share] request:API_TemplateSave parameters:[arr jm_ArryPrams] success:^(NSURLSessionDataTask *task, id responseObject) {
+        
+        if (Succeed(responseObject)) {
+            
+            SearPartData* rsp = [SearPartData mj_objectWithKeyValues:responseObject];
+            if (rsp) {
+                
+                
+            }
+            wSelf.block(model,self.model?NO:YES);
+            [self.navigationController popViewControllerAnimated:YES];
+            
+        }else{
+            [OMGToast showWithText:responseObject[@"msg"]];
+            
+        }
+        
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        
+        [OMGToast showWithText:@"服务器忙，请稍后再试！"];
+    }];
+    
+}
+
+@synthesize tableView = _tableView;
+
+- (UITableView *)tableView{
+    
+    if (!_tableView) {
+        _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, KScreenWidth, KScreenHeight - NavigationH) style:UITableViewStyleGrouped];
+        _tableView.backgroundColor=[UIColor colorWithHexString:@"#f6f5fa"];
+        _tableView.delegate = self;
+        _tableView.dataSource = self;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        
+        _tableView.tableFooterView = [[SaveView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 60) tipHiden:YES block:^{
+            
+            [self requestSaveWithImagePath:_imagePath];
+        }];
+        
+        [self.view addSubview:_tableView];
+    }
+    return _tableView;
+}
+@end

@@ -1,0 +1,292 @@
+//
+//  RechargeDetailVC.m
+//  BusinessManager
+//
+//  Created by smile apple on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "RechargeDetailVC.h"
+#import "RechargeDetailCell.h"
+#import "RechargeDetailHeader.h"
+#import "KxMenu.h"
+#import "LuckDrawModel.h"
+
+@interface RechargeDetailVC ()<UITableViewDataSource,UITableViewDelegate>{
+    RechargeDetailHeader *headerCell;
+    NSMutableArray *rechargeArray;
+    NSInteger pageIndex ;
+    BOOL isOpen;
+}
+//@property(nonatomic,assign)NSInteger pageIndex;
+@end
+
+@implementation RechargeDetailVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.title = @"现金红包充值记录";
+    
+    UIButton *rightItem = [self creatRightBtn];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithCustomView:rightItem];
+    
+    //删除cell多余的线
+    self.rechargeDetailTableView.tableFooterView = [[UIView alloc]init];
+    self.rechargeDetailTableView.backgroundColor = [UIColor colorWithHexString:@"f6f6f9"];
+    
+    UINib *cellNib = [UINib nibWithNibName:@"RechargeDetailCell" bundle:nil];
+    [self.rechargeDetailTableView registerNib:cellNib forCellReuseIdentifier:@"RechargeDetailCell"];
+    
+    
+    pageIndex = 1;
+    
+    WS(weakSelf);
+    // 添加下拉刷新头部控件
+    self.rechargeDetailTableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        pageIndex = 1;
+        if ([self.sortLB.text isEqualToString:@"全部"]) {
+            [weakSelf requestRechargeList:@"0" andWithIndex:pageIndex];
+        }else if ([self.sortLB.text isEqualToString:@"今日"]){
+            [weakSelf requestRechargeList:@"1" andWithIndex:pageIndex];
+        }
+        else if ([self.sortLB.text isEqualToString:@"最近7天"]){
+            [weakSelf requestRechargeList:@"7" andWithIndex:pageIndex];
+        }
+        else{
+            [weakSelf requestRechargeList:@"30" andWithIndex:pageIndex];
+        }
+       
+    }];
+    //添加上提加载更多尾部控件
+    self.rechargeDetailTableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+        pageIndex++;
+        if ([self.sortLB.text isEqualToString:@"全部"]) {
+            [weakSelf requestRechargeList:@"0" andWithIndex:pageIndex];
+        }else if ([self.sortLB.text isEqualToString:@"今日"]){
+            [weakSelf requestRechargeList:@"1" andWithIndex:pageIndex];
+        }
+        else if ([self.sortLB.text isEqualToString:@"最近7天"]){
+            [weakSelf requestRechargeList:@"7" andWithIndex:pageIndex];
+        }
+        else{
+            [weakSelf requestRechargeList:@"30" andWithIndex:pageIndex];
+        }
+    }];
+    //开始刷新
+    [self.rechargeDetailTableView.mj_header beginRefreshing];
+   
+}
+
+//现金红包充值列表请示
+- (void)requestRechargeList:(NSString *)time andWithIndex:(NSInteger)index{
+
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [params setObject:@(index) forKey:@"page"];
+    [params setObject:@"20" forKey:@"pageSize"];
+    [params setObject:time forKey:@"selectTime"];
+    
+    
+    
+    [[MallNetworkEngine loginshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_LuckyDraw_RechargeList Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"%@",dic);
+        RechargeDetailModel *dataModel = [RechargeDetailModel mj_objectWithKeyValues:dic];
+        
+        //下拉刷新
+        if (pageIndex == 1) {
+            if (rechargeArray) {
+                [rechargeArray removeAllObjects];
+            }else {
+                rechargeArray = [NSMutableArray array];
+            }
+        }
+        if ([dataModel.code isEqualToString:@"00-00"]) {
+            if (dataModel.data.count > 0) {
+                [rechargeArray addObjectsFromArray:dataModel.data];
+               
+            }else{
+                //提示数据加载完毕并关闭上啦加载
+                [self.rechargeDetailTableView.mj_footer endRefreshingWithNoMoreData];
+            }
+            
+        }else{
+            [SVProgressHUD showErrorWithStatus:@"服务器忙，请稍候再试"];
+        }
+        if([rechargeArray count]<10)
+        {
+            [self.rechargeDetailTableView.mj_footer setHidden:YES];
+        }
+        else
+        {
+            [self.rechargeDetailTableView.mj_footer setHidden:NO];
+            
+        }
+         [self.rechargeDetailTableView reloadData];
+         [self.rechargeDetailTableView.mj_header endRefreshing];
+         [self.rechargeDetailTableView.mj_footer endRefreshing];
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        [SVProgressHUD showErrorWithStatus:@"服务器忙，请稍候再试"];
+        [self.rechargeDetailTableView.mj_header endRefreshing];
+        [self.rechargeDetailTableView.mj_footer endRefreshing];
+        
+    }];
+}
+
+#pragma mark - 自定义导航右键 -
+- (UIButton *)creatRightBtn{
+    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+    btn.frame = CGRectMake(0, 0, 100, 20);
+    [btn setImage:[UIImage imageNamed:@"LuckyDraw_jt"]forState:(UIControlStateNormal)];
+    [btn setImageEdgeInsets:(UIEdgeInsetsMake(0, 0, 0, -100))];
+    [btn addTarget:self action:@selector(btnAction:) forControlEvents:(UIControlEventTouchUpInside)];
+    self.sortLB = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 90, 20)];
+    self.sortLB.text = @"全部";
+    self.sortLB.textAlignment = NSTextAlignmentRight;
+    self.sortLB.font = [UIFont systemFontOfSize:15];
+    self.sortLB.textColor = [UIColor whiteColor];
+    [btn addSubview:self.sortLB];
+    return btn;
+}
+
+#pragma mark - 排序点击事件 -
+- (void)btnAction:(UIButton *)sender{
+    if (isOpen) {
+        [KxMenu dismissMenu];
+        isOpen = NO;
+    }else{
+        [self showMenu:sender];
+        isOpen = YES;
+    }
+}
+
+#pragma mark - 弹出菜单 -
+- (void)showMenu:(UIButton *)sender
+{
+    NSArray *menuItems =
+    @[
+      [KxMenuItem menuItem:@"全部"
+                     image:nil
+                    target:self
+                    action:@selector(selectAllAction:)],
+      [KxMenuItem menuItem:@"今日"
+                     image:nil
+                    target:self
+                    action:@selector(selectTodayAction:)],
+      [KxMenuItem menuItem:@"最近7日"
+                     image:nil
+                    target:self
+                    action:@selector(selectRecent7Action:)],
+      [KxMenuItem menuItem:@"最近30日"
+                     image:nil
+                    target:self
+                    action:@selector(selectRecent30Action:)],
+      ];
+    [KxMenu showMenuInView:self.view
+                  fromRect:CGRectMake(KScreenWidth, -5, 0, 0)
+                 menuItems:menuItems];
+}
+#pragma mark - 弹出菜单 点击事件 -
+- (void)selectAllAction:(UIMenuItem *)menuItem{
+    isOpen = NO;
+    self.sortLB.text = @"全部";
+    [self requestRechargeList:@"0" andWithIndex:pageIndex];
+    
+}
+- (void)selectTodayAction:(UIMenuItem *)menuItem{
+    isOpen = NO;
+    self.sortLB.text = @"今日";
+   [self requestRechargeList:@"1" andWithIndex:pageIndex];
+}
+- (void)selectRecent7Action:(UIMenuItem *)menuItem{
+    isOpen = NO;
+    self.sortLB.text = @"最近7日";
+    [self requestRechargeList:@"7" andWithIndex:pageIndex];
+}
+- (void)selectRecent30Action:(UIMenuItem *)menuItem{
+    isOpen = NO;
+    self.sortLB.text = @"最近30日";
+    [self requestRechargeList:@"30" andWithIndex:pageIndex];
+}
+
+
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return 1;
+}
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return rechargeArray.count;
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    RechargeDetailCell *cell = [tableView dequeueReusableCellWithIdentifier:@"RechargeDetailCell"];
+    
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    if (rechargeArray.count > 0) {
+        RechargeDetailItemModel *model = [rechargeArray objectAtIndex:indexPath.row];
+    
+        cell.numLabel.text = model.b2cOrderId;
+        cell.moneyLabel.text = [NSString stringWithFormat:@"%.2f",[model.amount floatValue]/100];
+        cell.timeLabel.text = [self timeFormat:model.createTime];
+    
+    }
+    
+    return cell;
+}
+
+-(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    headerCell = [[[NSBundle mainBundle] loadNibNamed:@"RechargeDetailHeader" owner:self options:nil] lastObject];
+    return headerCell;
+    
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    return 48;
+}
+
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 48;
+}
+
+- (NSString *)timeFormat:(NSString *)time{
+    NSString *str      = [time substringToIndex:8];
+    NSString *yearStr  = [str substringToIndex:4];
+    NSString *monthStr = [str substringWithRange:NSMakeRange(4, 2)];
+    NSString *dayStr   = [str substringFromIndex:6];
+    
+    
+    NSString *timeStr   = [time substringFromIndex:8];
+    NSString *hourStr   = [timeStr substringToIndex:2];
+    NSString *minuteStr = [timeStr substringWithRange:NSMakeRange(2, 2)];
+    NSString *secondStr = [timeStr substringFromIndex:4];
+    
+    NSString *strTime=[NSString stringWithFormat:@"%@-%@-%@ %@:%@:%@",yearStr,monthStr,dayStr,hourStr,minuteStr,secondStr];
+    
+    
+    
+    return strTime;
+    
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

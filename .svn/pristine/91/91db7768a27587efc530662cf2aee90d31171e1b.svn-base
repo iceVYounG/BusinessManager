@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="8191" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="WZ_AddNewFloorVCViewController">
+            <connections>
+                <outlet property="floorCollectionView" destination="brk-ES-Cun" id="4gY-3l-T6l"/>
+                <outlet property="floorNameTF" destination="LCM-Vg-JrM" id="byw-f2-Mjy"/>
+                <outlet property="saveBtn" destination="nYe-pr-RGO" id="QLo-78-zNf"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nYe-pr-RGO">
+                    <rect key="frame" x="0.0" y="623" width="375" height="44"/>
+                    <animations/>
+                    <color key="backgroundColor" red="0.0" green="0.66666666666666663" blue="0.93333333333333335" alpha="1" colorSpace="calibratedRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="44" id="9Kb-I5-hBN"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                    <state key="normal" title="保存">
+                        <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                    </state>
+                    <connections>
+                        <action selector="saveBtnClick:" destination="-1" eventType="touchUpInside" id="Ggn-Os-iXI"/>
+                    </connections>
+                </button>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bGo-qi-Yv4">
+                    <rect key="frame" x="0.0" y="15" width="375" height="50"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LB8-re-0hl" customClass="BMSingleLineView">
+                            <rect key="frame" x="0.0" y="0.0" width="375" height="1"/>
+                            <animations/>
+                            <color key="backgroundColor" red="0.85490196078431369" green="0.85490196078431369" blue="0.85490196078431369" alpha="1" colorSpace="calibratedRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="1" id="nGV-s6-RFn"/>
+                            </constraints>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="color" keyPath="lineColor">
+                                    <color key="value" red="0.85490196078431369" green="0.85490196078431369" blue="0.85490196078431369" alpha="1" colorSpace="calibratedRGB"/>
+                                </userDefinedRuntimeAttribute>
+                            </userDefinedRuntimeAttributes>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eof-GT-Xod" customClass="BMSingleLineView">
+                            <rect key="frame" x="0.0" y="49" width="375" height="1"/>
+                            <animations/>
+                            <color key="backgroundColor" red="0.85490196078431369" green="0.85490196078431369" blue="0.85490196078431369" alpha="1" colorSpace="calibratedRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="1" id="8tM-K1-zEf"/>
+                            </constraints>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="color" keyPath="lineColor">
+                                    <color key="value" red="0.85490196078431369" green="0.85490196078431369" blue="0.85490196078431369" alpha="1" colorSpace="calibratedRGB"/>
+                                </userDefinedRuntimeAttribute>
+                            </userDefinedRuntimeAttributes>
+                        </view>
+                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请输入栏目名称" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="LCM-Vg-JrM">
+                            <rect key="frame" x="8" y="10" width="359" height="30"/>
+                            <animations/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="30" id="IeB-NO-3sQ"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                            <textInputTraits key="textInputTraits"/>
+                        </textField>
+                    </subviews>
+                    <animations/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="50" id="4G5-Op-2W5"/>
+                        <constraint firstItem="eof-GT-Xod" firstAttribute="leading" secondItem="bGo-qi-Yv4" secondAttribute="leading" id="6zN-lR-cYL"/>
+                        <constraint firstItem="LB8-re-0hl" firstAttribute="top" secondItem="bGo-qi-Yv4" secondAttribute="top" id="7AS-vt-6rt"/>
+                        <constraint firstAttribute="trailing" secondItem="LB8-re-0hl" secondAttribute="trailing" id="Muz-xx-9ti"/>
+                        <constraint firstAttribute="trailing" secondItem="eof-GT-Xod" secondAttribute="trailing" id="NdX-f3-op9"/>
+                        <constraint firstAttribute="trailing" secondItem="LCM-Vg-JrM" secondAttribute="trailing" constant="8" id="PV2-Oq-INd"/>
+                        <constraint firstItem="LCM-Vg-JrM" firstAttribute="leading" secondItem="bGo-qi-Yv4" secondAttribute="leading" constant="8" id="W1m-Bm-tCB"/>
+                        <constraint firstAttribute="bottom" secondItem="eof-GT-Xod" secondAttribute="bottom" id="XwQ-vI-2Bj"/>
+                        <constraint firstItem="LB8-re-0hl" firstAttribute="leading" secondItem="bGo-qi-Yv4" secondAttribute="leading" id="bqd-Bb-qZV"/>
+                        <constraint firstItem="LCM-Vg-JrM" firstAttribute="top" secondItem="LB8-re-0hl" secondAttribute="bottom" constant="9" id="svG-Ah-Yv8"/>
+                    </constraints>
+                </view>
+                <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="brk-ES-Cun">
+                    <rect key="frame" x="0.0" y="65" width="375" height="558"/>
+                    <animations/>
+                    <color key="backgroundColor" red="0.96078431372549022" green="0.96078431372549022" blue="0.97647058823529409" alpha="1" colorSpace="calibratedRGB"/>
+                    <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="S2M-u7-Xcq">
+                        <size key="itemSize" width="50" height="50"/>
+                        <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                        <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                        <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                    </collectionViewFlowLayout>
+                    <connections>
+                        <outlet property="dataSource" destination="-1" id="rJt-pg-EuJ"/>
+                        <outlet property="delegate" destination="-1" id="HMb-F8-d81"/>
+                    </connections>
+                </collectionView>
+            </subviews>
+            <animations/>
+            <color key="backgroundColor" red="0.96078431372549022" green="0.96078431372549022" blue="0.97647058823529409" alpha="1" colorSpace="calibratedRGB"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="nYe-pr-RGO" secondAttribute="bottom" id="1ig-k8-lNL"/>
+                <constraint firstItem="bGo-qi-Yv4" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="3eh-YO-z4w"/>
+                <constraint firstItem="nYe-pr-RGO" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="TMt-Ly-VGm"/>
+                <constraint firstItem="brk-ES-Cun" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="VMr-sv-kQR"/>
+                <constraint firstItem="nYe-pr-RGO" firstAttribute="top" secondItem="brk-ES-Cun" secondAttribute="bottom" id="bo3-ls-Q7C"/>
+                <constraint firstItem="bGo-qi-Yv4" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="15" id="cE3-hH-YCb"/>
+                <constraint firstAttribute="trailing" secondItem="nYe-pr-RGO" secondAttribute="trailing" id="hn8-SL-qkH"/>
+                <constraint firstItem="brk-ES-Cun" firstAttribute="top" secondItem="bGo-qi-Yv4" secondAttribute="bottom" id="k42-rW-0vu"/>
+                <constraint firstAttribute="trailing" secondItem="bGo-qi-Yv4" secondAttribute="trailing" id="noq-mw-cv8"/>
+                <constraint firstAttribute="trailing" secondItem="brk-ES-Cun" secondAttribute="trailing" id="tLZ-0u-WwX"/>
+            </constraints>
+            <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
+            <point key="canvasLocation" x="304.5" y="317.5"/>
+        </view>
+    </objects>
+</document>

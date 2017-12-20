@@ -1,0 +1,29 @@
+//
+//  QuestionListCell.h
+//  BusinessManager
+//
+//  Created by 朕 on 16/9/5.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "WeiZhanModel.h"
+
+
+@interface QuestionListCell : UITableViewCell<UITextViewDelegate,UITextFieldDelegate>
+@property (weak, nonatomic) IBOutlet UITextView *textView;
+@property (weak, nonatomic) IBOutlet UITextField *textFiledA;
+@property (weak, nonatomic) IBOutlet UITextField *textFiledB;
+@property (weak, nonatomic) IBOutlet UITextField *textFiledC;
+@property (weak, nonatomic) IBOutlet UITextField *textFiledD;
+@property (weak, nonatomic) IBOutlet UITextField *textFiledE;
+@property (weak, nonatomic) IBOutlet UITextField *textFiledF;
+@property (weak, nonatomic) IBOutlet UILabel *placeholderLabel;
+@property (weak, nonatomic) IBOutlet UIButton *deleteBtn;
+
+@property(nonatomic,strong)NSString *viewContent;
+@property(nonatomic,strong)NSString *filedContent;
+
+- (void)initCellContentWithIndex:(NSInteger)index  andModel:(PartModel*)model;
+
+@end

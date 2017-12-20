@@ -1,0 +1,42 @@
+//
+//  LoginVC.h
+//  BusinessManager
+//
+//  Created by xiong on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "BaseController.h"
+#import "UserInformation.h"
+#import "HomeController.h"
+
+typedef void (^CallBacllBlock)();
+@interface LoginVC : BaseController <UITextFieldDelegate,UIGestureRecognizerDelegate>{
+    
+    NSInteger downtimer;
+    NSTimer *timer;
+    NSString *username;
+    NSString *userpasswd;
+    
+}
+
+-(instancetype)initWithBlock:(CallBacllBlock)block;
+
+@property (weak, nonatomic) IBOutlet UITextField *userphonetext;  //手机号
+@property (weak, nonatomic) IBOutlet UITextField *userpasswdtext; //密码
+@property (weak, nonatomic) IBOutlet UIButton *smscodebtn;        //短信验证码
+@property (strong, nonatomic) NSString *getcodestr;  //发送的验证码
+@property (weak, nonatomic) IBOutlet UIButton *loginbtn;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *downConstraints;
+
+@property (strong , nonatomic) NSDictionary *userInfoDic; // 用户历史信息
+
+@property(nonatomic,copy)CallBacllBlock succeedBlock;
+
+- (IBAction)loginbtn:(UIButton *)sender; //登录
+- (IBAction)forgetbtn:(UIButton *)sender; //忘记密码
+
+- (IBAction)toRegisterAction:(UIButton *)sender;
+
+@end

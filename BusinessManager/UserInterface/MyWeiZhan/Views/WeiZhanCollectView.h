@@ -1,0 +1,25 @@
+//
+//  WeiZhanCollectView.h
+//  BusinessManager
+//
+//  Created by zhaojh on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+#define SpaceH 30
+#define SpaceW 40
+
+typedef void(^SelectIndex) (NSInteger index);
+
+@interface WeiZhanCollectView : UICollectionView <UICollectionViewDataSource,UICollectionViewDelegate>
+
+-(id)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout andIsTiyan:(BOOL)isTiyan select:(SelectIndex)block ;
+
+
+@property(nonatomic,strong)NSMutableArray* datasArry;
+
+@property(nonatomic,copy)SelectIndex block;
+@property(nonatomic,strong)UIButton *chooseBtn;
+@end

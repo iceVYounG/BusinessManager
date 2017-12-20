@@ -1,0 +1,453 @@
+//
+//  LoginVC.m
+//  BusinessManager
+//
+//  Created by xiong on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "LoginVC.h"
+#import "RetrievepasswordVC.h"
+#import "RegisterVC.h"
+#define kUserInfoKeys @"kUserInfoKeys"
+#define kUserPhoneKeys @"kUserPhoneKeys"
+#define kUserPasswdKeys @"kUserPasswdKeys"
+
+#import "WeiZhanMainVC.h"
+#import "BaseNavigationController.h"
+@interface LoginVC ()
+
+@end
+
+@implementation LoginVC
+//-(instancetype)initWithBlock:(CallBacllBlock)block{
+//
+//    if (self = [super init]) {
+//        
+//        _succeedBlock =block;
+//    }
+//    return self;
+//}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.title = @"登录";
+    self.backItemHiden = YES;
+    
+    //本地历史记录
+//    NSUserDefaults *readdefault = [NSUserDefaults standardUserDefaults];
+//    NSArray *temparr = [readdefault objectForKey:kUserInfoKeys];
+//    self.userInfoDic = [temparr firstObject];
+
+    [self initView];
+
+}
+
+-(void)viewWillAppear:(BOOL)animated{
+    
+    [super viewWillAppear:YES];
+    self.view.backgroundColor = [UIColor colorWithHexString:@"#ffffff"];
+
+    
+    if (AccountInfo.isLogin) {
+        
+        self.userphonetext.text = AccountInfo.linkPhone;
+    }
+    else{
+        
+        self.userphonetext.text = @"";
+        self.userpasswdtext.text = @"";
+    }
+
+
+}
+
+-(void)viewWillDisappear:(BOOL)animated{
+    
+    [super viewWillDisappear:YES];
+    [timer invalidate];  //离开界面，清空计时器
+    timer = nil;
+    
+}
+
+//加载view
+-(void)initView{
+    
+    //添加点击手势
+    UITapGestureRecognizer *tapGr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTapped)];
+    tapGr.cancelsTouchesInView = NO;
+    tapGr.delegate=self;
+    [self.view addGestureRecognizer:tapGr];
+    
+    //UI
+    self.loginbtn.layer.cornerRadius = 4;
+    self.smscodebtn.layer.cornerRadius = 3;   //获取验证码
+    self.smscodebtn.layer.borderWidth = 0.5;
+    self.smscodebtn.layer.borderColor = [UIColor colorWithHexString:@"#01AAEF"].CGColor;
+    [self.smscodebtn addTarget:self action:@selector(sendSmsCode:) forControlEvents:UIControlEventTouchUpInside];
+    
+    //监听弹出键盘
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+    
+    //可以监听收回键盘
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+    
+//    [self autoLogin];  //自动登录
+}
+
+
+//-(void)autoLogin{
+//    
+//    if (AccountInfo.isLogin) {
+//        
+//        
+//        [self requestLogin:[self.userInfoDic objectForKey:kUserPhoneKeys] andPassword:[self.userInfoDic objectForKey:kUserPasswdKeys]];
+//    }
+//        
+//}
+
+
+
+
+#pragma mark ---------keyboard---------------------
+
+//键盘弹出
+- (void)keyboardWillShow:(NSNotification *)aNotification
+
+{
+    
+    //创建自带来获取穿过来的对象的info配置信息
+    
+    NSDictionary *userInfo = [aNotification userInfo];
+    
+    //创建value来获取 userinfo里的键盘frame大小
+    
+    NSValue *aValue = [userInfo objectForKey:UIKeyboardFrameEndUserInfoKey];
+    
+    //创建cgrect 来获取键盘的值
+    
+    CGRect keyboardRect = [aValue CGRectValue];
+    
+    //最后获取高度 宽度也是同理可以获取
+    
+    NSInteger height = keyboardRect.size.height;
+
+    self.downConstraints.constant = height;   //弹出键盘
+    
+}
+
+//键盘收起
+- (void)keyboardWillHide:(NSNotification *)aNotification{
+    
+    self.downConstraints.constant = 0;
+}
+
+#pragma mark ---------按钮点击事件--------------------
+
+/*
+ 
+ 2.获取验证码接口
+ /getSmsCode.chtml
+ 参数：linkPhone：必传
+ 用例：
+ 入口参数：
+ {
+ "linkPhone":"18013149170"
+ }
+ 返回：
+ {
+ "code":"00-00",
+ "msg":"操作成功",
+ "data":
+ {
+ "smsCode":"93392"
+ }
+ }
+ 
+ */
+
+//获取验证码按钮点击事件
+-(void)sendSmsCode:(UIButton *)sender{
+    
+    //判断11位手机号码
+    if ([self.userphonetext.text length] == 11) {
+        
+        
+        downtimer = 60;
+        self.smscodebtn.enabled = NO;
+        
+        timer = [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(addTimer) userInfo:nil repeats:YES];
+        [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+        
+        NSMutableDictionary *manger = [NSMutableDictionary dictionary];
+        
+        [manger setObject:self.userphonetext.text forKey:@"linkPhone"];
+        
+        [[MallNetworkEngine loginshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_SmsCodeHost Params:manger CompletionHandler:^(MKNetworkOperation *completedOperation) {
+            
+            NSDictionary *dic = [completedOperation responseDecodeToDic];
+            
+            if ([[dic objectForKey:@"code"] isEqualToString:@"00-00"]) {
+                
+                NSDictionary *tempdic = [dic objectForKey:@"data"];
+                self.getcodestr = [tempdic objectForKey:@"smsCode"];
+                NSLog(@"发送成功");
+                
+                NSLog(@"%@",self.getcodestr);
+                
+                [OMGToast showWithText:@"发送成功！"];
+            }
+            
+            else{
+                
+                [OMGToast showWithText:@"发送失败！"];
+            }
+            
+        } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+            
+            [OMGToast showWithText:@"服务器忙，请稍后再试！"];
+        }];
+        
+    }
+    
+    else{
+        
+        [OMGToast showWithText:@"请输入正确的11位手机号码"];
+    }
+    
+}
+
+-(void)addTimer{
+    
+    downtimer = downtimer - 1;
+
+    if (downtimer == 0) {
+        [self.smscodebtn setTitle:@"重新获取验证码" forState:UIControlStateNormal];
+        [timer invalidate];
+        timer = nil;
+        self.smscodebtn.enabled = YES;
+    }
+    else {
+        
+        NSString *title = [NSString stringWithFormat:@"重新获取(%lds)", (long)downtimer];
+        [self.smscodebtn setTitle:title forState:UIControlStateNormal];
+    }
+
+}
+
+
+-(BOOL)checkInput{
+    
+    if (self.userphonetext.text.length != 11) {
+        
+        if (self.userphonetext.text.length == 0) {
+            
+           [OMGToast showWithText:@"请输入手机号码"];
+        }
+        
+        else{
+            
+            [OMGToast showWithText:@"请输入注册的手机号码"];
+        }
+        return NO;
+  
+    }
+    
+    //密码必须是五位数以上
+    if (self.userpasswdtext.text.length < 5) {
+        
+        if (self.userpasswdtext.text.length == 0) {
+            
+           [OMGToast showWithText:@"请输入密码/短信验证码"];
+        }
+        else{
+            
+            [OMGToast showWithText:@"密码至少为5位"];
+        }
+        
+        return NO;
+    }
+    
+    return YES;
+}
+
+
+/*
+ 
+ 1.登入接口：
+ /login.chtml
+ 参数：name：必传,  pwd：必传,md5加密      version:必传，版本
+ 用例：
+ 入口参数：
+ {
+ "name":"18013149170",
+ "pwd":"e10adc3949ba59abbe56e057f20f883e",
+ "version":"ios1.0"
+ }
+ 返回：{
+ "code":"00-00",
+ "msg":"操作成功",
+ "data":{
+ "storeId":"900000000077",
+ "storeName":"苏州中心8号",
+ "linkPhone":"18013149170",
+ "b2cStoreId":null,
+ "b2cmsg":"查不到数据"}
+ }
+ 或  {
+ "code":"02-02",
+ "msg":"用户名密码不存在"
+ }
+ 
+ */
+
+//登录按钮点击事件
+- (IBAction)loginbtn:(UIButton *)sender {
+
+    
+    if (![self checkInput]) {
+        return;
+    }
+    
+    [self requestLogin:self.userphonetext.text andPassword:self.userpasswdtext.text];
+    
+
+
+
+}
+-(void)requestLogin:(NSString *)userName andPassword:(NSString *)passWd{
+    
+    NSMutableDictionary *manger = [NSMutableDictionary dictionary];
+    username = userName;
+    userpasswd = [passWd md5];
+    
+    [manger setObject:username forKey:@"name"];
+    [manger setObject:userpasswd forKey:@"pwd"];
+    
+    [[MallNetworkEngine loginshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_LoginHost Params:manger CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        
+        NSDictionary *dic=[completedOperation responseDecodeToDic];
+        
+        if ([[dic objectForKey:@"code"] isEqualToString:@"00-00"])  {
+            
+            NSLog(@"登录成功");
+            NSDictionary *tempdic = [dic objectForKey:@"data"];
+            AccountInfo.storeId = [tempdic objectForKey:@"storeId"];
+            AccountInfo.storeName = [tempdic objectForKey:@"storeName"];
+            AccountInfo.linkPhone = [tempdic objectForKey:@"linkPhone"];
+            AccountInfo.b2cmsg = [tempdic objectForKey:@"b2cmsg"];
+            AccountInfo.b2cStoreId = [tempdic objectForKey:@"b2cStoreId"];
+            AccountInfo.isLogin = YES;
+            
+//            NSMutableDictionary *mdic = [NSMutableDictionary dictionary];
+//            [mdic setObject:username forKey:kUserPhoneKeys];   //用户手机号码
+//            [mdic setObject:userpasswd forKey:kUserPasswdKeys];  //用户密码
+//            
+//            
+//            [self saveUserInfoHistory:mdic];  //保存登录信息
+            
+                        HomeController *vc = [[HomeController alloc]initWithNibName:@"HomeController" bundle:nil];
+                        [self.navigationController pushViewController:vc animated:YES];
+//            if ([(UINavigationController*)[[UIApplication sharedApplication] delegate].window.rootViewController viewControllers].count > 1) {
+//                
+//                [self dismissViewControllerAnimated:NO completion:^{
+//                    
+//                    if (self.popBlock) {
+//                        self.popBlock();
+//                    }
+//                }];
+//                
+//            }else if (self.succeedBlock){
+//            
+//                self.succeedBlock();
+//            }
+//            
+        }
+        else{
+            
+            [OMGToast showWithText:[dic objectForKey:@"msg"]];
+        }
+        
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        
+        [OMGToast showWithText:@"服务器忙，请稍后再试！"];
+    }];
+    
+    
+}
+
+
+
+//忘记密码按钮点击事件
+- (IBAction)forgetbtn:(UIButton *)sender {
+    RetrievepasswordVC *vc = [[RetrievepasswordVC alloc]initWithNibName:@"RetrievepasswordVC" bundle:nil];
+    [self.navigationController pushViewController:vc animated:YES];
+ 
+}
+
+
+- (IBAction)toRegisterAction:(UIButton *)sender {
+    
+    
+    WS(weakSelf);
+    RegisterVC *vc = [[RegisterVC alloc]initWithNibName:@"RegisterVC" bundle:nil];
+    vc.registerBlock = ^(NSString *phone,NSString *pwd){
+        [weakSelf requestLogin:phone andPassword:pwd];
+    };
+    [self.navigationController pushViewController:vc animated:YES];
+
+    
+}
+
+-(void)saveUserInfoHistory:(NSMutableDictionary *)dic{
+    
+    if(dic.count > 0){
+        
+        NSUserDefaults *hisdefault = [NSUserDefaults standardUserDefaults];
+        NSArray *hisarray = [hisdefault objectForKey:kUserInfoKeys];
+        NSMutableArray *hismarray = [NSMutableArray arrayWithArray:hisarray];
+        if (!hismarray) {
+            hismarray = [[NSMutableArray alloc]initWithCapacity:0];
+        }
+        
+        for(int i = 0;i< hismarray.count;i ++){
+            NSMutableDictionary *tempDic = [NSMutableDictionary dictionaryWithDictionary:[hismarray objectAtIndex:i]];
+            
+            if ([[tempDic objectForKey:kUserPhoneKeys] isEqualToString:username]) {
+               
+                [hismarray removeAllObjects];
+                [hismarray insertObject:tempDic atIndex:0];
+                [hisdefault setObject:hismarray forKey:kUserInfoKeys];
+                
+                return;
+            }
+        }
+        
+        if (hismarray.count > 0) {
+            
+            [hismarray removeAllObjects];
+        }
+        [hismarray insertObject:dic atIndex:0];
+        
+        [hisdefault setObject:hismarray forKey:kUserInfoKeys];
+        [hisdefault synchronize];
+    }
+}
+
+
+
+//关键盘
+- (void)viewTapped
+{
+    [[[UIApplication sharedApplication] keyWindow] endEditing:YES];
+}
+
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
+
+
+@end

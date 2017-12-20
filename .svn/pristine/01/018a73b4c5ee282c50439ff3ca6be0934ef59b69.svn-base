@@ -1,0 +1,344 @@
+//
+//  MPAddNewPushVC.m
+//  BusinessManager
+//
+//  Created by KL on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "MPAddNewPushVC.h"
+#import "MPChooseUserTypeView.h"
+
+#define KWSize [UIApplication sharedApplication].keyWindow.bounds.size
+#define ADDNEWPUSH_MAX_STARWORDS_LENGTH 140 //消息内容字数限制
+#define ADDNEWPUSH_MAX_STARWORDS_LENGTH_TITLE 40 //标题字符限制
+
+@interface MPAddNewPushVC ()<UITextFieldDelegate, UITextViewDelegate>
+
+@property (weak, nonatomic) IBOutlet UITextField *pushUserTextField;
+@property (weak, nonatomic) IBOutlet UITextField *msgCountTextField;
+@property (weak, nonatomic) IBOutlet UITextField *msgTitleTextField;
+@property (weak, nonatomic) IBOutlet UITextView *detailMsgTextView;
+@property (weak, nonatomic) IBOutlet UIButton *saveBtn;
+@property (weak, nonatomic) IBOutlet UIButton *chooseUserTypeBtn;
+@property (weak, nonatomic) IBOutlet UILabel *wordLimitLab;
+
+@property (nonatomic, strong) NSString *userNum; //选择用户等级ID
+
+- (IBAction)saveBtnClick:(UIButton *)sender;
+- (IBAction)chooseUserTypeBtnClick:(UIButton *)sender;
+@property (weak, nonatomic) IBOutlet UILabel *placeHolderLab;
+
+@end
+
+@implementation MPAddNewPushVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"新增推送消息";
+    [self setUpViews];
+    
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(detailMsgTextViewEditChanged:)
+                                                name:UITextViewTextDidChangeNotification
+                                              object:self.detailMsgTextView];
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(titleMsgTextFiledEditChanged:)
+                                                name:UITextFieldTextDidChangeNotification
+                                              object:self.msgTitleTextField];
+}
+
+- (void)dealloc {
+//    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextViewTextDidChangeNotification object:self.detailMsgTextView];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextFieldTextDidChangeNotification object:self.msgTitleTextField];
+}
+
+//设置views
+- (void)setUpViews {
+    //textView
+    self.detailMsgTextView.text = @"";
+    self.detailMsgTextView.layer.borderWidth = 0.5f;
+    self.detailMsgTextView.layer.borderColor = [UIColor colorWithHexString:@"#e5e5e5"].CGColor;
+    self.detailMsgTextView.delegate = self;
+    //saveBtn
+    self.saveBtn.layer.cornerRadius = 5.0f;
+    self.saveBtn.layer.masksToBounds = YES;
+    //textField
+    self.pushUserTextField.delegate = self;
+    self.msgTitleTextField.delegate = self;
+    self.msgCountTextField.userInteractionEnabled = NO;
+    //pushUser
+    self.pushUserTextField.userInteractionEnabled = NO;
+    
+}
+
+#pragma mark - UITextViewDelegate
+- (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
+    
+    return YES;
+}
+
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
+    if ([text isEqualToString:@"\n"]) {
+        [textView resignFirstResponder];
+        return NO;
+    }
+    
+    if (textView.text.length == 0) {
+        
+        if ([text isEqualToString:@""]) {
+            [self.placeHolderLab setHidden:NO];
+        }else {
+            [self.placeHolderLab setHidden:YES];
+        }
+        
+    }else {
+        
+        if (textView.text.length == 1) {
+            if ([text isEqualToString:@""]) {
+                [self.placeHolderLab setHidden:NO];
+            }else {
+                [self.placeHolderLab setHidden:YES];
+            }
+        }else {
+            [self.placeHolderLab setHidden:YES];
+        }
+        
+    }
+    
+    return YES;
+    
+}
+
+- (void)textViewDidChange:(UITextView *)textView {
+    
+    if ([textView.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] == 0) {
+        self.saveBtn.backgroundColor = [UIColor lightGrayColor];
+        self.saveBtn.userInteractionEnabled = NO;
+    }else {
+        self.saveBtn.backgroundColor = [UIColor colorWithHexString:@"#3990ff"];
+        self.saveBtn.userInteractionEnabled = YES;
+    }
+    
+    if (textView.text.length > 0 || ![textView.text isEqualToString:@""]) {
+        [self.placeHolderLab setHidden:YES];
+    }else {
+        [self.placeHolderLab setHidden:NO];
+    }
+    
+    [self textLength];//计算剩余字数
+    
+}
+
+//计算剩余字数
+- (void)textLength {
+
+    NSInteger length = ADDNEWPUSH_MAX_STARWORDS_LENGTH - self.detailMsgTextView.text.length;
+    if (length <= 0) {
+        length = 0;
+        NSString *textTip = [NSString stringWithFormat:@"你还可以输入%ld个字", length];
+        NSMutableAttributedString *attriStr = [[NSMutableAttributedString alloc] initWithString:textTip];
+        [attriStr addAttributes:@{NSForegroundColorAttributeName:[UIColor colorWithHexString:@"#f15a4a"], NSFontAttributeName:[UIFont systemFontOfSize:12]} range:[textTip rangeOfString:[NSString stringWithFormat:@"%ld", length]]];
+        self.wordLimitLab.attributedText = attriStr;
+        
+    }else {
+        NSString *textTip = [NSString stringWithFormat:@"你还可以输入%ld个字", length];
+        NSMutableAttributedString *attriStr = [[NSMutableAttributedString alloc] initWithString:textTip];
+        [attriStr addAttributes:@{NSForegroundColorAttributeName:[UIColor colorWithHexString:@"#f15a4a"], NSFontAttributeName:[UIFont systemFontOfSize:12]} range:[textTip rangeOfString:[NSString stringWithFormat:@"%ld", length]]];
+        self.wordLimitLab.attributedText = attriStr;
+    }
+    
+}
+
+#pragma mark - Notification Method
+-(void)detailMsgTextViewEditChanged:(NSNotification *)obj
+{
+    
+    UITextView *textView = (UITextView *)obj.object;
+    
+    if ([textView isEqual:self.detailMsgTextView]) {
+        
+        NSString *toBeString = textView.text;
+        
+        //获取高亮部分
+        UITextRange *selectedRange = [textView markedTextRange];
+        UITextPosition *position = [textView positionFromPosition:selectedRange.start offset:0];
+        
+        // 没有高亮选择的字，则对已输入的文字进行字数统计和限制
+        if (!position)
+        {
+            if (toBeString.length > ADDNEWPUSH_MAX_STARWORDS_LENGTH)
+            {
+                NSRange rangeIndex = [toBeString rangeOfComposedCharacterSequenceAtIndex:ADDNEWPUSH_MAX_STARWORDS_LENGTH];
+                if (rangeIndex.length == 1)
+                {
+                    textView.text = [toBeString substringToIndex:ADDNEWPUSH_MAX_STARWORDS_LENGTH];
+                }
+                else
+                {
+                    NSRange rangeRange = [toBeString rangeOfComposedCharacterSequencesForRange:NSMakeRange(0, ADDNEWPUSH_MAX_STARWORDS_LENGTH)];
+                    textView.text = [toBeString substringWithRange:rangeRange];
+                }
+            }
+        }
+        
+    }
+    
+}
+
+-(void)titleMsgTextFiledEditChanged:(NSNotification *)obj
+{
+    
+    UITextField *textField = (UITextField *)obj.object;
+    
+    if ([textField isEqual:self.msgTitleTextField]) {
+        
+        NSString *toBeString = textField.text;
+        
+        //获取高亮部分
+        UITextRange *selectedRange = [textField markedTextRange];
+        UITextPosition *position = [textField positionFromPosition:selectedRange.start offset:0];
+        
+        // 没有高亮选择的字，则对已输入的文字进行字数统计和限制
+        if (!position)
+        {
+            if (toBeString.length > ADDNEWPUSH_MAX_STARWORDS_LENGTH_TITLE)
+            {
+                NSRange rangeIndex = [toBeString rangeOfComposedCharacterSequenceAtIndex:ADDNEWPUSH_MAX_STARWORDS_LENGTH_TITLE];
+                if (rangeIndex.length == 1)
+                {
+                    textField.text = [toBeString substringToIndex:ADDNEWPUSH_MAX_STARWORDS_LENGTH_TITLE];
+                }
+                else
+                {
+                    NSRange rangeRange = [toBeString rangeOfComposedCharacterSequencesForRange:NSMakeRange(0, ADDNEWPUSH_MAX_STARWORDS_LENGTH_TITLE)];
+                    textField.text = [toBeString substringWithRange:rangeRange];
+                }
+            }
+        }
+        
+    }
+    
+}
+
+
+#pragma mark - 请求
+- (void)sendRequestToSaveOrModifyWithMsgId:(NSInteger)msgId storeId:(double)storeId {
+    
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    
+    [params setObject:@(msgId) forKey:@"id"];
+    [params setObject:@(storeId) forKey:@"storeId"];
+    [params setObject:NoNullStr(self.msgTitleTextField.text, @"") forKey:@"title"];
+    [params setObject:@"1" forKey:@"msgType"];
+    [params setObject:NoNullStr(self.detailMsgTextView.text, @"") forKey:@"content"];
+    [params setObject:NoNullStr(self.userNum, @"") forKey:@"targetUser"];
+    
+//    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.navigationController.view animated:YES];
+//    hud.mode = MBProgressHUDModeIndeterminate;
+//    hud.labelText = @"请稍等...";
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeGradient];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD showWithStatus:@"请稍等..."];
+    [[MallNetworkEngine loginshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_MessagePush_smsSave Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@">>>>>>>>>>:%@", dic);
+        if (Succeed(dic)) {
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+            [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+            [SVProgressHUD showSuccessWithStatus:@"保存成功！"];
+            [self.navigationController popViewControllerAnimated:YES];
+        }else {
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+            [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+            [SVProgressHUD showErrorWithStatus:[NSString stringWithFormat:@"%@", [dic objectForKey:@"msg"]]];
+//            [SVProgressHUD showInfoWithStatus:@"该会员级别下无用户，请选择有用户的会员级别"];
+        }
+        self.saveBtn.enabled = YES;
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD showErrorWithStatus:@"服务器繁忙！请稍后再试"];
+        self.saveBtn.enabled = YES;
+    }];
+}
+
+
+
+#pragma mark - 保存按钮
+- (IBAction)saveBtnClick:(UIButton *)sender {
+    if (self.pushUserTextField.text.length == 0) {
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD showErrorWithStatus:@"请选择推送用户！"];
+        return;
+    }else if (self.msgTitleTextField.text.length == 0 ) {
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD showErrorWithStatus:@"请填写消息标题！"];
+        return;
+    }else if (self.detailMsgTextView.text.length == 0 || [self.detailMsgTextView.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] == 0) {
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD showErrorWithStatus:@"请填写消息内容！"];
+        return;
+    }
+    //输入过滤
+//    if ([self checkingInputFormat:self.msgTitleTextField.text]) {
+//        [self.msgTitleTextField becomeFirstResponder];
+//        return;
+//    }
+    NSString *account = AccountInfo.storeId;
+    double storeId = [account doubleValue];
+    //请求
+    [self sendRequestToSaveOrModifyWithMsgId:0 storeId:storeId];
+    
+    if (self.saveBtn.enabled) {
+        self.saveBtn.enabled = NO;
+    }
+}
+
+#pragma mark - 选择用户类型
+- (IBAction)chooseUserTypeBtnClick:(UIButton *)sender {
+
+    
+    MPChooseUserTypeView *view = [[MPChooseUserTypeView alloc] initWithFrame:CGRectMake(0, 0, KWSize.width, KWSize.height) type:OnlyVipUserShow WithBlock:^(NSString *userType, NSString *userNum) {
+        NSLog(@"userType >>>:%@,userNum >>>>:%@", userType, userNum);
+        self.pushUserTextField.text = @"";
+        self.pushUserTextField.text = userType;
+        self.userNum = userNum;
+    }];
+    
+//    MPChooseUserTypeView *view = [[MPChooseUserTypeView alloc] initWithFrame:CGRectMake(0, 0, KWSize.width, KWSize.height) showType:AllUserShow block:^(NSString *userType) {
+//        NSLog(@"%@", userType);
+//        self.pushUserTextField.text = @"";
+//        self.pushUserTextField.text = userType;
+//    }];
+    
+    [view show];
+}
+
+#pragma mark - 输入检查
+
+- (BOOL)checkingInputFormat:(NSString *)text {
+    NSString *regex = @"^[a-zA-Z0-9\u4e00-\u9fa5]+$";
+    
+    NSPredicate *pred = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", regex];
+    if (![pred evaluateWithObject:text]) {
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD showErrorWithStatus:@"只能输入汉字、字母和数字哦！"];
+        return YES;
+    }
+    
+    return NO;
+
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+@end

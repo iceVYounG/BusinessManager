@@ -1,0 +1,44 @@
+//
+//  QuetsionOptionCell.m
+//  BusinessManager
+//
+//  Created by 朕 on 16/9/8.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "QuetsionOptionCell.h"
+
+@implementation QuetsionOptionCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+    self.optionTF.delegate = self;
+}
+
+- (void)initCellContentWithIndex:(NSInteger)index andModel:(TemplateModel*)model
+{
+    self.model = model;
+    self.index = index;
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField
+{
+    TemplateModel *newModel = self.model;
+    TemplateModel *childModel = newModel.tabs[textField.tag];
+    
+    childModel.title = textField.text;
+    
+    NSDictionary *noteDic = @{@"model":newModel,
+                              @"index":@(self.index)
+                              };
+    [[NSNotificationCenter defaultCenter]postNotificationName:@"OPTIONCHANGE" object:noteDic];
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

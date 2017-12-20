@@ -1,0 +1,25 @@
+//
+//  EditHongBaoVC.m
+//  BusinessManager
+//
+//  Created by zhaojh on 16/8/8.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "EditHongBaoVC.h"
+
+@interface EditHongBaoVC ()
+
+@end
+
+@implementation EditHongBaoVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"编辑活动展现形式";
+    
+}
+
+
+
+@end

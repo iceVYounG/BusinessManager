@@ -1,0 +1,330 @@
+//
+//  FoodDetailEditVC.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "FoodDetailEditVC.h"
+#import "ADCollectionViewCell.h"
+#import "JMPickCollectView.h"
+#import "WeiZhanModel.h"
+
+@interface FoodDetailEditVC () <UICollectionViewDataSource,UICollectionViewDelegate,ImageSenderDelegate>
+{
+    NSString* _imagePath;
+    BOOL _isNew;
+   
+}
+@property (nonatomic, strong) UICollectionView* collectionView;
+@property (nonatomic, strong) UIButton *saveSender;
+@property (nonatomic, strong) NSMutableArray* datasArray;
+@property (nonatomic, strong) NSMutableArray *originImages;
+@property (nonatomic, strong) NSMutableArray* tempArr;
+
+@property (nonatomic, strong) NSMutableArray* indexPathsArr;
+@property (nonatomic, strong) NSIndexPath *currentIndexPath;
+@end
+
+@implementation FoodDetailEditVC
+
+- (instancetype)initWithBlock:(FoodMenuBlock)block{
+    
+    if (self = [super init]) {
+        
+        self.block = block;
+    }
+    return self;
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    
+    [self setUpSubView];
+}
+
+- (void)setUpSubView{
+    
+    self.title = @"菜单详情编辑";
+
+    [self.view addSubview:self.saveSender];
+    [self.collectionView registerNib:[UINib nibWithNibName:@"ADCollectionViewCell" bundle:nil] forCellWithReuseIdentifier:@"ADCollectionViewCell"];
+
+    
+    if (self.model) {
+        _isNew = NO;
+        [self.collectionView reloadData];
+    }else{
+        _isNew = YES;
+    }
+}
+
+#pragma mark - colloctionView dataSource
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
+    
+    return self.tempArr.count + 1;
+}
+
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
+    static NSString* identify = @"ADCollectionViewCell";
+
+    ADCollectionViewCell* cell = [collectionView dequeueReusableCellWithReuseIdentifier:identify forIndexPath:indexPath];
+    if (indexPath.row == self.tempArr.count) {
+        [cell.imageSender setImage:[UIImage imageNamed:@"uploadImage"] forState:UIControlStateNormal];
+        cell.deleteSender.hidden = YES;
+        cell.model = nil;
+        cell.imageSender.userInteractionEnabled = YES;
+    }else{
+        cell.deleteSender.hidden = NO;
+        TemplateModel *temModel=self.tempArr[indexPath.row];
+        cell.model = temModel;
+        cell.imageSender.userInteractionEnabled = NO;
+    }
+    if (indexPath.row==0) {
+        [self.indexPathsArr removeAllObjects];
+    }
+    self.currentIndexPath = indexPath;
+    if (self.indexPathsArr.count == 0) {
+        [self.indexPathsArr addObject:indexPath];
+    }else{
+        
+        if ([self.indexPathsArr containsObject:indexPath]) {
+        
+        }else{
+            [self.indexPathsArr addObject:indexPath];
+        }
+    }
+    
+    cell.deleteSender.tag = indexPath.row;
+    cell.tag = indexPath.row + 80;
+    cell.delegate = self;
+
+    return cell;
+}
+
+#pragma mark - collectionView delegate
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+}
+
+#pragma mark - UICollectionViewDelegateFlowLayout
+//定义每个UICollectionView 的大小
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+    return CGSizeMake(KCollectionCellW, KCollectionCellH);
+}
+//定义每个UICollectionView 的 margin
+-(UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section{
+    return UIEdgeInsetsMake(12, 16, 12, 16);
+}
+#pragma mark - imageSenderDelegate
+- (void)jump2ImagePickerVCsender:(UIButton *)sender{
+    NSIndexPath *index=[NSIndexPath indexPathForItem:self.currentIndexPath.row-1 inSection:0];
+    ADCollectionViewCell* cell=(ADCollectionViewCell*)[self.collectionView cellForItemAtIndexPath:index];
+    if ([cell.nameField.text isEqualToString:@""]||[cell.priceField.text isEqualToString:@""]) {
+        [OMGToast showWithText:@"请输入完整信息"];
+        return;
+    }
+    [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage) {
+        if (mediaImage) {
+            [self uploadMessage:mediaImage];
+            [self.originImages addObject:mediaImage];
+            [self.datasArray addObject:mediaImage];
+        }
+        else{
+            [self uploadMessage:originImage];
+            [self.originImages addObject:originImage];
+            [self.datasArray addObject:originImage];
+        
+        }
+        
+    }];
+}
+
+- (void)deleteImageCell:(UIButton *)sender{
+  
+    [self.originImages removeObjectAtIndex:sender.tag];
+    [self.collectionView performBatchUpdates:^{
+        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:sender.tag inSection:0];
+        [self.collectionView deleteItemsAtIndexPaths:@[indexPath]];
+        [self.indexPathsArr removeObjectAtIndex:indexPath.row];
+        [self.tempArr removeObjectAtIndex:indexPath.row];
+    } completion:^(BOOL finished) {
+        [self.collectionView reloadData];
+    }];
+}
+
+- (void)saveAction:(UIButton *)sender{
+    PartModel* model=[[PartModel alloc]init];
+
+    model.storeId = NoNullStr(AccountInfo.storeId, @"");
+    model.templateModelname = @"菜单";
+    model.templateModelnameCode = FoodMenu;
+    model.templateNo = CanYin;
+    if (self.indexPathsArr.count==1) {
+        ADCollectionViewCell* cell = (ADCollectionViewCell*)[self.collectionView viewWithTag:0 + 80];
+        TemplateModelData* data = [[TemplateModelData alloc] init];
+        TemplateModel* temp = [[TemplateModel alloc] init];
+        temp.name = cell.nameField.text;
+        temp.type = cell.priceField.text;
+        data.date = @[temp];
+        model.templateModelnameDate = data;
+
+        NSLog(@"%@---%@",model,data);
+        
+    }else{
+        NSMutableArray *modelArr=[NSMutableArray array];
+        for (int i=0; i<self.indexPathsArr.count-1; i++) {
+        NSIndexPath *index=self.indexPathsArr[i];
+        ADCollectionViewCell* cell = (ADCollectionViewCell*)[self.collectionView cellForItemAtIndexPath:index];
+        if ([cell.priceField.text isEqualToString:@""] || [cell.nameField.text isEqualToString:@""]) {
+            [OMGToast showWithText:@"请输入完整信息"];
+            return;
+        }else{
+            TemplateModel* item = [[TemplateModel alloc]init];
+            item=self.tempArr[i];
+            item.name = cell.nameField.text;
+            item.type = cell.priceField.text;
+            [modelArr addObject:item];
+        }
+              }
+        self.model.templateModelnameDate.date = [modelArr copy];
+        model = self.model;
+}
+    NSLog(@"%@",model);
+    
+    NSArray* arr = @[model];
+
+    __weak typeof(self) wSelf = self;
+    
+    [[MallNetManager share] request:API_TemplateSave parameters:[arr jm_ArryPrams] success:^(NSURLSessionDataTask *task, id responseObject) {
+        
+        NSLog(@"success == %@",responseObject);
+        
+        if (Succeed(responseObject)) {
+            
+            SearPartData* rsp = [SearPartData mj_objectWithKeyValues:responseObject];
+            if (rsp) {
+                
+                
+            }
+            
+            wSelf.block(model,_isNew);
+            [self.navigationController popViewControllerAnimated:YES];
+            
+        }else{
+            [OMGToast showWithText:responseObject[@"msg"]];
+            
+        }
+        
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        
+        [OMGToast showWithText:@"服务器忙，请稍后再试！"];
+    }];
+
+}
+
+#pragma mark - upload message
+
+- (void)uploadMessage:(UIImage*)image{
+    CGFloat offSet = 1;
+    if (image.size.height > 750) {
+        offSet = image.size.height / 750;
+    }
+    
+    NSData* imageData = UIImageJPEGRepresentation(UIImageScaleToSize(image, CGSizeMake(image.size.width/offSet,image.size.height/offSet)), 1.0);
+    
+    NSString* imageDataStr = [imageData base64EncodedString];
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    [params setObject:NoNullStr(imageDataStr, @"") forKey:@"code"];
+    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [params setObject:@"png" forKey:@"suffix"];
+    
+    [[MallNetManager share] request:API_ImageUpload prams:params succeed:^(id responseObject)   {
+        
+        ImageUpLoadBackModel* rsp = [ImageUpLoadBackModel mj_objectWithKeyValues:responseObject];
+        
+        if (Succeed(rsp)) {
+            TemplateModel* model = [[TemplateModel alloc] init];
+            model.imgPath = rsp.data.imgPath;
+            [self.tempArr addObject:model];
+            [self.collectionView  reloadData];
+
+        }
+        
+    } showHUD:(YES)];
+}
+
+@synthesize collectionView  = _collectionView,datasArray = _datasArray,originImages = _originImages,saveSender = _saveSender,indexPathsArr = _indexPathsArr;
+
+- (UICollectionView *)collectionView{
+    if (!_collectionView) {
+        UICollectionViewFlowLayout* flowLayout = [[UICollectionViewFlowLayout alloc] init];
+        flowLayout.itemSize = CGSizeMake(KCollectionCellW, KCollectionCellH);
+        flowLayout.minimumLineSpacing = 16.f;
+        
+        _collectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, KScreenWidth, KScreenHeight - NavigationH - 55) collectionViewLayout:flowLayout];
+        _collectionView.delegate = self;
+        _collectionView.dataSource = self;
+        _collectionView.backgroundColor = [UIColor groupTableViewBackgroundColor];
+        [self.view addSubview:_collectionView];
+    }
+    return _collectionView;
+}
+
+- (NSMutableArray *)datasArray{
+    if (!_datasArray) {
+        _datasArray = [NSMutableArray array];
+    }
+    return _datasArray;
+}
+
+- (void)setModel:(PartModel *)model{
+    _model=model;
+    if (model) {
+    [self.tempArr removeAllObjects];
+    [self.tempArr addObjectsFromArray: model.templateModelnameDate.date.mutableCopy];
+    }
+}
+
+- (NSMutableArray *)originImages{
+    
+    if (_originImages) {
+        _originImages = [NSMutableArray array];
+    }
+    return _originImages;
+}
+
+- (UIButton *)saveSender{
+    if (!_saveSender) {
+        _saveSender = [UIButton buttonWithType:UIButtonTypeCustom];
+        _saveSender.frame = CGRectMake(15, KScreenHeight - 55 - NavigationH, KScreenWidth - 15 * 2, 40);
+        [_saveSender setTitle:@"保存" forState:UIControlStateNormal];
+        [_saveSender addTarget:self action:@selector(saveAction:) forControlEvents:UIControlEventTouchUpInside];
+        [_saveSender setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        _saveSender.backgroundColor = [UIColor blueColor];
+        _saveSender.clipsToBounds = YES;
+        _saveSender.layer.cornerRadius = 5.f;
+        
+    }
+    return _saveSender;
+}
+- (NSMutableArray *)indexPathsArr{
+    
+    if (!_indexPathsArr) {
+        _indexPathsArr = [NSMutableArray array];
+    }
+    return _indexPathsArr;
+}
+
+- (NSMutableArray *)tempArr{
+    if (!_tempArr) {
+        _tempArr=[NSMutableArray array];
+    }
+    return _tempArr;
+}
+
+@end

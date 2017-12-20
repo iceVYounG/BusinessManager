@@ -1,0 +1,13 @@
+//
+//  BedroomCameraVC.h
+//  CMCCMall
+//
+//  Created by spring on 16/9/5.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "BaseController.h"
+
+@interface HVMonitorCameraVC : BaseController
+
+@end

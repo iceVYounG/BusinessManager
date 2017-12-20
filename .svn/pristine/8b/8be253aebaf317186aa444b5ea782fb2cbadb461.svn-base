@@ -1,0 +1,174 @@
+//
+//  MPMsgPushDetailVC.m
+//  BusinessManager
+//
+//  Created by 周迎春 on 16/7/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "MPMsgPushDetailVC.h"
+#import "MsgPushModel.h"
+
+@interface MPMsgPushDetailVC ()<UIAlertViewDelegate>
+
+@property (weak, nonatomic) IBOutlet UILabel *smsIDLab;
+@property (weak, nonatomic) IBOutlet UILabel *pushUserLab;
+@property (weak, nonatomic) IBOutlet UILabel *smsCountLab;
+@property (weak, nonatomic) IBOutlet UILabel *pushTimeLab;
+@property (weak, nonatomic) IBOutlet UILabel *smsDetailLab;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *scrollerviewHeight;
+
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *carryFiveHeight;
+
+@property (weak, nonatomic) IBOutlet UIButton *deleteBtn;
+
+@property (nonatomic, strong) MsgPushManagerList *modelList;
+
+- (IBAction)deleteBtnClick:(UIButton *)sender;
+
+
+
+@end
+
+@implementation MPMsgPushDetailVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+//    self.leftTitle = @"短彩信推送详情";
+    self.title = @"短彩信推送详情";
+    //请求数据
+    [self requestSMSDetailData];
+    
+    self.deleteBtn.layer.cornerRadius = 5.0;
+    self.deleteBtn.layer.masksToBounds = YES;
+    
+}
+
+//界面数据填充...
+- (void)setUpViews {
+    
+    self.smsIDLab.text = NoNullStr(self.modelList.ID, @"") ;
+    self.pushUserLab.text = NoNullStr(self.modelList.targetUserName, @"");
+    self.pushTimeLab.text = NoNullStr([self tramsformTimeFormatWithTimeString:self.modelList.createTime], @"") ;
+    self.smsCountLab.text = NoNullStr(self.modelList.targetUserNum, @"");
+    self.smsDetailLab.text = NoNullStr(self.modelList.content, @"");
+    
+    
+    self.carryFiveHeight.constant = [self smsDetailLabHeightFortext:self.smsDetailLab.text];
+    self.carryFiveHeight.constant = 29 + self.carryFiveHeight.constant;
+     self.scrollerviewHeight.constant = self.carryFiveHeight.constant + 280;
+
+}
+
+//自适应高度
+- (CGFloat)smsDetailLabHeightFortext:(NSString *)textStr{
+    CGRect bounds = [textStr boundingRectWithSize:CGSizeMake(KScreenWidth - 160, 1000) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:12]} context:nil];
+    return bounds.size.height;
+    
+}
+
+#pragma mark - 请求
+
+//请求详情数据
+- (void)requestSMSDetailData {
+    
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD showWithStatus:@"请稍等..."];
+    
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:self.model.ID forKey:@"id"];
+    
+    [[MallNetworkEngine loginshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_MessagePush_smsView Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@">>>>>>>>>>>:%@", dic);
+        
+        if (Succeed(dic)) {
+            [SVProgressHUD dismiss];
+            NSDictionary *data = [dic objectForKey:@"data"];
+            if (Succeed(dic)) {
+                self.modelList = [MsgPushManagerList mj_objectWithKeyValues:data];
+                //界面数据填充...
+                [self setUpViews];
+            }
+        }else {
+            [SVProgressHUD showErrorWithStatus:@"请求失败，请稍后再试！"];
+        }
+        
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        [SVProgressHUD showErrorWithStatus:@"服务器忙，请稍后再试"];
+    }];
+}
+
+
+//删除
+#pragma mark - 详情删除接口 -
+- (void)sendRequestToDeleteSMS:(NSInteger)msgId {
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:@(msgId) forKey:@"id"];
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.navigationController.view animated:YES];
+    hud.mode = MBProgressHUDModeIndeterminate;
+    hud.labelText = @"请稍等...";
+    
+    [[MallNetworkEngine loginshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_MessagePush_smsDelete Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@">>>>>>>>>>:%@", dic);
+        [hud hide:YES];
+        if (Succeed(dic)) {
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+            [SVProgressHUD showSuccessWithStatus:@"删除成功！"];
+            [self.navigationController popViewControllerAnimated:YES];
+        }else {
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+            [SVProgressHUD showErrorWithStatus:@"删除失败！"];
+        }
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        [hud hide:YES];
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD showErrorWithStatus:@"服务器繁忙！请稍后再试"];
+        
+    }];
+    
+}
+
+- (IBAction)deleteBtnClick:(UIButton *)sender {
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:nil message:@"确认删除此条推送消息吗？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"删除", nil];
+    [alertView show];
+}
+
+#pragma mark - AlertViewDelegate
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == 1) {
+        [self sendRequestToDeleteSMS:[self.model.ID integerValue]];
+    }else {
+        
+    }
+}
+
+
+#pragma mark - 时间转换
+- (NSString *)tramsformTimeFormatWithTimeString:(NSString *)timeStr {
+    if (timeStr.length < 14) {
+        return @"";
+    }
+    NSDateFormatter *inputFormat = [[NSDateFormatter alloc] init];
+    [inputFormat setDateFormat:@"yyyyMMddHHmmss"];
+    NSDate *time = [inputFormat dateFromString:timeStr];
+    NSDateFormatter *outFormat = [[NSDateFormatter alloc] init];
+    [outFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    NSString *formatTime = [outFormat stringFromDate:time];
+    return formatTime;
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+
+@end

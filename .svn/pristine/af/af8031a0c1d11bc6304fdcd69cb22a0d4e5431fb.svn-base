@@ -1,0 +1,54 @@
+//
+//  PushTableViewCell.m
+//  BusinessManager
+//
+//  Created by 周迎春 on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "PushTableViewCell.h"
+
+@implementation PushTableViewCell
+
+- (void)setModel:(MsgPushManagerList *)model {
+    _model = model;
+    
+    self.numberLB.text = model.ID;
+    self.titleLB.text = model.title;
+    self.statuLB.text = model.sendStateName;
+//    self.timeLB.text = model.createTime;
+    //拼接时间
+    NSString *yearStr = [model.createTime substringWithRange:(NSMakeRange(0, 4))];
+    NSString *monthStr = [model.createTime substringWithRange:NSMakeRange(4, 2)];
+    NSString *dayStr = [model.createTime substringWithRange:NSMakeRange(6, 2)];
+    NSMutableArray *arr1 = [NSMutableArray arrayWithObjects:yearStr,monthStr,dayStr,nil];
+    NSString *timeStr1 =[arr1 componentsJoinedByString:@"-"];
+    
+    NSString *hourStr = [model.createTime substringWithRange:NSMakeRange(8, 2)];
+    NSString *minStr = [model.createTime substringWithRange:NSMakeRange(10, 2)];
+    NSString *secStr = [model.createTime substringWithRange:NSMakeRange(12, 2)];
+    NSMutableArray *arr2 = [NSMutableArray arrayWithObjects:hourStr,minStr,secStr,nil];
+    NSString *timeStr2 =[arr2 componentsJoinedByString:@":"];
+    self.timeLB.text = [timeStr1 stringByAppendingString:[NSString stringWithFormat:@" %@",timeStr2]];
+    
+    
+}
+
+- (IBAction)pushBtn:(UIButton *)sender {
+    
+    if (self.block) {
+        self.block(sender);
+    }
+}
+
+- (void)awakeFromNib {
+    // Initialization code
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

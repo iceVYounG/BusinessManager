@@ -1,0 +1,83 @@
+//
+//  NewVipCardManagerViewController.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "NewVipCardManagerViewController.h"
+#import "NewVipCardView.h"
+#import "ChooseVipCardTypeView.h"
+
+@interface NewVipCardManagerViewController ()<NewVipCardViewDelegate,ChooseVipCardTypeViewDelegate>
+
+@property (nonatomic,strong) NewVipCardView *vipCardView;
+
+@end
+
+@implementation NewVipCardManagerViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.title = @"创建电子会员卡";
+    self.view.backgroundColor = [UIColor colorWithHexString:@"f6f5fa"];
+    [self setUI];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)setUI{
+    _vipCardView = [[NewVipCardView alloc]initWithType:VipCardNoChoose];
+    _vipCardView.delegate = self;
+    [self.view addSubview:_vipCardView];
+    [_vipCardView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.equalTo(self.view);
+        make.top.equalTo(self.view).offset(12);
+    }];
+}
+
+- (void)didClickChooseCardType:(NSString *)cardType{
+    ChooseVipCardTypeView *chooseVipCardTypeView = [[ChooseVipCardTypeView alloc]initWtihTypeStr:cardType];
+    chooseVipCardTypeView.delegate = self;
+    [self.view addSubview:chooseVipCardTypeView];
+    chooseVipCardTypeView.selectedStr = cardType;
+    [chooseVipCardTypeView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.left.bottom.top.equalTo(self.view);
+    }];
+}
+
+- (void)didClickTheButton:(NSString *)buttonTitle{
+    if ([buttonTitle isEqualToString:@"储值会员卡"]) {
+        _vipCardView.type = VipCardSaving;
+    }else if([buttonTitle isEqualToString:@"优惠会员卡"]){
+        _vipCardView.type = VipCardCoupon;
+    }else{
+        _vipCardView.type = VipCardNoChoose;
+    }
+}
+//zyc
+- (void)saveVIPCardBtn:(UIButton *)saveBtn{
+    NSLog(@"点保存");
+}
+- (void)requestDataBySaveBtn{
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    NSString *storeId = AccountInfo.storeId;
+    [params setObject:@"900000000077" forKey:@"storeId"];
+    [params setObject:@"900000000077" forKey:@"storeId"];
+}
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

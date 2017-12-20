@@ -1,0 +1,144 @@
+//
+//  HouseWeiZhanVC.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/8/3.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "HouseWeiZhanVC.h"
+#import "JMView.h"
+#import "ADViewCell.h"
+#import "BannerEditVC.h"
+#import "weizhanModel.h"
+
+@interface HouseWeiZhanVC () <UITableViewDataSource,UITableViewDelegate,JMViewDelegate>
+
+@property (nonatomic, strong) UITableView* tableView;
+@property (nonatomic, strong) SearPartData* dataSource;
+
+@end
+
+@implementation HouseWeiZhanVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    self.title = @"房产微站配置";
+    [self requestWeiZhanDetail];
+    [self tableView];
+}
+
+
+#pragma mark - tableView dataSource
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return 1;
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *indetify = @"PropertyCell";
+    PropertyCell *cell = [tableView dequeueReusableCellWithIdentifier:indetify];
+    
+    if (!cell) {
+        cell = [[[NSBundle mainBundle] loadNibNamed:NSStringFromClass([ADViewCell class]) owner:nil options:nil] objectAtIndex:6];
+    }
+    
+    cell.jView.delegate = self;
+    
+    return cell;
+}
+
+#pragma mark - tableView delegate
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return KADPropertyCellH;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return .1f;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    return 0;
+}
+- (UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    return nil;
+}
+- (UIView*)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
+    return nil;
+}
+
+#pragma mark - JMView delegate
+- (void)userDidSelectTitle:(NSString *)title atIndex:(NSInteger)index inView:(UIView *)view{
+    
+    switch (view.tag) {
+        case 899:
+        {
+            BannerEditVC* vc = [[BannerEditVC alloc] initWithNibName:@"BannerEditVC" bundle:nil block:^(PartModel* model,BOOL isNewData) {
+                
+                
+            }];
+            
+            vc.isBig = YES;
+            [self.navigationController pushViewController:vc animated:YES];
+            
+        }
+            break;
+            
+        default:
+            break;
+    }
+}
+
+#pragma mark - netWork request
+
+- (void)requestWeiZhanDetail{//请求房产模板下的详情
+    
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    
+    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [params setObject:FangChan forKey:@"templateNo"];
+    
+    
+    [[MallNetManager share] request:API_Storecenter_TemplateSearch prams:params succeed:^(id responseObject) {
+        
+        self.dataSource = [SearPartData mj_objectWithKeyValues:responseObject];
+        
+        [self.tableView reloadData];
+        
+    } showHUD:YES];
+}
+
+
+@synthesize tableView = _tableView,dataSource = _dataSource;
+
+- (UITableView *)tableView{
+    
+    if (!_tableView) {
+        _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, KScreenWidth, KScreenHeight - NavigationH) style:UITableViewStyleGrouped];
+        _tableView.delegate = self;
+        _tableView.dataSource = self;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        
+        _tableView.tableFooterView = [[SaveView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 90) tipHiden:NO block:^{
+            
+            [self saveTemple:FangChan];
+        }];
+        
+        [self.view addSubview:_tableView];
+    }
+    return _tableView;
+}
+
+- (SearPartData *)dataSource{
+    
+    if (!_dataSource) {
+        _dataSource = [[SearPartData alloc] init];
+    }
+    
+    return _dataSource;
+}
+
+@end

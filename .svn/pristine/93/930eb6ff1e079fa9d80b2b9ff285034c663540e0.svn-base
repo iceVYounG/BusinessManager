@@ -1,0 +1,89 @@
+//
+//  HZCaseDetailCell.m
+//  BusinessManager
+//
+//  Created by niuzs on 16/8/26.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "HZCaseDetailCell.h"
+
+@implementation HZCaseDetailCell
+
+- (void)awakeFromNib {
+    // Initialization code
+    self.selectionStyle  = 0;
+    self.contentTextV.layer.borderColor = [[UIColor colorWithHexString:@"#e5e5e5"]CGColor];
+    
+    self.contentTextV.layer.borderWidth = 1.0;
+    self.contentTextV.layer.cornerRadius = 6.0f;
+    self.contentTextV.delegate = self;
+    
+}
+- (BOOL)textViewShouldEndEditing:(UITextView *)textView{
+    
+    if ([self.contentTextV.text isEqualToString:@""]|!self.contentTextV.text) {
+        self.placeholderLab.text = @"输入文字介绍 , 如果没有图片可不上传图片";
+    }
+    return YES;
+}
+- (void)textViewDidBeginEditing:(UITextView *)textView{
+    self.placeholderLab.text = @"";
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end
+
+@implementation HZCaseDetailImageCell
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+//        [self addSubview];
+        
+    }
+    return self;
+}
+
+
+
+- (void)addSubview{
+    CGFloat gap = 15;
+    CGFloat iconViewW = ([UIScreen mainScreen].bounds.size.width - 5 *gap)/4;
+    CGFloat iconViewH = iconViewW;
+    
+    for (int i = 0; i < 15; i++) {
+        
+        self.iconView = [[HZCaseDetailImageView alloc]initWithFrame:CGRectMake((i%4) * iconViewH + gap, (i/4) * iconViewH + gap, iconViewW, iconViewH)];
+        [self.contentView addSubview:self.iconView];
+    }
+}
+
+@end
+
+
+
+@implementation HZCaseDetailImageView
+
+- (instancetype)initWithFrame:(CGRect)frame{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.attachment = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.attachment.frame = CGRectMake(0, 0, self.frame.size.width,self.frame.size.height);
+        self.attachment.backgroundColor = [UIColor redColor];
+        [self addSubview:self.attachment];
+        
+        self.deleteSender = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.deleteSender.frame = CGRectMake(CGRectGetWidth(self.frame)-15, 0, 15, 15);
+        [self.deleteSender setBackgroundImage:[UIImage imageNamed:@"VipCardManager_CancelImage"] forState:UIControlStateNormal];
+        [self addSubview:self.deleteSender];
+    }
+    return self;
+}
+
+@end

@@ -1,0 +1,23 @@
+//
+//  HZCaseDetailCell.m
+//  BusinessManager
+//
+//  Created by 牛志胜 on 16/8/26.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "HZCaseDetailCell.h"
+
+@implementation HZCaseDetailCell
+
+- (void)awakeFromNib {
+    // Initialization code
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

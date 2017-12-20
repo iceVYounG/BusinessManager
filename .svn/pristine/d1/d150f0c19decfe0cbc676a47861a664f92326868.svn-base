@@ -1,0 +1,98 @@
+//
+//  BannerCell.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/8/4.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "BannerCell.h"
+#import "WeiZhanModel.h"
+#import "UIView+UIViewController.h"
+#import "UIButton+WebCache.h"
+
+@implementation BannerCell
+
+- (void)awakeFromNib {
+    // Initialization code
+    
+    self.backgroundColor = [UIColor groupTableViewBackgroundColor];
+    _icon.enabled=NO;
+    self.bannerLabel.tag = 2013;
+    _updateSender.hidden=YES;
+    _updateSender.enabled=NO;
+    self.telephoneField.tag = 2014;
+    self.shopNameField.tag = 2015;
+    
+}
+
+- (void)setModel:(PartModel *)model{
+    _model = model;
+    if (!_model) {
+        return;
+    }
+    TemplateModel* template = [model.templateModelnameDate.date lastObject];
+    
+    _shopNameField.text = template.name;
+    _telephoneField.text = template.type;
+    
+    if (template.imgPath) {
+        _icon.hidden = YES;
+        _bannerLabel.hidden = YES;
+        _updateSender.hidden = NO;
+    }
+    NSString* imagePath = [NSString stringWithFormat:@"%@%@",ImagePre,template.imgPath];
+    [_imageSender sd_setImageWithURL:[NSURL URLWithString:imagePath] forState:UIControlStateNormal placeholderImage:[UIImage imageNamed:@"addImage"]];
+}
+- (IBAction)imageSenderAction:(UIButton *)sender {
+    
+    if (self.delegate) {
+        [self.delegate imageSelectWithButton:sender cell:self];
+    }
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end
+
+
+@implementation EditCell
+
+- (void)awakeFromNib{
+    
+}
+
+- (void)setModel:(ADImageModel *)model{
+    
+    _model = model;
+    if (!_model) {
+        return;
+    }
+    
+    CGFloat width = KScreenWidth/4;
+    CGFloat height = self.contentView.height;
+//    CGFloat imageW = 30;
+//    CGFloat titleW = 27;
+    [model.titles enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        
+        int i = idx / 4; int j = idx % 4;
+        MenuView* sender = [[MenuView alloc] initWithFrame:CGRectMake(width*j, 8 + width*i, width, height-2) block:^(id sender) {
+            MenuView* view = (MenuView*)sender;
+            
+            if (self.delegate) {
+                [self.delegate editSenderCilckWithBtn:view cell:sender isEdit:model.isEdit];
+            }
+        }];
+        
+        sender.tag = idx + 666;
+        sender.imageStr = model.images[idx];
+        sender.title = model.titles[idx];
+        [self.contentView addSubview:sender];
+    }];
+
+}
+@end

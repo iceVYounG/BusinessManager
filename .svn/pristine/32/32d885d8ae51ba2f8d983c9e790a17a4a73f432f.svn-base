@@ -1,0 +1,34 @@
+//
+//  HZCaseDetailCell.h
+//  BusinessManager
+//
+//  Created by niuzs on 16/8/26.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+@class HZCaseDetailCell ;
+@protocol HZCaseDetailCellDelegate <NSObject>
+
+@end
+@interface HZCaseDetailCell : UITableViewCell<UITextViewDelegate>
+@property (weak, nonatomic) IBOutlet UILabel *caseNumLab;
+@property (weak, nonatomic) IBOutlet UIButton *deleteBtn;
+@property (weak, nonatomic) IBOutlet UIButton *iconImageBtn;
+@property (weak, nonatomic) IBOutlet UITextField *iconNameTextF;
+@property (weak, nonatomic) IBOutlet UILabel *placeholderLab;
+@property (weak, nonatomic) IBOutlet UITextView *contentTextV;
+@end
+
+
+
+@interface HZCaseDetailImageView : UIView
+@property (strong, nonatomic)UIButton *attachment;
+@property (strong, nonatomic)UIButton *deleteSender;
+@end
+
+
+
+@interface HZCaseDetailImageCell : UITableViewCell
+@property (strong, nonatomic)HZCaseDetailImageView *iconView;
+@end

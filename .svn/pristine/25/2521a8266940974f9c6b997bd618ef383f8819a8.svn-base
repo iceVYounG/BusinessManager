@@ -1,0 +1,72 @@
+//
+//  WZ_ConfigGoodsImageViewCell.m
+//  BusinessManager
+//
+//  Created by KL on 16/9/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WZ_ConfigGoodsImageViewCell.h"
+
+@implementation WZ_ConfigGoodsImageViewCell
+
+- (void)awakeFromNib {
+    UITapGestureRecognizer *tapAction = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(chooseImageAction:)];
+    [self.goodsImgView addGestureRecognizer:tapAction];
+}
+
+- (void)setIsAddNewGoodsCell:(BOOL)isAddNewGoodsCell {
+    _isAddNewGoodsCell = isAddNewGoodsCell;
+    if (isAddNewGoodsCell) {
+        [self.goodsImgView setImage:[UIImage imageNamed:@"jiahao.png"]];
+        [self.deleteBtn setHidden:YES];
+    }else {
+        [self.deleteBtn setHidden:NO];
+        self.goodsImgView.image = nil;
+    }
+    
+}
+
+- (void)setImgPathStr:(NSString *)imgPathStr {
+    _imgPathStr = imgPathStr;
+    
+    if (imgPathStr && imgPathStr.length > 0) {
+        NSString *imgPath = [NSString stringWithFormat:@"%@/%@", ImagePre, imgPathStr];
+        NSLog(@"---imgPath-->>%@", imgPath);
+        [self.goodsImgView sd_setImageWithURL:[NSURL URLWithString:imgPath] placeholderImage:[UIImage imageNamed:@"106.png"]];
+    }else {
+        self.goodsImgView.image = nil;
+    }
+
+}
+
+- (void)setImage:(UIImage *)image {
+    _image = image;
+    if (self.image) {
+        [self.goodsImgView setImage:self.image];
+    }else {
+        self.goodsImgView.image = nil;
+    }
+}
+
+
+- (IBAction)deleteBtnClick:(UIButton *)sender {
+    if ([self.imageViewCellDelegate conformsToProtocol:@protocol(WZ_ConfigGoodsImageViewCellDelegate)]
+        &&
+        [self.imageViewCellDelegate respondsToSelector:@selector(WZ_ConfigGoodsImageViewCell_DeleteGoodsWithIndexPath:)]) {
+        [self.imageViewCellDelegate WZ_ConfigGoodsImageViewCell_DeleteGoodsWithIndexPath:self.indexPath];
+    }
+}
+
+//add GoodsImg
+- (void)chooseImageAction:(UITapGestureRecognizer *)gesture {
+    if (gesture.numberOfTouches == 1) {
+        if ([self.imageViewCellDelegate conformsToProtocol:@protocol(WZ_ConfigGoodsImageViewCellDelegate)]
+            &&
+            [self.imageViewCellDelegate respondsToSelector:@selector(WZ_ConfigGoodsImageViewCell_ChoosePhotoWithIndexPath:)]) {
+            [self.imageViewCellDelegate WZ_ConfigGoodsImageViewCell_ChoosePhotoWithIndexPath:self.indexPath];
+        }
+    }
+}
+
+@end

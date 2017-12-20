@@ -1,0 +1,17 @@
+//
+//  WZ_ConfigGooodsTopTextInfoCell.h
+//  BusinessManager
+//
+//  Created by KL on 16/9/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface WZ_ConfigGooodsTopTextInfoCell : UICollectionViewCell
+
+@property (weak, nonatomic) IBOutlet UITextView *goodsNameTV;
+@property (weak, nonatomic) IBOutlet UITextField *goodsPriceTF;
+@property (weak, nonatomic) IBOutlet UITextView *goodsDescribeTV;
+
+@end

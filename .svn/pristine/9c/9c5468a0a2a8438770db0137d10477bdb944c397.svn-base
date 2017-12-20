@@ -1,0 +1,21 @@
+//
+//  WZ_EditActivitiesVC.h
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/29.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+
+typedef enum{
+    FourButtonStatus,
+    SixButtonStatus
+    
+}buttonStatus;
+
+#import "WeiZhanBaseController.h"
+
+@interface WZ_EditActivitiesVC : WeiZhanBaseController
+
+@property (nonatomic, assign) buttonStatus status;
+@end

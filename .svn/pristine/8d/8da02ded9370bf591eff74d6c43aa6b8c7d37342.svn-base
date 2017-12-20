@@ -1,0 +1,15 @@
+//
+//  VerifyDetailView.h
+//  BusinessManager
+//
+//  Created by Raven－z on 16/8/25.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+@interface VerifyDetailView : UIView
+
+@property (nonatomic, strong) NSArray *dataArray;
+- (instancetype)initWithFrame:(CGRect)frame;
+
+@end

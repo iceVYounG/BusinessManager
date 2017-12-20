@@ -1,0 +1,49 @@
+//
+//  WeiZhanBaseController.m
+//  BusinessManager
+//
+//  Created by zhaojh on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanBaseController.h"
+#import "WeiZhanModel.h"
+
+@interface WeiZhanBaseController ()
+
+@end
+
+@implementation WeiZhanBaseController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+}
+
+-(void)saveTemplte:(NSMutableArray*)datas succeed:(void (^)(id responseObject))succeed error:(void (^)(NSError* error))errored{
+
+    [SVProgressHUD showWithStatus:@"数据处理中..."];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeGradient];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    
+    [[MallNetManager share] request:API_TemplateSave parameters:[datas jm_ArryPrams] success:^(NSURLSessionDataTask *task, id responseObject) {
+         [SVProgressHUD dismiss];
+        if (Succeed(responseObject)) {
+            if (succeed) {
+                succeed(responseObject);
+            }
+        }else{
+         
+          [OMGToast showWithText:responseObject[@"msg"]];
+        }
+       
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        [SVProgressHUD dismiss];
+        [SVProgressHUD showErrorWithStatus:@"网络异常"];
+        if (errored) {
+             errored(error);
+        }
+    }];
+}
+
+@end

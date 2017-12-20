@@ -1,0 +1,529 @@
+//
+//  EditHongBaoVC.m
+//  BusinessManager
+//
+//  Created by zhaojh on 16/8/8.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "EditHongBaoVC.h"
+#import "HongBaoTableCell.h"
+#import "JMPickCollectView.h"
+#import "JMView.h"
+#import "DrawActivityManageVC.h"
+#import "WeiZhanModel.h"
+#import "LuckDrawModel.h"
+#import "DrawActivityCell.h"
+
+#import <MobileCoreServices/MobileCoreServices.h>
+#import "STPhotoKitController.h"
+#import "UIImagePickerController+ST.h"
+#import "STConfig.h"
+
+@interface EditHongBaoVC ()<UITableViewDelegate,UITableViewDataSource,HongBaoTypeDeledate,HongBaoInfoDeledate,STPhotoKitDelegate>
+{
+    NSString* HB_content;
+    NSString* HB_imagePath;
+    HongBaoType HB_type;
+}
+@property(nonatomic,strong)UITableView* tableView;
+@property(nonatomic,strong)avtivityListItem* myHBModel;
+
+@end
+
+@implementation EditHongBaoVC
+
+-(instancetype)initWithBlock:(CallBacked)block{
+
+    if (self = [super init]) {
+        
+        self.block = block;
+    }
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"编辑活动展现形式";
+    
+    [self tableView];
+}
+
+-(void)viewWillAppear:(BOOL)animated{
+
+    [super viewWillAppear:YES];
+    
+}
+
+-(void)setModel:(PartModel *)model{
+    _model = model;
+
+    if (model.templateModelnameDate) {
+      
+        NSLog(@"%@",[(TemplateModel*)model.templateModelnameDate.date.lastObject id]);
+        if (![(TemplateModel*)model.templateModelnameDate.date.lastObject id] ) {
+            
+            return;
+        }
+        [self requestActivtyDetail:[(TemplateModel*)model.templateModelnameDate.date.lastObject id]];
+        
+    }
+
+}
+
+
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+
+    if (self.myHBModel) {
+        return 3;
+    }
+    return 2;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    
+    return 1;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    switch (indexPath.section) {
+        case 0:{
+        
+            NSString* idengfier=@"HongBaoTypeCell_ident";
+            HongBaoTypeCell *cell = [tableView dequeueReusableCellWithIdentifier:idengfier];
+            if (!cell) {
+                cell = [[HongBaoTypeCell alloc]initWithStyle:0 reuseIdentifier:idengfier];
+            }
+            if (self.model) {
+                 cell.model = self.model;
+            }
+            cell.delegate = self;
+            return cell;
+        }
+            break;
+        case 1:{
+          
+            NSString* idengfier=@"HongBaoInfoCell_ident";
+            HongBaoInfoCell *cell = [tableView dequeueReusableCellWithIdentifier:idengfier];
+            if (!cell) {
+                cell = [[HongBaoInfoCell alloc]initWithStyle:0 reuseIdentifier:idengfier];
+            }
+            if (self.model) {
+                cell.model = self.model;
+            }
+            cell.delegate = self;
+            return cell;
+
+        }
+            break;
+        case 2:{
+            // --------
+            NSString* idengfier=@"MyHongBaoCell_ident";
+            DrawActivityCell *cell = [tableView dequeueReusableCellWithIdentifier:idengfier];
+            if (!cell) {
+                cell = [[[NSBundle mainBundle] loadNibNamed:@"DrawActivityCell" owner:nil options:nil] lastObject];
+            }
+            if (self.myHBModel) {
+                
+                cell.orderNumberLable.text = self.myHBModel.ID;
+                cell.activityName.text = self.myHBModel.name;
+                cell.startActivityTimeLable.text = [self timeFormat:self.myHBModel.startTime] ;
+                cell.endActivityTimeLable.text = [self timeFormat:self.myHBModel.endTime];
+            }
+            return cell;
+        }
+            break;
+            
+        default: {
+            
+           return nil;
+        }
+            break;
+    }
+  
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    switch (indexPath.section) {
+        case 0:{
+            return HongBaoTypeH;
+        }
+            break;
+        case 1:{
+            return HongBaoInfoH;
+        }
+            break;
+        case 2:{
+            return MyHongBaoH;
+        }
+            break;
+        default:{
+        
+            return 0;
+        }
+            break;
+    }
+}
+
+-(UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    
+    if (section != 0) {
+        UIView* secView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 40)];
+        secView.backgroundColor = HexColor(@"#f6f5fa");
+        return secView;
+    }
+    UIView* secView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 40)];
+    secView.backgroundColor = HexColor(@"#f6f5fa");
+    
+    UILabel*tipLabel = [[UILabel alloc]initWithFrame:CGRectMake(15, 0, 300, 40)];
+    tipLabel.text = @"*活动为非必配项,不配置则不显示活动信息";
+    tipLabel.font = [UIFont systemFontOfSize:15];
+    tipLabel.textColor = HexColor(@"#F15A4A");
+    [secView addSubview:tipLabel];
+    return secView;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    
+    switch (section) {
+        case 0:{
+            return 40;
+        }
+            break;
+        default:{
+        
+            return 15;
+        }
+            break;
+    };
+}
+-(UIView*)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
+
+    if ((self.myHBModel && section == 2) || (!self.myHBModel && section == 1)){
+        
+         __weak typeof(self) wSelf = self;
+        SaveView* view = [[SaveView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 78) tipHiden:YES block:^{
+            
+            if (!wSelf.myHBModel) {
+                
+                [wSelf selectActive];
+            }else{
+            
+                [wSelf requestSave];
+            }
+        }];
+        if (self.myHBModel) {
+            view.senderTitle = @"保存";
+        }else{
+            view.senderTitle = @"下一步,关联抽奖活动";
+        }
+        return view;
+    }
+    return nil;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    
+    if ((self.myHBModel && section == 2) || (!self.myHBModel && section == 1)) {
+    
+        return 78;
+    }
+    return 0;
+}
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+
+    if (indexPath.section == 2) {
+        
+        [self selectActive];
+    }
+}
+
+-(void)selectActive{
+   __weak typeof(self) wSelf = self;
+    DrawActivityManageVC* vc = [[DrawActivityManageVC alloc]initWithNibName:@"DrawActivityManageVC" bundle:nil];
+    vc.callBack = ^(avtivityListItem* model){
+        wSelf.myHBModel = model;
+        [wSelf.tableView reloadData];
+    };
+    
+    vc.FromVC = 0;
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+#pragma mark - Delegate
+-(void)selectedHongBaoType:(HongBaoType)type{
+
+    NSIndexPath* idx = [NSIndexPath indexPathForRow:0 inSection:1];
+    HongBaoInfoCell* cell = [self.tableView cellForRowAtIndexPath:idx];
+    cell.type = type;
+
+    HB_type = type;
+}
+
+-(void)selectedImageActionWithHongBaoType:(HongBaoType)type{
+    
+    [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage) {
+        
+        STPhotoKitController *photoVC = [STPhotoKitController new];
+        [photoVC setDelegate:self];
+        if (originImage) {
+            [photoVC setImageOriginal:originImage];
+        }
+        else{
+            [photoVC setImageOriginal:mediaImage];
+        }
+        
+        [photoVC setSizeClip:CGSizeMake(KScreenWidth-30, (KScreenWidth-30)*234/750.0f)];
+        [self presentViewController:photoVC animated:YES completion:nil];
+     
+    }];
+
+    
+}
+
+#pragma mark - 1.STPhotoKitDelegate的委托
+
+- (void)photoKitController:(STPhotoKitController *)photoKitController resultImage:(UIImage *)resultImage
+{
+    
+    [self upLoadImage:resultImage block:^(NSString *imgPath) {
+        
+        HB_imagePath = imgPath;
+        
+        NSIndexPath* idx = [NSIndexPath indexPathForRow:0 inSection:1];
+        HongBaoInfoCell* cell = [self.tableView cellForRowAtIndexPath:idx];
+        
+        [cell.actArry replaceObjectAtIndex:HB_type withObject:imgPath];
+        cell.type = HB_type;
+        
+        if ([HB_KeysArry indexOfObject:self.model.templateModelnameCode] == HB_type) {
+            
+            TemplateModel* model = self.model.templateModelnameDate.date.lastObject;
+            model.imgPath = imgPath;
+            self.model.templateModelnameDate.date = @[model];
+        }
+    }];
+}
+
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+    [picker dismissViewControllerAnimated:YES completion:^(){
+    }];
+}
+
+
+-(void)userDidEndEditContent:(NSString*)content{
+ 
+    HB_content = content;
+}
+#pragma mark - Request
+-(void)upLoadImage:(UIImage*)image block:(void(^)(NSString* imgPath))callBack{
+    [SVProgressHUD showWithStatus:@"照片上传中..."];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeGradient];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    NSData* imageData = UIImageJPEGRepresentation(UIImageScaleToSize(image, CGSizeMake(720, 144)), 1.0);
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    [params setObject:NoNullStr([imageData base64EncodedString], @"") forKey:@"code"];
+    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [params setObject:@"png" forKey:@"suffix"];
+    
+    [[MallNetManager share] request:API_ImageUpload parameters:params success:^(NSURLSessionDataTask *task, id responseObject) {
+        [SVProgressHUD dismiss];
+        if (Succeed(responseObject)) {
+            
+            if ([responseObject objectForKey:@"data"]) {
+                NSDictionary* data = [responseObject objectForKey:@"data"];
+                
+                if ([data objectForKey:@"imgPath"]) {
+                    
+                    if (callBack) {
+                        
+                        callBack([data objectForKey:@"imgPath"]);
+                    }
+                }
+            }
+        }
+        
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        
+    }];
+}
+
+
+-(void)requestActivtyDetail:(NSString*)actId{
+    
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    [prams setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [prams setObject:NoNullStr(actId,@"") forKey:@"id"];
+    
+    [[MallNetManager share] request:@"storecenter/activeInfo.chtml" prams:prams succeed:^(id responseObject) {
+        
+        self.myHBModel = [avtivityListItem mj_objectWithKeyValues:responseObject[@"data"]];
+        
+        [self.tableView reloadData];
+        
+    } showHUD:YES];
+}
+
+-(void)requestSave{
+    
+//    if ([self judgeIsHave]) {
+//        [SVProgressHUD showErrorWithStatus:@"该活动已配置过了,请重新选择!"];
+//        return;
+//    }
+     PartModel* model = [[PartModel alloc]init];
+    if ([self judgeIsNew]) {
+        
+        model.storeId = NoNullStr(AccountInfo.storeId, @"");
+        [self settingType:model];
+        model.id = 0;
+        TemplateModelData* data = [[TemplateModelData alloc] init];
+        TemplateModel* item = [[TemplateModel alloc]init];
+        item.content = NoNullStr(HB_content, @"恭喜发财,大吉大利");
+        item.imgPath = HB_imagePath;
+        item.id = self.myHBModel.ID;
+        item.status = @"1";
+        data.date = @[item];
+        
+        model.templateModelnameCode = [self settingType:nil];
+        model.templateModelnameDate = data;
+        model.templateNo = _templeId;
+   
+    }else{
+        
+        model = [self getHBModel];
+        TemplateModel* item = self.model.templateModelnameDate.date.firstObject;
+        item.content = NoNullStr(HB_content, @"恭喜发财,大吉大利");
+        NSLog(@"%@",item.imgPath);
+        
+        if (item.imgPath.length==0) {
+           item.imgPath = HB_imagePath;
+        }
+        item.id = self.myHBModel.ID;
+        model.templateModelname=self.model.templateModelname;
+        model.templateModelnameCode=self.model.templateModelnameCode;
+        model.id=self.model.id;
+//        [self settingType:self.model];
+        model.templateModelnameDate.date = @[item];
+    }
+    NSArray* arr = @[model];
+     __weak typeof(self) wSelf = self;
+    [self saveTemplte:arr.mutableCopy succeed:^(id responseObject) {
+        
+        if (wSelf.block) {
+             wSelf.block(model,[self judgeIsNew]);
+        }
+        [wSelf.navigationController popViewControllerAnimated:YES];
+        [wSelf performSelector:@selector(delyAction) withObject:nil afterDelay:.3];
+        
+    } error:^(NSError *error) {
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD showErrorWithStatus:@"保存失败!"];
+    }];
+
+}
+-(BOOL)judgeIsHave{
+
+    if (self.model) {
+        
+        for (PartModel*model in self.models) {
+           
+            NSLog(@"%@", model.templateModelnameCode);
+//            
+//            if (self.model.id ==_myHBModel.ID.integerValue) {
+//                return YES;
+//            }
+//            
+            if (![self.model.templateModelnameCode isEqualToString:[self settingType:nil]] && [model.templateModelnameCode isEqualToString:[self settingType:nil]]) {
+                
+                return YES;
+                
+            }
+        }
+    }
+    return NO;
+}
+
+-(BOOL)judgeIsNew{
+
+    for (PartModel*model in self.models) {
+        
+        if ([[self settingType:nil] isEqualToString:model.templateModelnameCode]) {
+            
+            return NO;
+        }
+    }
+    return YES;
+}
+
+-(PartModel*)getHBModel{
+    for (PartModel*model in self.models) {
+        
+        if ([[self settingType:nil] isEqualToString:model.templateModelnameCode]) {
+            
+            return model;
+        }
+    }
+    return nil;
+}
+
+-(NSString*)settingType:(PartModel*)model{
+
+    switch (HB_type) {
+        case HongBao:{
+            model.templateModelname = @"抢红包";
+            model.templateModelnameCode = QiangHB;
+            return QiangHB;
+        }
+            break;
+        case DaZhuanPan:{
+            model.templateModelname = @"大转盘";
+            model.templateModelnameCode = DaZP;
+            return  DaZP;
+        }
+            break;
+        case GuaGuaLe:{
+            model.templateModelname = @"刮刮卡";
+            model.templateModelnameCode = GuaGK;
+            return GuaGK;
+        }
+            break;
+        default:
+            break;
+    }
+}
+
+-(void)delyAction{
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+    [SVProgressHUD showSuccessWithStatus:@"保存成功!"];
+}
+
+@synthesize tableView = _tableView;
+-(UITableView *)tableView{
+    
+    if (!_tableView) {
+        
+        _tableView = [[UITableView alloc]initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height-NavigationH) style:0];
+        
+        _tableView.delegate = self;
+        _tableView.dataSource = self;
+        [self.view addSubview:_tableView];
+    }
+    return _tableView;
+}
+-(NSString *)timeFormat :(NSString *)time{
+    NSString *str=[time substringToIndex:8];
+    NSString *str2=[str substringToIndex:4];
+    
+    NSString *str3=[str substringWithRange:NSMakeRange(4, 2)];
+    
+    NSString *str4=[str substringFromIndex:6];
+    
+    NSString *str5=[NSString stringWithFormat:@"%@-%@-%@",str2,str3,str4];
+    
+    
+    return str5;
+}
+
+
+@end

@@ -1,0 +1,39 @@
+//
+//  BedroomCameraVC.m
+//  CMCCMall
+//
+//  Created by spring on 16/9/5.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "HVMonitorCameraVC.h"
+
+@interface HVMonitorCameraVC ()
+
+@end
+
+@implementation HVMonitorCameraVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    self.title = @"卧室摄像头";
+    
+    UIBarButtonItem *spaceBtn = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
+    UIBarButtonItem *rightBtn = [[UIBarButtonItem alloc]initWithImage:[UIImage imageNamed:@"hv_fullScreen"] style:UIBarButtonItemStylePlain target:self action:@selector(rightBtnAction:)];
+    self.navigationItem.rightBarButtonItems = @[spaceBtn,rightBtn];
+    
+    
+}
+#pragma mark - 全屏按钮点击事件 -
+- (void)rightBtnAction:(UIBarButtonItem *)sender{
+    
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+@end

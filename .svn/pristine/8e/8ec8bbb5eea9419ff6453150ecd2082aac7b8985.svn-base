@@ -1,0 +1,101 @@
+//
+//  EaditDrawCell.m
+//  BusinessManager
+//
+//  Created by The Only on 16/7/27.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "EaditDrawCell.h"
+
+@implementation EaditDrawCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+-(void)setDrawModel:(activityInfoItem *)DrawModel
+{
+     _DrawModel = DrawModel;
+ 
+    if (DrawModel.chooseDrawType == nil) {
+        
+        self.infoViewHeightConstraint.constant = 0;
+        // 强制布局
+        [self layoutIfNeeded];
+        self.presentTypeView.hidden = YES;
+    }
+    else
+    {
+        if (![DrawModel.chooseDrawType isEqualToString:@"type"])
+        {
+            
+            self.infoViewHeightConstraint.constant = 0;
+            self.presentTypeView.hidden = YES;
+        }
+        else
+        {
+            self.infoViewHeightConstraint.constant = 240;
+            self.presentTypeView.hidden = NO;
+        }
+        
+    }
+    [self.redTypeBtn setTitle:DrawModel.btnTitle forState:UIControlStateNormal];
+    [self.redTypeBtn setTitleColor:[UIColor colorWithHexString:@"000000"] forState:UIControlStateNormal];
+ 
+//    NSArray *prizes = DrawModel.prizes;
+//    if(prizes.count == 0)return;// 保证数组中有东西
+//    self.redNameTF.text = prizes[0];
+//    self.singleRedMoneyTF.text = prizes[1];
+//    self.redCountTF.text = prizes[2];
+//    self.winningChanceTF.text = prizes[3];
+//    self.winningCountTF.text = prizes[4];
+    
+    
+}
+
+/*
+-(void)setModel:(RedBagModel *)model
+{
+    _model = model;
+    if (model.type == nil) {
+        
+        self.infoViewHeightConstraint.constant = 0;
+        self.presentTypeView.hidden = YES;
+    }
+    else
+    {
+        self.infoViewHeightConstraint.constant = 240;
+        self.presentTypeView.hidden = NO;
+    }
+    [self.redTypeBtn setTitle:model.btnTitle forState:UIControlStateNormal];
+    [self.redTypeBtn setTitleColor:[UIColor colorWithHexString:@"000000"] forState:UIControlStateNormal];
+}
+ */
+- (IBAction)deleteRedBag:(id)sender
+{
+    if ([self.delegate respondsToSelector:@selector(deleteEaditDrawCell:)]) {
+        
+        [self.delegate deleteEaditDrawCell:self];
+    }
+    
+}
+- (IBAction)chooseType:(id)sender
+{
+    
+    if ([self.delegate respondsToSelector:@selector(chooseTypeOnEaditDrawCell:)])
+    {
+        [self.delegate chooseTypeOnEaditDrawCell:self];
+    }
+    
+}
+
+
+@end

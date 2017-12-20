@@ -1,0 +1,137 @@
+//
+//  VipCardModel.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "VipCardModel.h"
+
+@implementation VipCardModel
+
+- (id)initWithDic:(NSDictionary *)dic{
+    self = [super init];
+    if (self) {
+        //businessType有几个数据为空暂时注销
+        self.businessType = [dic objectForKey:@"businessType"];
+        self.cardLevel = [dic objectForKey:@"cardLevel"];
+        self.cardLevelValue = [dic objectForKey:@"cardLevelValue"];
+        self.cardName = [dic objectForKey:@"cardName"];
+        self.createTime = [dic objectForKey:@"createTime"];
+        self.discount = [[dic objectForKey:@"discount"]stringValue];
+        self.vipCardId = [[dic objectForKey:@"id"]stringValue];
+        self.initialAmount = [dic objectForKey:@"initialAmount"];
+        self.number = [[dic objectForKey:@"number"]stringValue];
+        self.pinitialAmount = [dic objectForKey:@"pinitialAmount"];
+        self.remarks = [dic objectForKey:@"remarks"];
+        self.state = [dic objectForKey:@"state"];
+        self.storeId = [dic objectForKey:@"storeId"];
+        self.validityTime = [dic objectForKey:@"validityTime"];
+    }
+    return self;
+}
+- (void)setValue:(id)value forUndefinedKey:(NSString *)key{
+    
+}
+@end
+
+@implementation VipCardListModel
+
+- (instancetype)init {
+    if (self = [super init]) {
+        [VipCardListModel mj_setupReplacedKeyFromPropertyName:^NSDictionary *{
+            return @{@"ID" : @"id"};
+        }];
+    }
+    return self;
+}
+
+@end
+//zyc
+//-------------创建电子会员卡--------------------//
+@implementation NewVipCardManagerVC_VipCard_Model
+- (void)setValue:(id)value forUndefinedKey:(NSString *)key{
+    if ([key isEqualToString:@"id"]) {
+        self.ID = value;
+    }
+}
++(NewVipCardManagerVC_VipCard_Model *)returnModelWithDic:(NSDictionary *)dic{
+    NewVipCardManagerVC_VipCard_Model *model = [[NewVipCardManagerVC_VipCard_Model alloc]init];
+    [model setValuesForKeysWithDictionary:dic];
+    return model;
+}
+
+@end
+
+//-------------会员列表数据--------------------//
+@implementation VipCardVipListModel
+
+
+
+@end
+
+//------------会员详情-------------------------//
+@implementation VipCardVipUserDetailModel
+
+
+
+@end
+
+@implementation VipCardVipUserDetail_VipCard_Model
+
+- (instancetype)init {
+    if (self = [super init]) {
+        [VipCardVipUserDetail_VipCard_Model mj_setupReplacedKeyFromPropertyName:^NSDictionary *{
+            return @{@"ID" : @"id"};
+        }];
+    }
+    return self;
+}
+
+@end
+
+@implementation VipCardVipUserDetail_VipUser_Model
+
+- (instancetype)init {
+    if (self = [super init]) {
+        [VipCardVipUserDetail_VipUser_Model mj_setupReplacedKeyFromPropertyName:^NSDictionary *{
+            return @{@"ID" : @"id"};
+        }];
+    }
+    return self;
+}
+
+@end
+
+@implementation VipCardLevelListModel
+
+- (instancetype)init {
+    if (self = [super init]) {
+        [VipCardLevelListModel mj_setupObjectClassInArray:^NSDictionary *{
+            return @{@"data" : @"VipCardLevelItemModel"};
+        }];
+    }
+    return self;
+}
+
+@end
+
+@implementation VipCardLevelItemModel
+
+- (instancetype)init {
+    if (self = [super init]) {
+        [VipCardLevelItemModel mj_setupReplacedKeyFromPropertyName:^NSDictionary *{
+            return @{@"ID" : @"id"};
+        }];
+    }
+    return self;
+}
+
+@end
+
+//----------充值记录-----------------//
+@implementation VipCardRechargeRecordItemModel
+
+
+@end

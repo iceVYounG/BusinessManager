@@ -1,0 +1,85 @@
+//
+//  AbountUS.m
+//  BusinessManager
+//
+//  Created by 朕  on 16/7/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "AbountUsVC.h"
+#import "ChangePasswoedCell.h"
+#import "SolveProblemVC.h"
+
+@interface AbountUsVC ()<UITableViewDataSource,UITableViewDelegate>
+@property (weak, nonatomic) IBOutlet UITableView *abountUSTableView;
+@property(nonatomic,strong)NSArray *aboutUSArr;
+@end
+
+@implementation AbountUsVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"关于我们";
+    self.aboutUSArr = @[
+                        @{@"name": @"客服电话",@"info":@"4001-511-511"},
+                        @{@"name": @"网址",@"info":@"http://v.12580.com"},
+                        @{@"name": @"商户宝协议",@"info":@""}
+                        ];
+    self.abountUSTableView.scrollEnabled = NO;
+    [self.abountUSTableView registerNib:[UINib nibWithNibName:@"ChangePasswoedCell" bundle:nil] forCellReuseIdentifier:@"ChangePasswoedCell"];
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 3;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    return 0.1;
+}
+
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 48;
+}
+
+- (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString*ID=@"ChangePasswoedCell";
+    ChangePasswoedCell *cell=[tableView dequeueReusableCellWithIdentifier:ID];
+    if (!cell) {
+        cell=[[ChangePasswoedCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+    }
+    NSDictionary *dic = self.aboutUSArr[indexPath.row];
+    cell.nameLabel.text = [dic objectForKey:@"name"];
+    cell.infoLabel.text = [dic objectForKey:@"info"];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    return cell;
+    
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.row == 0)
+    {
+        NSString * phone = [NSString stringWithFormat:@"telprompt://%@",@"4001511511"];
+        [[UIApplication sharedApplication]openURL:[NSURL URLWithString:phone]];
+    }
+    else if (indexPath.row == 1) {
+        SolveProblemVC *vc = [[SolveProblemVC alloc]initWithNibName:@"SolveProblemVC" bundle:nil];
+        vc.title = @"首页";
+        vc.url = @"http://v.12580.com";
+        [self.navigationController pushViewController:vc animated:YES];
+    }
+    else if (indexPath.row == 2) {
+        SolveProblemVC *vc = [[SolveProblemVC alloc]initWithNibName:@"SolveProblemVC" bundle:nil];
+        vc.title = @"商户宝协议";
+        vc.url = @"http://112.4.27.9/bfsh-ws_inter/static/html/FAQ/about-protocol.html";
+        [self.navigationController pushViewController:vc animated:YES];
+    }
+}
+
+
+@end

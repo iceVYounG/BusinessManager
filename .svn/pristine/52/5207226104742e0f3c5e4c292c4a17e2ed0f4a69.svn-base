@@ -1,0 +1,19 @@
+//
+//  SelectPresentView.h
+//  BusinessManager
+//
+//  Created by The Only on 16/8/10.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+@interface SelectPresentView : UIView
+@property (strong, nonatomic) IBOutlet UIView *presentTypeView;// 奖品类型View
+@property (weak, nonatomic) IBOutlet UIButton *redTypeBtn;// 红包类型
+@property (weak, nonatomic) IBOutlet UITextField *redNameTF;// 红包名称
+@property (weak, nonatomic) IBOutlet UITextField *singleRedMoneyTF;// 单个红包金额
+@property (weak, nonatomic) IBOutlet UITextField *redCountTF;//红包个数
+@property (weak, nonatomic) IBOutlet UITextField *winningChanceTF;// 中间概率
+@property (weak, nonatomic) IBOutlet UIButton *prizeDeleteBtn;// 删除单个活动奖品
+@property (weak, nonatomic) IBOutlet UITextField *winningCountTF;// 中奖次数
+@end

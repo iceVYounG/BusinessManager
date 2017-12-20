@@ -1,0 +1,289 @@
+//
+//  ADViewCell.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "ADViewCell.h"
+#import "UIView+UIViewController.h"
+#import "BannerEditVC.h"
+#import "WZ_TextViewPhotoVC.h"
+#import "FoodDetailEditVC.h"
+#import "WZ_EditActivitiesVC.h"
+#import "JMButton.h"
+#import "WeiZhanModel.h"
+#import "WZ_LoopVC.h"
+
+@implementation ADViewCell
+
+- (void)awakeFromNib {
+    // Initialization code
+    
+    [self addEditingSender];
+    
+}
+
+-(void)addEditingSender{
+    CGFloat w = [JMView getWidth:@[@"编辑"]];
+    self.jView = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, (self.contentView.frame.size.height - JMViewH) * 0.5 + 16, w, JMViewH) btnNames:@[@"编辑"]];
+    self.jView.tag = KADViewTag;
+    [self.contentView addSubview:self.jView];
+}
+
+- (void)setAdImageWithArray:(NSArray *)array{
+    
+    self.adArray = [NSMutableArray arrayWithArray:array];
+    
+    NSMutableArray *imgArray = [NSMutableArray array];
+    
+    for (int i = 0; i < self.adArray.count; i++)
+    {
+        NSString *string = [self.adArray[i] objectForKey:@"IMG_PATH"];
+        [imgArray addObject:string];
+    }
+    
+    self.loopView.imageNames = imgArray;
+    self.loopView.imageNames = @[@"foodLopView1" ,@"foodLopView2"];
+}
+
+@end
+
+@implementation ADTitleViewCell
+
+- (void)awakeFromNib {
+    _phoneNumber.clipsToBounds = YES;
+    _phoneNumber.layer.cornerRadius = 2.f;
+    
+    _shopName.clipsToBounds = YES;
+    _shopName.layer.cornerRadius = 2.f;
+    
+    [self addEditingSender];
+}
+
+-(void)addEditingSender{
+    CGFloat w = [JMView getWidth:@[@"编辑"]];
+    self.jView = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, (self.frame.size.height - JMViewH) * 0.5, w, JMViewH) btnNames:@[@"编辑"]];
+    self.jView.tag = KADTitleViewTag;
+    [self.contentView addSubview:self.jView];
+
+}
+
+
+- (void)setModel:(TemplateModel *)model{
+    _model = model;
+    
+    if (!_model) {
+        return;
+    }
+    _shopName.text = model.name;
+    _phoneNumber.text = model.type;
+    if (model.imgPath) {
+        NSString* imagePath = [NSString stringWithFormat:@"%@%@",ImagePre,model.imgPath];
+        
+        [_iconImage sd_setImageWithURL:[NSURL URLWithString:imagePath] placeholderImage:[UIImage imageNamed:@"foodLopView2"]];
+
+    }
+    
+}
+@end
+
+@implementation ADImageCell
+
+- (void)awakeFromNib{
+    
+}
+
+- (void)setModel:(ADImageModel *)model{
+    
+    _model = model;
+    
+    if (!model) {
+        return;
+    }
+    BOOL isContain = NO;
+    for (UIView* view in self.contentView.subviews) {
+        
+        if (view.tag == 998) {
+            isContain = YES;
+        }
+    }
+    if (!isContain) {
+         [self creatBottomSenders:_model];
+    }
+    if (_model.isEdit) {
+        
+        
+        CGFloat w = [JMView getWidth:OneBtnsEdit];
+        self.jView = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, (KADImageCellH - JMViewH) * 0.5, w, JMViewH) btnNames:OneBtnsEdit];
+        self.jView.tag = KADImageTag;
+        [self addSubview:self.jView];
+    }
+    
+
+}
+
+-(void)creatBottomSenders:(ADImageModel*)model{
+    
+    CGFloat width = KScreenWidth/4;
+    CGFloat height = self.contentView.height;
+    CGFloat imageW = 30;
+    CGFloat titleW = 27;
+    [model.titles enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        
+//        int i = idx / 4; int j = idx % 4;
+//        JMButton* sender = [JMButton creatButton:CGRectMake(width*j, 1 + i*(height-2), width, height-2)];
+        JMButton* sender = [JMButton creatButton:CGRectMake(width*idx, 1, width, height-2)];
+
+        sender.tag = idx + 998;
+        sender.ImagePrams(model.images[idx],0).TitlePrams(model.titles[idx],13,[UIColor grayColor])
+        .ImageEdgInsets((width - imageW) * 0.5,(height - imageW - titleW)*0.5,imageW,imageW)
+        .TitleEdgInsets(4,(height - imageW - titleW*0.4),width - 8,imageW)
+        .ClickAction(self,nil);
+        [self.contentView addSubview:sender];
+    }];
+}
+
+@end
+
+@implementation ADBannerCell
+
+- (void)awakeFromNib{
+    
+    
+    [self addEditingSender];
+}
+
+-(void)addEditingSender{
+    CGFloat w = [JMView getWidth:ThreeBtns];
+    self.jView = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, (KADImageCellH - JMViewH) * 0.5, w, JMViewH) btnNames:ThreeBtns];
+    self.jView.tag = KADBannerTag;
+    [self.contentView addSubview:self.jView];
+
+}
+
+@end
+
+
+#pragma mark - ADButtonCell
+@implementation ADButtonCell
+
+- (void)awakeFromNib{
+    _ideaBtn.clipsToBounds = YES;
+    _ideaBtn.layer.cornerRadius = 8.f;
+
+    [self addEditingSender];
+}
+
+- (void)addEditingSender{
+    CGFloat w = [JMView getWidth:@[@"编辑"]];
+    self.jView = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, (self.frame.size.height - JMViewH) * 0.5, w, JMViewH) btnNames:@[@"编辑"]];
+    self.jView.tag = KADButtonTag;
+    [self.contentView addSubview:self.jView];
+}
+@end
+
+
+@implementation PropertyCell
+
+- (void)awakeFromNib{
+    [self setUpSubView];
+    
+    
+    [self addEditingSender];
+    
+}
+
+- (void)setUpSubView{
+    CGFloat width = KScreenWidth/3;
+    CGFloat height = 60;
+    CGFloat imageW = 30;
+    CGFloat titleW = 27;
+    NSArray* title = @[@"楼盘简介",@"户型欣赏",@"为您导航",@"促销活动",@"预约看房",@"联系我们"];
+    NSArray* images = @[@"100",@"101",@"102",@"103",@"104",@"105"];
+    [title enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+
+        int i = idx / 3; int  j = idx % 3;
+        JMButton* sender = [JMButton creatButton:CGRectMake(width*j, self.bigImage.height*0.5 - (height + 10)*(i), imageW, height)];
+        sender.tag = idx + 673;
+        sender.ImagePrams(images[idx],0).TitlePrams(title[idx],13,[UIColor grayColor])
+        .ImageEdgInsets((width - imageW) * 0.5,8,imageW,imageW)
+        .TitleEdgInsets(4,imageW + 16,width - 8,titleW)
+        .ClickAction(self,nil);
+        [self.contentView addSubview:sender];
+//        idx%3
+
+
+    }];
+
+}
+
+- (void)addEditingSender{
+    
+    CGFloat w = [JMView getWidth:@[@"编辑"]];
+    self.jView = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, (self.frame.size.height - JMViewH) * 0.1, w, JMViewH) btnNames:@[@"编辑"]];
+//    self.jView.delegate = self;
+    self.jView.tag = 899;
+    [self.contentView addSubview:self.jView];
+    
+    JMView* editSender = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w, (self.frame.size.height - JMViewH) * 0.5, w, JMViewH) btnNames:@[@"编辑"]];
+    editSender.delegate = self;
+    editSender.tag = 990;
+    [self.contentView addSubview:editSender];
+    
+    CGFloat w1 = [JMView getWidth:@[@"显示活动"]];
+    JMView* bottomSender = [[JMView alloc] initWithFrame:CGRectMake(KScreenWidth - w1, (self.frame.size.height - JMViewH) * 0.75, w1, JMViewH) btnNames:@[@"显示活动"]];
+    bottomSender.tag = 991;
+    bottomSender.delegate = self;
+
+    [self.contentView addSubview:bottomSender];
+    
+}
+
+#pragma mark - delegate
+
+- (void)userDidSelectTitle:(NSString *)title atIndex:(NSInteger)index inView:(UIView *)view{
+    
+    switch (view.tag) {
+        case 899:
+        {
+            BannerEditVC* vc = [[BannerEditVC alloc] initWithNibName:@"BannerEditVC" bundle:nil block:^(BOOL isRefresh) {
+                
+                
+            }];
+            
+            [self.viewController.navigationController pushViewController:vc animated:YES];
+
+        }
+            break;
+        case 990:
+        {
+            
+            WZ_EditActivitiesVC* vc = [[WZ_EditActivitiesVC alloc] init];
+            vc.status = SixButtonStatus;
+            [self.viewController.navigationController pushViewController:vc animated:YES];
+            
+        }
+            break;
+        case 991:
+        {
+            
+        }
+            break;
+        default:
+            break;
+    }
+}
+@end
+
+@implementation ADCollectionCell
+
+- (void)awakeFromNib{
+    
+    self.backgroundColor = [UIColor whiteColor];
+}
+
+
+@end
+

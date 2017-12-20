@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10117" systemVersion="15C50" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="gTV-IL-0wX" customClass="HVScreenShotDetailCell">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="211"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="375" height="211"/>
+                <subviews>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="lc_xsrw" translatesAutoresizingMaskIntoConstraints="NO" id="9WY-7s-P1G">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="211"/>
+                    </imageView>
+                </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+            </view>
+            <constraints>
+                <constraint firstItem="9WY-7s-P1G" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="CcU-Fr-e1W"/>
+                <constraint firstAttribute="trailing" secondItem="9WY-7s-P1G" secondAttribute="trailing" id="KBO-zD-124"/>
+                <constraint firstAttribute="bottom" secondItem="9WY-7s-P1G" secondAttribute="bottom" id="Ykq-sA-ll8"/>
+                <constraint firstItem="9WY-7s-P1G" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="jMh-gn-dHY"/>
+            </constraints>
+            <connections>
+                <outlet property="screenShotImage" destination="9WY-7s-P1G" id="XR5-xb-lpz"/>
+            </connections>
+            <point key="canvasLocation" x="251.5" y="284.5"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="lc_xsrw" width="171" height="96"/>
+    </resources>
+</document>

@@ -1,0 +1,224 @@
+//
+//  WeiZhanModel.h
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "BaseModel.h"
+#import "JsonArray.h"
+
+@interface WeiZhanModel : BaseModel
+#define HZImageH 151
+#define HZImageGap 3
+
+NSString* DefaultStr();
+
+@end
+
+
+@interface PhotoImageModel : BaseModel
+
+@property (nonatomic, copy) NSString *shopName;
+@property (nonatomic, copy) NSString *phoneNumber;
+@property (nonatomic, copy) NSString *imageName;
+
+
+@end
+
+
+@interface MyWeiZhans : BaseModel
+
+@property (nonatomic, strong) NSArray *data;
+@end
+
+#pragma mark - 我的微站model
+@interface MyWeiZhanModel : BaseModel
+
+@property (nonatomic, copy) NSString *auditId;
+@property (nonatomic, copy) NSString *auditStatus;
+@property (nonatomic, copy) NSString *imageName;
+@property (nonatomic, copy) NSString *dyStoreId;
+@property (nonatomic, copy) NSString *frontPageUrl; //预览图
+@property (nonatomic, copy) NSString *qrcImagePath; //二维码图
+@property (nonatomic, copy) NSString *shopName;
+@property (nonatomic, copy) NSString *shortAddress;
+@property (nonatomic, copy) NSString *templateNo;
+@property (nonatomic, copy) NSString *shortIdentification;
+@property (nonatomic, copy) NSString *updateStatus;
+@property (nonatomic, assign) NSInteger storeId;
+@property (nonatomic, assign) NSInteger state;
+@property (nonatomic, assign) NSInteger source;
+@property (nonatomic, assign) NSInteger wzId;
+
+@end
+
+#pragma mark - 二级界面模块model
+@class TemplateData;
+@interface SearPartData : BaseModel
+
+@property (nonatomic, strong) NSArray *data;
+@property (nonatomic, strong) TemplateData *temPlate;
+
+@end
+
+
+
+@interface TemplateData : BaseModel
+
+@property (nonatomic, copy) NSString *auditId;
+@property (nonatomic, copy) NSString *auditStatus;
+@property (nonatomic, copy) NSString *createTime;
+@property (nonatomic, copy) NSString *dyStoreId;
+@property (nonatomic, copy) NSString *shopName;
+@property (nonatomic, copy) NSString *shortAddress;
+@property (nonatomic, copy) NSString *shortIdentification;
+@property (nonatomic, copy) NSString *templateNo;
+@property (nonatomic, copy) NSString *updateStatus;
+@property (nonatomic, assign) NSInteger id;
+@property (nonatomic, assign) NSInteger source;
+@property (nonatomic, assign) NSInteger state;
+@property (nonatomic, assign) NSInteger storeId;
+@end
+
+@class TemplateModelData;
+@interface PartModel : BaseModel
+
+@property (nonatomic, copy) NSString *createTime;
+@property (nonatomic, copy) NSString *dateType;
+@property (nonatomic, copy) NSString *sortNum;
+@property (nonatomic, copy) NSString *storeId;
+@property (nonatomic, copy) NSString *templateModelname;
+@property (nonatomic, copy) NSString *templateModelnameCode;
+@property (nonatomic, copy) NSString *templateNo;
+@property (nonatomic, strong) TemplateModelData *templateModelnameDate;
+@property (nonatomic, assign) NSInteger id;
+#pragma mark - 自定义
+@property (nonatomic, copy) NSString *HB_hidenAtIndex;
+@end
+
+
+
+@interface TemplateModelData : BaseModel
+
+@property (nonatomic, strong) NSArray *date;
+@end
+
+
+
+@interface TemplateModel : NSObject
+
+@property (nonatomic, copy) NSString *content;//内容
+@property (nonatomic, copy) NSString *id;
+@property (nonatomic, assign)BOOL status;
+@property (nonatomic, copy) NSString *imgPath;//图片路径
+@property (nonatomic, copy) NSString *type;//餐饮模块代表电话
+@property (nonatomic, copy) NSString *name;
+@property (nonatomic, copy) NSString *imageName;
+@property (nonatomic, copy) NSString *shortName;
+@property (nonatomic, copy) NSString *marketPrice;
+@property (nonatomic, copy) NSString *shopPrice;
+@property (nonatomic, copy) NSString *outPath;
+@property (nonatomic, copy) NSString *busline;//公交、地铁线路
+@property (nonatomic, copy) NSString *address;//地址
+@property (nonatomic, copy) NSString *bdLong;//纬度
+@property (nonatomic, copy) NSString *bdLat;//经度
+@property (nonatomic, copy) NSString *webPath;
+@property (nonatomic, copy) NSString *code;
+@property (nonatomic, copy) NSString *key;
+@property (nonatomic, copy) NSString *value;
+@property(nonatomic,strong) NSMutableArray* images;
+
+#pragma mark - 自定义
+@property(nonatomic,assign) NSString* shopFileCellH;
+
+
+@end
+
+@interface ImagePathModel : NSObject
+
+@property (nonatomic, copy) NSString *imagePath;
+@end
+
+#pragma mark - 要上传的参数model
+@interface PramsArryModel : BaseModel
+
+@property (nonatomic, strong) NSArray* prams;
+
+@end
+
+
+@interface ImagePath : BaseModel
+@property (nonatomic, copy) NSString *imgPath;
+@end
+
+@interface ImageUpLoadBackModel : BaseModel
+
+@property (nonatomic, strong) ImagePath *data;
+
+@end
+
+@interface ADImageModel : BaseModel
+@property (nonatomic, strong) NSArray *images;
+@property (nonatomic, strong) NSArray *titles;
+@property (nonatomic) BOOL isEdit;
+@end
+
+@interface ECProductModel : BaseModel
+@property (nonatomic,strong)NSString *productId;
+@property (nonatomic,strong)NSString *name;
+@property (nonatomic,strong)NSString *shortName;
+@property (nonatomic,strong)NSString *webPath;
+@property (nonatomic,strong)NSString *marketPrice;
+@property (nonatomic,strong)NSString *shopPrice;
+@property (nonatomic,strong)NSString *itemType;
+@end
+@interface HZImageModel : BaseModel
+@property (nonatomic, strong)NSMutableArray *images;
+@property (nonatomic, strong)NSMutableArray *names;
+
+@end
+
+@interface HZIconViewFrame : NSObject
+@property (nonatomic, strong)NSArray *dataArr;
+@property (nonatomic, assign)CGFloat cellHeight;
+@end
+
+
+@interface YuyueRecordModel : BaseModel
+
+@property (nonatomic, strong) NSArray *data;
+@end
+
+@interface YueyueDataModel : NSObject
+@property (nonatomic, strong)NSString *userName;
+@property (nonatomic, strong)NSString *mobile;
+@property (nonatomic, strong)NSString *dateTime;
+@property (nonatomic, strong)NSString *templateModelnameCode;
+@property (nonatomic, strong)NSString *yuyueId;
+@end
+
+typedef NS_ENUM(NSInteger, ModelSectionType) {
+    
+    ModelSectionTypeNomal,
+    ModelSectionTypeFooter
+};
+@interface ModelSection : NSObject
+
+@property (nonatomic, assign) ModelSectionType type;
+@property (nonatomic, strong) NSMutableArray<UIImage *> *itemsArray;
+@property (nonatomic, strong)TemplateModel *model;
+
+@end
+
+
+@interface ShenHeModel : BaseModel
+
+@property (nonatomic, strong) NSArray *data;
+@end
+
+@interface ShenHeDataModel : NSObject
+@property (nonatomic, strong)NSString *auditContent;
+@property (nonatomic, strong)NSString *auditStatus;
+@end

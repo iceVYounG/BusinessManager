@@ -1,0 +1,33 @@
+//
+//  VerifyRecordModel.h
+//  BusinessManager
+//
+//  Created by Raven－z on 16/8/27.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+//{
+//    "AMOUNT_PAYABLE" = 10000;
+//    "BUSINESS_TYPE" = 1;
+//    "CARD_LEVEL" = "\U666e\U901a";
+//    "CARD_NUM" = 10401;
+//    "CREATE_TIME" = 20160825161552;
+//    DISCOUNT = 8;
+//    "REALPAY_AMOUNT" = 8000;
+//    "USER_MOBILE" = 15062452718;
+//}
+@interface VerifyRecordModel : NSObject
+
+@property (nonatomic, strong) NSString *AMOUNT_PAYABLE;
+@property (nonatomic, strong) NSString *BUSINESS_TYPE;
+@property (nonatomic, strong) NSString *CARD_LEVEL;
+@property (nonatomic, strong) NSString *CARD_NUM;
+@property (nonatomic, strong) NSString *CREATE_TIME;
+@property (nonatomic, strong) NSString *DISCOUNT;
+@property (nonatomic, strong) NSString *REALPAY_AMOUNT;
+@property (nonatomic, strong) NSString *USER_MOBILE;
+
+- (instancetype)initWithDic:(NSDictionary *)dic;
+
+@end

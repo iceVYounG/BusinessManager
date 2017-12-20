@@ -1,0 +1,30 @@
+//
+//  NewVipCardView.h
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@protocol NewVipCardViewDelegate <NSObject>
+
+- (void)didClickChooseCardType:(NSString *)cardType;
+
+@end
+
+typedef NS_ENUM(NSInteger,VipCard){
+    VipCardSaving,
+    VipCardCoupon,
+    VipCardNoChoose
+};
+
+@interface NewVipCardView : UIView
+
+- (id)initWithType:(VipCard)type;
+
+@property (nonatomic) VipCard type;
+@property (nonatomic) id<NewVipCardViewDelegate> delegate;
+
+@end

@@ -1,0 +1,15 @@
+//
+//  WZ_TextViewPhotoVC.h
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanBaseController.h"
+
+@interface WZ_TextViewPhotoVC : WeiZhanBaseController
+
+@property (nonatomic, copy) NSString *placeholder;
+
+@end

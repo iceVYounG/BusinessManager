@@ -1,0 +1,586 @@
+//
+//  FlowerShopVC.m
+//  BusinessManager
+//
+//  Created by 王启明 on 16/9/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "FlowerShopVC.h"
+#import "JMView.h"
+#import "FlowerShopCell.h"
+#import "E_CommerceCell.h"
+#import "WZ_AddNewFloorVCViewController.h"
+#import "EditHongBaoVC.h"
+#import "CustomCollectionHeader.h"
+#import "ChangeDoorImageVC.h"
+#import "LunBoEditeVC.h"
+#define kWidth_scale [UIScreen mainScreen].bounds.size.width/375.0
+@interface FlowerShopVC ()<UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout,JMViewDelegate>
+@property (nonatomic,strong)UICollectionView *myCo;
+@property (nonatomic,strong)UIView *saveV;
+@property (nonatomic,strong)SearPartData *dataSource;
+@property (nonatomic,strong)NSArray *keypathArray;
+@property (nonatomic,strong)NSMutableArray *activityArr;
+@property (nonatomic,assign)NSInteger Section;
+@property (nonatomic,strong)NSMutableArray *rowCountArray;
+@end
+
+@implementation FlowerShopVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title=self.titleStr;
+    _keypathArray=@[@[DianPBanner],@[DianPMessage],@[ReMTJ],@[QiangHB,DaZP,GuaGK],@[LOUC]];
+    self.Section=6;
+    [self myCo];
+    [self requestWeiZhanDetail];
+    // Do any additional setup after loading the view from its nib.
+}
+
+#pragma mark-privateMethod
+-(void)settingHiden:(PartModel*)model{
+    
+    for (PartModel* mol in self.activityArr) {
+        
+        if ([mol.templateModelnameCode isEqualToString:model.templateModelnameCode]) {
+            //            mol.HB_hidenAtIndex = [NSString stringWithFormat:@"%ld",(NSInteger)![model.HB_hidenAtIndex boolValue]];
+            TemplateModel *temp = [model.templateModelnameDate.date lastObject];
+            temp.status =[NSString stringWithFormat:@"%ld",(NSInteger)![temp.status boolValue]];
+            break;
+        }
+    }
+    [self.myCo reloadData];
+}
+-(NSMutableArray*)getTempleData:(FlowerShopStatus)type{
+    
+    NSMutableArray* targetArr = [NSMutableArray array];
+    
+    NSArray* tArr = [_keypathArray objectAtIndex:type];
+    
+    for (PartModel*model in self.dataSource.data) {
+        
+        if ([tArr containsObject:model.templateModelnameCode]) {
+            
+            [targetArr addObject:model];
+        }
+    }
+    return targetArr;
+}
+//获取总共区的个数和每个楼层的row个数
+- (void)getSectionCount{
+    PartModel *model=[[self getTempleData: floorStatus] lastObject];
+    NSInteger index=model?model.templateModelnameDate.date.count+4:6;
+    self.Section=index;
+    [self.rowCountArray removeAllObjects];
+    [model.templateModelnameDate.date enumerateObjectsUsingBlock:^(TemplateModel  *obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [self.rowCountArray addObject:obj.items];
+    }];
+}
+
+- (BOOL)getHidenWith:(NSInteger)row{
+    
+    if (row >= self.activityArr.count) {
+        return NO;
+    }
+    PartModel* mol = [self.activityArr objectAtIndex:row];
+    TemplateModel *temp =[mol.templateModelnameDate.date lastObject];
+    return [temp.status boolValue];
+}
+
+#pragma mark-responseClick
+//保存
+- (void)saveTemp:(UIButton *)sender{
+[self saveTemple:FlowerShop andshopName:@"哈哈"];
+}
+//预览
+- (void)previewTemp:(UIButton *)sender{
+
+
+}
+
+#pragma mark-requestData
+- (void)requestWeiZhanDetail{
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [params setObject:self.type forKey:@"templateNo"];
+    [[MallNetManager share] request:API_Storecenter_TemplateSearch prams:params succeed:^(id responseObject) {
+        if([responseObject[@"code"]isEqualToString:@"00-00"]){
+            if (responseObject) {
+                self.dataSource = [SearPartData mj_objectWithKeyValues:responseObject];
+                [self getSectionCount];
+                [self.myCo reloadData];
+            }
+        }
+    } showHUD:YES];
+}
+
+- (void)saveShopInfoModel:(PartModel *)model{
+    if (!model) {
+        
+    }
+
+}
+
+
+
+#pragma mark-保存模板
+-(void)requestChangeShowStatu:(BOOL)isShow data:(PartModel*)model callBack:(void(^)())callBack{
+    TemplateModel* m;
+    if (isShow) {
+        m.status=@"1";
+    }
+    else{
+        m.status=@"0";
+    }
+    if (!model) {
+        model = [[PartModel alloc] init];
+        m = [[TemplateModel alloc] init];
+        //        m.status = [NSString stringWithFormat:@"%ld",(NSInteger)isShow];
+        NSMutableArray* temp = [NSMutableArray array];
+        [temp addObject:m];
+        model.templateModelnameDate.date = temp.copy;
+    }
+    m = model.templateModelnameDate.date.lastObject;
+    //    m.status = [NSString stringWithFormat:@"%ld",(NSInteger)isShow];
+    
+    [self saveTemplte:@[model].mutableCopy succeed:^(id responseObject) {
+        
+        if (callBack) {
+            callBack();
+        }
+    } error:nil];
+}
+
+#pragma mark-更新数据
+-(void)setTempleData:(NSArray*)tArrData isNew:(BOOL)isNew{
+    
+    if (!isNew) {
+        for (PartModel*model1 in self.dataSource.data) {
+            
+            for (PartModel*model2 in tArrData) {
+                
+                if ([model1.templateModelnameCode isEqualToString:model2.templateModelnameCode]) {
+                    
+                    model1.templateModelnameDate = model2.templateModelnameDate;
+                }
+            }
+        }
+       
+        return;
+    }
+    NSMutableArray* tempArr = [NSMutableArray array];
+    [tempArr addObjectsFromArray:self.dataSource.data];
+    [tempArr addObjectsFromArray:tArrData];
+    self.dataSource.data = tempArr.copy;
+    [self getSectionCount];
+}
+
+#pragma mark-删除数据
+- (void)deleteData:(NSInteger)index{
+    PartModel *model = [[self getTempleData:floorStatus]lastObject];
+    if (model) {
+        [[model.templateModelnameDate.date mutableCopy]removeObjectAtIndex:index];
+        if ([model.templateModelnameDate.date count]==0) {
+            self.Section++;
+        }
+        [self setTempleData:@[model] isNew:NO];
+    }else{
+        if (self.Section>5) {
+            self.Section--;
+        }else{
+        
+        }
+        
+    }
+   
+    [self.myCo reloadData];
+   
+}
+
+#pragma mark-CollectionViewDataSource
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
+    switch (section) {
+        case 0:
+        case 1:
+        case 2:
+            return 1;
+        case 3:
+            return [self getHidenWith:0]==YES?0:1;
+        case 4:
+            return self.rowCountArray.count==1?[[self.rowCountArray objectAtIndex:0]count]:4;
+        case 5:
+            return self.rowCountArray.count==2?[[self.rowCountArray objectAtIndex:1]count]:4;
+    }
+    
+    return [[self.rowCountArray objectAtIndex:section-4] count];
+}
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView{
+   
+    return self.Section;
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
+    PartModel *model;
+    switch (indexPath.section) {
+        case 0:{
+            FlowerShopCell *cell=[collectionView dequeueReusableCellWithReuseIdentifier:@"FlowerShopCell" forIndexPath:indexPath];
+            cell.backgroundColor=[UIColor redColor];
+            cell.view.delegate=self;
+            model=[[self getTempleData:BannerPictureStatus] lastObject];
+            cell.model=model;
+            return cell;
+        }
+        case 1:{
+            FlowerShopSectionTwoCell *cell=[collectionView dequeueReusableCellWithReuseIdentifier:@"FlowerShopSectionTwoCell" forIndexPath:indexPath];
+             __weak typeof(self) wSelf = self;
+            cell.block=^{
+                PartModel *model=[[wSelf getTempleData:shopInfoStatus] lastObject];
+                [wSelf saveShopInfoModel:model];
+            };
+            return cell;
+        }
+        case 2:{
+            FlowerShopLunBoCell *cell=[collectionView dequeueReusableCellWithReuseIdentifier:@"FlowerShopLunBoCell" forIndexPath:indexPath];
+            cell.view.delegate=self;
+            model=[[self getTempleData:hotStatus] lastObject];
+            cell.model=model;
+            return cell;
+        
+        }
+        case 3:{
+            FlowerHongBaoCell *cell=[collectionView dequeueReusableCellWithReuseIdentifier:@"FlowerHongBaoCell" forIndexPath:indexPath];
+            cell.model = [self.activityArr firstObject];;
+            cell.cellType=1;
+            cell.jView.tag = 103;
+            cell.jView.delegate=self;
+            return cell;
+        }
+
+    }
+    ECProductorCell *cell=[collectionView dequeueReusableCellWithReuseIdentifier:@"ECProductorCell" forIndexPath:indexPath];
+    return cell;
+}
+
+#pragma mark-CollectionViewDelegate
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+    switch (indexPath.section) {
+        case 0:
+            return CGSizeMake(KScreenWidth, FlowerShopCellHeight);
+        case 1:
+             return CGSizeMake(KScreenWidth, FlowerShopSectionTwoCellHeight);
+        case 2:
+            return CGSizeMake(KScreenWidth, FlowerShopLunBoCellHeight);
+        case 3:
+            return CGSizeMake(KScreenWidth, FlowerHongBaoCellHeight);
+    }
+ return CGSizeMake((KScreenWidth-flowerShopSpace)/2.0,ECProductorCellHeight);
+
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section{
+    if (section==self.Section-1) {
+        return CGSizeMake(KScreenWidth, 50);
+    }
+    return CGSizeZero;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section{
+    if (section!=0&&section!=1&&section!=3) {
+        return CGSizeMake(KScreenWidth, 40);
+    }
+    return CGSizeZero;
+}
+- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section{
+    if (section==self.Section-1) {
+        return UIEdgeInsetsMake(0, 0, 20, 0);
+    }
+    if (section==3) {
+        if ([self getHidenWith:0]==YES) {
+            return UIEdgeInsetsMake(0, 0, 0, 0);
+        }
+    }
+    return UIEdgeInsetsMake(0, 0, 15, 0);
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section{
+    if (section>=4) {
+        return flowerShopSpace;
+    }
+    return 0;
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section{
+    if (section>=4) {
+        return flowerShopSpace;
+    }
+    return 0;
+}
+
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath{
+    CustomCollectionHeader *head=nil;
+    if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
+        head =[collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"head" forIndexPath:indexPath];
+        head.backgroundColor=[UIColor whiteColor];
+        head.jview.delegate=self;
+    }else{
+        UICollectionReusableView *foot=[collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"foot" forIndexPath:indexPath];
+        [foot addSubview:self.saveV];
+        return foot;
+        
+    }
+    NSString *title=@"你好啊";
+    head.titlelab.text=title;
+    if (indexPath.section!=2) {
+        head.jview.hidden=NO;
+    }else{
+        head.jview.hidden=YES;
+    }
+   head.jview.tag=indexPath.section+100;
+    return head;
+}
+
+#pragma mark-JMViewDelegate
+-(void)userDidSelectIndex:(NSInteger)index inView:(UIView*)view data:(id)data{
+    
+}
+
+- (void)userDidSelectTitle:(NSString *)title atIndex:(NSInteger)index inView:(UIView *)view{
+    NSLog(@"view.tag:%ld",view.tag);
+    JMView* jView = (JMView*)view;
+    __weak typeof(self) wSelf = self;
+    switch (view.tag) {
+        case 100://更换门头
+        {
+            ChangeDoorImageVC* vc = [[ChangeDoorImageVC alloc]initWithBlock:^(PartModel *model, BOOL isNew) {
+                [wSelf setTempleData:@[model] isNew:isNew];
+                [wSelf.myCo reloadData];
+            }];
+            
+            vc.model = [[self getTempleData:BannerPictureStatus] lastObject];
+            [self.navigationController pushViewController:vc animated:YES];
+            
+        }
+            break;
+        case 102:
+        {
+            switch (index) {
+                case 0:{//轮播图
+                    LunBoEditeVC* vc = [[LunBoEditeVC alloc] initWithBlock:^(PartModel *model, BOOL isNew) {
+                        [wSelf setTempleData:@[model] isNew:isNew];
+                        [wSelf.myCo reloadData];
+                    }];
+                    vc.model = [[self getTempleData: hotStatus] lastObject];
+                    vc.modelNo=FlowerShop;
+                    vc.modelCode=ReMTJ;
+                    vc.modelName=@"热们推荐";
+                    [self.navigationController pushViewController:vc animated:YES];
+                
+                }
+                    break;
+                case 1:{//新增活动
+                    if ([(TemplateModel*)[[[(PartModel*)jView.prams templateModelnameDate] date] lastObject] id] == nil) {
+                        [self settingHiden:jView.prams];
+                        return;
+                    }
+                    [self settingHiden:jView.prams];
+                    
+                    [self requestChangeShowStatu:YES data:jView.prams callBack:^{
+                        
+                        //                [self settingHiden:jView.prams];
+                    }];
+                    
+                }
+                    break;
+                default:{
+                
+                
+                }
+                    break;
+            }
+            
+        }
+            break;
+            
+        case 103:
+        {
+            switch (index) {
+                    
+                case 0:{
+                    
+                    EditHongBaoVC* vc = [[EditHongBaoVC alloc]initWithBlock:^(PartModel *model, BOOL isNew) {
+                        [wSelf setTempleData:@[model] isNew:isNew];
+                        [wSelf.myCo reloadData];
+                    }];
+                    vc.templeId = self.type;
+                    vc.model = jView.prams;
+                    vc.isEdite=YES;
+                    vc.models = [self getTempleData:FlowerShopHongBaoStatus];
+                    [self.navigationController pushViewController:vc animated:YES];
+                
+                }
+                    break;
+                    
+                case 1:{  //编辑
+                    if ([(TemplateModel*)[[[(PartModel*)jView.prams templateModelnameDate] date] lastObject] id] == nil) {
+                        [self settingHiden:jView.prams];
+                        return;
+                    }
+                    
+                    [self settingHiden:jView.prams];
+                    [self requestChangeShowStatu:NO data:jView.prams callBack:^{
+                        
+                        //                        [self settingHiden:jView.prams];
+                    }];
+                    
+                }
+                    break;
+                    
+                    
+            default:{//删除
+             
+        }
+            break;
+            }
+            break;
+   
+        default:{
+            switch (index) {
+                case 1:{//删除
+                    [self deleteData:view.tag-104];
+                }
+                    break;
+                    
+                case 2:{//新增楼层
+                    WZ_AddNewFloorVCViewController *NewFloorVC = [[WZ_AddNewFloorVCViewController alloc] initWithNibName:@"WZ_AddNewFloorVCViewController" bundle:nil];
+                    [self.navigationController pushViewController:NewFloorVC animated:YES];
+                    
+                }
+                    break;
+                default:{//编辑
+                    
+                }
+                    break;
+        
+            }
+            
+        }
+            break;
+        }
+    }
+    
+}
+
+#pragma mark-setterORgetter
+
+- (UICollectionView *)myCo{
+    if(!_myCo){
+        UICollectionViewFlowLayout *layout=[[UICollectionViewFlowLayout alloc]init];
+        _myCo=[[UICollectionView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, KScreenHeight-NavigationH) collectionViewLayout:layout];
+        _myCo.backgroundColor=[UIColor whiteColor];
+        [_myCo registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
+        [_myCo registerClass:[FlowerShopCell class] forCellWithReuseIdentifier:@"FlowerShopCell"];
+        [_myCo registerClass:[FlowerShopSectionTwoCell class] forCellWithReuseIdentifier:@"FlowerShopSectionTwoCell"];
+        [_myCo registerClass:[FlowerShopLunBoCell class] forCellWithReuseIdentifier:@"FlowerShopLunBoCell"];
+        [_myCo registerClass:[ECProductorCell  class] forCellWithReuseIdentifier:@"ECProductorCell"];
+        [_myCo registerClass:[FlowerHongBaoCell class] forCellWithReuseIdentifier:@"FlowerHongBaoCell"];
+        [_myCo registerClass:[CustomCollectionHeader class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"head"];
+        [_myCo registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"foot"];
+        _myCo.backgroundColor=[UIColor colorWithHexString:@"#f5f4f9"];
+        _myCo.delegate=self;
+        _myCo.dataSource=self;
+        [self.view addSubview:_myCo];
+    
+    }
+    return _myCo;
+}
+
+- (UIView *)saveV{
+    if (!_saveV) {
+        _saveV=[[UIView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 50)];
+        UIButton *saveBtn=[UIButton buttonWithType:UIButtonTypeSystem];
+        saveBtn.frame=CGRectMake(0, 0, KScreenWidth/2.0, 44);
+        [saveBtn setBackgroundColor:[UIColor colorWithHexString:@"#01aaef"]];
+        saveBtn.titleLabel.font=[UIFont systemFontOfSize:17];
+        [saveBtn setTitle:@"保存" forState:UIControlStateNormal];
+        [saveBtn setTitleColor:[UIColor colorWithHexString:@"#FFFFFF"] forState:UIControlStateNormal];
+        [saveBtn addTarget:self action:@selector(saveTemp:) forControlEvents:UIControlEventTouchUpInside];
+        [_saveV addSubview:saveBtn];
+        UIButton *previewBtn=[UIButton buttonWithType:UIButtonTypeSystem];
+        [previewBtn setBackgroundColor:[UIColor whiteColor]];
+        previewBtn.frame=CGRectMake(KScreenWidth/2.0, 0, KScreenWidth/2.0, 44);
+        previewBtn.titleLabel.font=[UIFont systemFontOfSize:17];
+        [previewBtn setTitle:@"预览" forState:UIControlStateNormal];
+        [previewBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [previewBtn addTarget:self action:@selector(previewTemp:) forControlEvents:UIControlEventTouchUpInside];
+        [_saveV addSubview:previewBtn];
+    }
+    return _saveV;
+}
+
+- (void)setDataSource:(SearPartData *)dataSource{
+    _dataSource = dataSource;
+    
+    //红包
+    if (!_activityArr) {
+        _activityArr = [NSMutableArray array];
+    }else{
+        [self.activityArr removeAllObjects];
+    }
+    
+    self.activityArr = [self getTempleData: FlowerShopHongBaoStatus];
+    if (self.activityArr.count == 0) {
+        
+        PartModel*model = [[PartModel alloc]init];
+        model.storeId = NoNullStr(AccountInfo.storeId, @"");
+        model.templateModelnameCode = QiangHB;
+        TemplateModelData* data = [[TemplateModelData alloc]init];
+        TemplateModel* item = [[TemplateModel alloc]init];
+        data.date = @[item];
+        model.templateModelnameDate = data;
+        [self.activityArr addObject:model];
+    }
+    [dataSource.data enumerateObjectsUsingBlock:^(PartModel  * obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//        if ([obj.templateModelnameCode isEqualToString:LunBT]) {
+//            [self.sectionHTitleArr replaceObjectAtIndex:2 withObject:obj.templateModelname];
+//        }
+//        if ([obj.templateModelnameCode isEqualToString:LouCE]) {
+//            [self.sectionHTitleArr replaceObjectAtIndex:5 withObject:obj.templateModelname];
+//        }
+//        if ([obj.templateModelnameCode isEqualToString:LouCY]) {
+//            [self.sectionHTitleArr replaceObjectAtIndex:4 withObject:obj.templateModelname];
+//        }
+    }];
+    
+}
+
+- (NSMutableArray *)rowCountArray{
+    if (!_rowCountArray) {
+        _rowCountArray=[NSMutableArray array];
+    }
+    return _rowCountArray;
+}
+
+- (void)dealloc{
+
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

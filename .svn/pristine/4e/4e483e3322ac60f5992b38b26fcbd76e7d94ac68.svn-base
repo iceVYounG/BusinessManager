@@ -1,0 +1,13 @@
+//
+//  HouseWeiZhanVC.h
+//  BusinessManager
+//
+//  Created by Niuyp on 16/8/3.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanBaseController.h"
+
+@interface HouseWeiZhanVC : WeiZhanBaseController
+
+@end

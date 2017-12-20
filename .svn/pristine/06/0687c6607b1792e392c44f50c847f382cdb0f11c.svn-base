@@ -1,0 +1,842 @@
+//
+//  GiveVipCardView.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/26.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "VipManageView.h"
+#import "AppDelegate.h"
+#import "UIScrollView+EmptyDataSet.h"
+#import "BMSingleLineView.h"
+
+//会员类型
+typedef NS_ENUM(NSInteger, CardType) {
+    CardType_Chuzhika = 1,
+    CardType_Youhuika
+};
+
+//数据降序排列依据
+typedef NS_ENUM(NSInteger, DescType) {
+    DescType_CreatTime = 1,
+    DescType_Discount
+};
+
+//那个tableVIew
+typedef NS_ENUM(NSInteger, TableViewType) {
+    TableViewType_Chuzhika = 1,
+    TableViewType_Youhuika
+};
+
+@interface VipManageView ()<UIScrollViewDelegate,UITableViewDataSource,UITableViewDelegate, DZNEmptyDataSetDelegate, DZNEmptyDataSetSource>
+
+@property (nonatomic, strong) UIButton *sortButton;
+@property (nonatomic, strong) UIView *sortView;
+@property (nonatomic, strong) UIView *sortBGView;   //灰色半透明遮罩
+@property (nonatomic, strong) UIImageView *chooseDiscountSortImage;
+@property (nonatomic, strong) UIImageView *chooseBecomeVipDateImage;
+@property (nonatomic, strong) UIButton *becomeVipDateButton;
+@property (nonatomic, strong) UIButton *discountSortButton;
+@property (nonatomic, strong) UIButton *showSavingCardVip;
+@property (nonatomic, strong) UIButton *showCouponCardVip;
+@property (nonatomic, strong) UIScrollView *scrollView;
+@property (nonatomic, strong) UITableView *savingCardTableView;
+@property (nonatomic, strong) UITableView *couponCardTableView;
+
+@property (nonatomic, strong) NSMutableArray *chuZhiKa_dataArry; //储值卡数据源
+@property (nonatomic, strong) NSMutableArray *youHuiKa_dataArry;//优惠卡数据源
+
+@property (nonatomic, assign) NSInteger CHKpageIndex; //储值卡请求页码
+@property (nonatomic, assign) NSInteger YHKpageIndex; //优惠卡请求页码
+
+@property (nonatomic, assign) DescType descTypeSelected;    //升降序，打折查询
+
+@property (nonatomic, assign) BOOL isConnected; //是否联网
+@property (nonatomic, assign) BOOL whichTableVIewShow;//现在显示的是哪个tableView
+
+@end
+
+@implementation VipManageView
+
+- (id)init{
+    self = [super init];
+    if (self) {
+        self.backgroundColor = [UIColor colorWithHexString:@"f6f5fa"];
+        [self setUI];
+    }
+    return self;
+}
+
+- (void)setUI{
+    UIView *topWhiteBackgroundView = [[UIView alloc]init];
+    topWhiteBackgroundView.backgroundColor = [UIColor whiteColor];
+    topWhiteBackgroundView.layer.borderWidth = 1;
+    topWhiteBackgroundView.layer.borderColor = [UIColor colorWithHexString:@"dadada"].CGColor;
+    [self addSubview:topWhiteBackgroundView];
+    [topWhiteBackgroundView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.equalTo(self);
+        make.height.mas_equalTo(@44);
+        make.top.equalTo(self);
+    }];
+    
+    _sortButton = [[UIButton alloc]init];
+    _sortButton.backgroundColor = [UIColor clearColor];
+    _sortButton.titleLabel.font = [UIFont systemFontOfSize:14];
+    [_sortButton setTitle:@"按成为会员时间降序▼" forState:UIControlStateNormal];
+    [_sortButton setTitleColor:[UIColor colorWithHexString:@"00aaee"] forState:UIControlStateNormal];
+    [_sortButton addTarget:self action:@selector(clickSortButton:) forControlEvents:UIControlEventTouchUpInside];
+    _sortButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+    [topWhiteBackgroundView addSubview:_sortButton];
+    [_sortButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(topWhiteBackgroundView).offset(15);
+        make.top.bottom.equalTo(topWhiteBackgroundView);
+        make.width.mas_equalTo(@140);
+    }];
+    
+    UIButton *giveVipCard = [[UIButton alloc]init];
+    giveVipCard.backgroundColor = [UIColor colorWithHexString:@"f1594b"];
+    [giveVipCard setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [giveVipCard setTitle:@"发放会员卡" forState:UIControlStateNormal];
+    giveVipCard.layer.cornerRadius = 4;
+    giveVipCard.titleLabel.font = [UIFont systemFontOfSize:13];
+    [giveVipCard addTarget:self action:@selector(clickGiveCardButton) forControlEvents:UIControlEventTouchUpInside];
+    [topWhiteBackgroundView addSubview:giveVipCard];
+    [giveVipCard mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(84, 28));
+        make.right.equalTo(topWhiteBackgroundView).offset(-15);
+        make.centerY.equalTo(topWhiteBackgroundView);
+    }];
+    
+    _showSavingCardVip = [[UIButton alloc]init];
+    [_showSavingCardVip setTitle:@"储值卡会员" forState:UIControlStateNormal];
+    [_showSavingCardVip setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    _showSavingCardVip.titleLabel.font = [UIFont systemFontOfSize:14];
+    _showSavingCardVip.backgroundColor = [UIColor colorWithHexString:@"5b5d69"];
+    _showSavingCardVip.selected = YES;
+    [_showSavingCardVip addTarget:self action:@selector(clickShowCardTypeButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:_showSavingCardVip];
+    [_showSavingCardVip mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self);
+        make.right.equalTo(self.mas_centerX);
+        make.top.equalTo(topWhiteBackgroundView.mas_bottom).offset(12);
+        make.height.mas_equalTo(@44);
+    }];
+    
+    _showCouponCardVip = [[UIButton alloc]init];
+    [_showCouponCardVip setTitle:@"优惠卡会员" forState:UIControlStateNormal];
+    [_showCouponCardVip setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    _showCouponCardVip.titleLabel.font = [UIFont systemFontOfSize:14];
+    _showCouponCardVip.backgroundColor = [UIColor colorWithHexString:@"eeeef0"];
+    [_showCouponCardVip addTarget:self action:@selector(clickShowCardTypeButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:_showCouponCardVip];
+    [_showCouponCardVip mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(self);
+        make.left.equalTo(self.mas_centerX);
+        make.top.equalTo(topWhiteBackgroundView.mas_bottom).offset(12);
+        make.height.mas_equalTo(@44);
+    }];
+    
+    _scrollView = [[UIScrollView alloc]init];
+    _scrollView.backgroundColor = [UIColor whiteColor];
+    _scrollView.pagingEnabled = YES;
+    _scrollView.contentSize = CGSizeMake(SCREEN_SIZE.width * 2, SCREEN_SIZE.height - 164);
+    _scrollView.bounces = NO;
+    _scrollView.showsHorizontalScrollIndicator = NO;
+    _scrollView.delegate = self;
+    [self addSubview:_scrollView];
+    [_scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.equalTo(self);
+        make.top.equalTo(_showSavingCardVip.mas_bottom);
+    }];
+    
+    [self setTableHeadView];
+    
+    
+    _savingCardTableView = [[UITableView alloc]init];
+    _savingCardTableView.dataSource = self;
+    _savingCardTableView.delegate = self;
+    _savingCardTableView.emptyDataSetDelegate = self;
+    _savingCardTableView.emptyDataSetSource = self;
+    _savingCardTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    //添加头部刷新
+    WS(weakSelf);
+    _savingCardTableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        weakSelf.CHKpageIndex = 1;
+        [weakSelf requestVipListData:self.CHKpageIndex cardType:CardType_Chuzhika descType:self.descTypeSelected andTBType:TableViewType_Chuzhika];
+    }];
+    //添加尾部加载跟多
+    _savingCardTableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+        weakSelf.CHKpageIndex ++;
+        [weakSelf requestVipListData:self.CHKpageIndex cardType:CardType_Chuzhika descType:self.descTypeSelected andTBType:TableViewType_Chuzhika];
+    }];
+    
+    [_scrollView addSubview:_savingCardTableView];
+    [_savingCardTableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(_scrollView.mas_left);
+        make.top.equalTo(_scrollView).offset(48);
+        make.height.mas_equalTo(SCREEN_SIZE.height - 164 - 48);
+        make.width.mas_equalTo(SCREEN_SIZE.width);
+    }];
+    
+    _couponCardTableView = [[UITableView alloc]init];
+    _couponCardTableView.dataSource = self;
+    _couponCardTableView.delegate = self;
+    _couponCardTableView.emptyDataSetDelegate = self;
+    _couponCardTableView.emptyDataSetSource = self;
+    _couponCardTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    //添加头部刷新
+    _couponCardTableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        weakSelf.YHKpageIndex = 1;
+        [weakSelf requestVipListData:self.YHKpageIndex cardType:CardType_Youhuika descType:self.descTypeSelected andTBType:TableViewType_Youhuika];
+    }];
+    //添加尾部加载更多
+    _couponCardTableView.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+        weakSelf.YHKpageIndex ++;
+        [weakSelf requestVipListData:self.YHKpageIndex cardType:CardType_Youhuika descType:self.descTypeSelected andTBType:TableViewType_Youhuika];
+    }];
+    
+    [_scrollView addSubview:_couponCardTableView];
+    [_couponCardTableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(_savingCardTableView.mas_right);
+        make.top.equalTo(_savingCardTableView);
+        make.height.mas_equalTo(SCREEN_SIZE.height - 164 - 48);
+        make.width.mas_equalTo(SCREEN_SIZE.width);
+    }];
+    
+//    UIView *view1 = [[UIView alloc]init];
+//    view1.backgroundColor = [UIColor redColor];
+//    [_scrollView addSubview:view1];
+//    [view1 mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.equalTo(_scrollView.mas_left);
+//        make.top.equalTo(_scrollView);
+//        make.height.mas_equalTo(_scrollView.mas_height);
+//        make.width.mas_equalTo(SCREEN_SIZE.width);
+//    }];
+//    
+//    UIView *view2 = [[UIView alloc]init];
+//    view2.backgroundColor = [UIColor blackColor];
+//    [_scrollView addSubview:view2];
+//    [view2 mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.top.equalTo(_scrollView);
+//        make.height.mas_equalTo(_scrollView);
+//        make.width.mas_equalTo(SCREEN_SIZE.width);
+//        make.left.equalTo(view1.mas_right);
+//    }];
+    
+    //
+    self.descTypeSelected = DescType_CreatTime;
+    self.CHKpageIndex = 1;
+    self.YHKpageIndex = 1;
+    self.isConnected = YES;
+    //请求数据
+    [self requestVipListData:self.CHKpageIndex cardType:CardType_Chuzhika descType:DescType_CreatTime andTBType:TableViewType_Chuzhika];   //储值卡
+    [self requestVipListData:self.YHKpageIndex cardType:CardType_Youhuika descType:DescType_CreatTime andTBType:TableViewType_Youhuika];   //优惠卡
+    //
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshMemberListViewData:) name:@"VIPCARD_REFRESHMEMBERLIST" object:nil];
+    
+}
+
+- (void)setTableHeadView{
+    UIView *tableViewHeadView = [[UIView alloc]init];
+    tableViewHeadView.backgroundColor = [UIColor whiteColor];
+    [_scrollView addSubview:tableViewHeadView];
+    [tableViewHeadView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(_scrollView);
+        make.left.equalTo(_scrollView);
+        make.height.mas_equalTo(@48);
+        make.width.mas_equalTo(SCREEN_SIZE.width * 2);
+    }];
+    //lingView
+    UIView *lineView = [[UIView alloc] init];
+    lineView.backgroundColor = [UIColor colorWithHexString:@"#e5e5e5"];
+    [tableViewHeadView addSubview:lineView];
+    [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.equalTo(tableViewHeadView);
+        make.bottom.equalTo(tableViewHeadView);
+        make.height.mas_lessThanOrEqualTo(@1);
+    }];
+    
+    UILabel *userPhoneNumberLabel1 = [[UILabel alloc]init];
+    userPhoneNumberLabel1.text = @"用户手机号";
+    userPhoneNumberLabel1.textColor = [UIColor colorWithHexString:@"333333"];
+    userPhoneNumberLabel1.font = [UIFont fontWithName:@"Helvetica-Bold" size:13];
+    userPhoneNumberLabel1.textAlignment = NSTextAlignmentCenter;
+    [tableViewHeadView addSubview:userPhoneNumberLabel1];
+    [userPhoneNumberLabel1 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(tableViewHeadView).offset(15);
+        make.top.equalTo(tableViewHeadView);
+        make.bottom.equalTo(lineView.mas_top);
+        make.width.mas_equalTo(@108);
+    }];
+    
+    UILabel *vipCardNameLabel1 = [[UILabel alloc]init];
+    vipCardNameLabel1.text = @"会员卡名称";
+    vipCardNameLabel1.textColor = [UIColor colorWithHexString:@"333333"];
+    vipCardNameLabel1.font = [UIFont fontWithName:@"Helvetica-Bold" size:13];
+    vipCardNameLabel1.textAlignment = NSTextAlignmentCenter;
+    [tableViewHeadView addSubview:vipCardNameLabel1];
+    [vipCardNameLabel1 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(userPhoneNumberLabel1.mas_right);
+        make.top.equalTo(tableViewHeadView);
+        make.bottom.equalTo(lineView.mas_top);
+        make.width.mas_equalTo(@108);
+    }];
+    
+//    UILabel *balanceLabel = [[UILabel alloc] init];
+//    balanceLabel.text = @"会员卡余额";
+//    balanceLabel.textColor = [UIColor colorWithHexString:@"#333333"];
+//    balanceLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:13];
+//    balanceLabel.textAlignment = NSTextAlignmentCenter;
+//    [tableViewHeadView addSubview:balanceLabel];
+//    [balanceLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.equalTo(vipCardNameLabel1.mas_right);
+//        make.top.equalTo(tableViewHeadView);
+//        make.bottom.equalTo(lineView.mas_top);
+//        make.width.mas_equalTo(@79);
+//    }];
+    
+    UILabel *discountLabel1 = [[UILabel alloc]init];
+    discountLabel1.text = @"折扣";
+    discountLabel1.textColor = [UIColor colorWithHexString:@"333333"];
+    discountLabel1.font = [UIFont fontWithName:@"Helvetica-Bold" size:13];
+    discountLabel1.textAlignment = NSTextAlignmentCenter;
+    [tableViewHeadView addSubview:discountLabel1];
+    [discountLabel1 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(vipCardNameLabel1.mas_right);
+        make.top.equalTo(tableViewHeadView);
+        make.bottom.equalTo(lineView.mas_top);
+        make.width.mas_equalTo(@86);
+    }];
+    
+    UILabel *userPhoneNumberLabel2 = [[UILabel alloc]init];
+    userPhoneNumberLabel2.text = @"用户手机号";
+    userPhoneNumberLabel2.textColor = [UIColor colorWithHexString:@"333333"];
+    userPhoneNumberLabel2.font = [UIFont fontWithName:@"Helvetica-Bold" size:13];
+    userPhoneNumberLabel2.textAlignment = NSTextAlignmentCenter;
+    [tableViewHeadView addSubview:userPhoneNumberLabel2];
+    [userPhoneNumberLabel2 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(tableViewHeadView.mas_centerX).offset(15);
+        make.top.equalTo(tableViewHeadView);
+        make.bottom.equalTo(lineView.mas_top);
+        make.width.mas_equalTo(@108);
+    }];
+    
+    UILabel *vipCardNameLabel2 = [[UILabel alloc]init];
+    vipCardNameLabel2.text = @"会员卡名称";
+    vipCardNameLabel2.textColor = [UIColor blackColor];
+    vipCardNameLabel2.textColor = [UIColor colorWithHexString:@"333333"];
+    vipCardNameLabel2.font = [UIFont fontWithName:@"Helvetica-Bold" size:13];
+    vipCardNameLabel2.textAlignment = NSTextAlignmentCenter;
+    [tableViewHeadView addSubview:vipCardNameLabel2];
+    [vipCardNameLabel2 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(userPhoneNumberLabel2.mas_right);
+        make.top.equalTo(tableViewHeadView);
+        make.bottom.equalTo(lineView.mas_top);
+        make.width.mas_equalTo(@108);
+    }];
+    
+    UILabel *discountLabel2 = [[UILabel alloc]init];
+    discountLabel2.text = @"折扣";
+    discountLabel2.textColor = [UIColor blackColor];
+    discountLabel2.textColor = [UIColor colorWithHexString:@"333333"];
+    discountLabel2.font = [UIFont fontWithName:@"Helvetica-Bold" size:13];
+    discountLabel2.textAlignment = NSTextAlignmentCenter;
+    [tableViewHeadView addSubview:discountLabel2];
+    [discountLabel2 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(vipCardNameLabel2.mas_right);
+        make.top.equalTo(tableViewHeadView);
+        make.bottom.equalTo(lineView.mas_top);
+        make.width.mas_equalTo(@86);
+    }];
+}
+
+- (void)setSortUIWithButtonName:(NSString *)sortButtonTittle{
+    if (_sortView && _sortView.hidden == NO){
+        _sortView.hidden = YES;
+        _sortBGView.hidden = YES;
+        if ([sortButtonTittle hasSuffix:@"▼"]) {
+            return;
+        }
+        if ([sortButtonTittle hasPrefix:@"按成为会员时间降序"]) {
+            [_sortButton setTitle:[NSString stringWithFormat:@"%@▼",sortButtonTittle] forState:UIControlStateNormal];
+            self.descTypeSelected = DescType_CreatTime;
+            
+        }else{
+            [_sortButton setTitle:[NSString stringWithFormat:@"%@▼",sortButtonTittle] forState:UIControlStateNormal];
+            self.descTypeSelected = DescType_Discount;
+            
+        }
+        
+        if (_showSavingCardVip.selected == YES) {
+            self.CHKpageIndex = 1;
+            [self requestVipListData:self.CHKpageIndex cardType:CardType_Chuzhika descType:self.descTypeSelected andTBType:TableViewType_Chuzhika];
+        }else {
+            self.YHKpageIndex = 1;
+            [self requestVipListData:self.YHKpageIndex cardType:CardType_Youhuika descType:self.descTypeSelected andTBType:TableViewType_Youhuika];
+        }
+        
+    }else if(_sortView && _sortView.hidden == YES){
+        _sortView.hidden = NO;
+        _sortBGView.hidden = NO;
+        if ([sortButtonTittle hasPrefix:@"按成为会员时间降序"]) {
+            [_becomeVipDateButton setTitleColor:[UIColor colorWithHexString:@"00aaee"] forState:UIControlStateNormal];
+            _chooseBecomeVipDateImage.hidden = NO;
+            [_discountSortButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+            _chooseDiscountSortImage.hidden = YES;
+        }else{
+            [_discountSortButton setTitleColor:[UIColor colorWithHexString:@"00aaee"] forState:UIControlStateNormal];
+            _chooseDiscountSortImage.hidden = NO;
+            [_becomeVipDateButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+            _chooseBecomeVipDateImage.hidden = YES;
+        }
+    }else{
+        _sortView = [[UIView alloc]init];
+        _sortView.backgroundColor = [UIColor whiteColor];
+        [self addSubview:_sortView];
+        [_sortView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self).offset(44);
+            make.left.right.equalTo(self);
+            make.height.mas_equalTo(@89);
+        }];
+        _sortBGView = [[UIView alloc] init];
+        _sortBGView.backgroundColor = [UIColor colorWithHexString:@"#000000" alpha:0.6];
+        UITapGestureRecognizer *sortTapped = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(sortTappedAction)];
+        [_sortBGView addGestureRecognizer:sortTapped];
+        [self addSubview:_sortBGView];
+        [_sortBGView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(_sortView.mas_bottom);
+            make.left.right.equalTo(self);
+            make.bottom.equalTo(self);
+        }];
+        
+        _becomeVipDateButton = [[UIButton alloc]init];
+        _becomeVipDateButton.backgroundColor = [UIColor clearColor];
+        [_becomeVipDateButton setTitle:@"按成为会员时间降序" forState:UIControlStateNormal];
+        _becomeVipDateButton.titleLabel.font = [UIFont systemFontOfSize:14];
+        [_becomeVipDateButton setTitleColor:[UIColor colorWithHexString:@"00aaee"] forState:UIControlStateNormal];
+        _becomeVipDateButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+        [_becomeVipDateButton addTarget:self action:@selector(clickSortButton:) forControlEvents:UIControlEventTouchUpInside];
+        [_sortView addSubview:_becomeVipDateButton];
+        [_becomeVipDateButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(@44);
+            make.right.top.equalTo(_sortView);
+            make.left.equalTo(_sortView).offset(15);
+        }];
+        
+        _chooseBecomeVipDateImage = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"VipCardManager_ChoseNow"]];
+        [_becomeVipDateButton addSubview:_chooseBecomeVipDateImage];
+        [_chooseBecomeVipDateImage mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_equalTo(CGSizeMake(18, 18));
+            make.right.equalTo(_becomeVipDateButton).offset(-15);
+            make.centerY.equalTo(_becomeVipDateButton);
+        }];
+        //单线
+        UIView *lineView1 = [[UIView alloc]init];
+        lineView1.backgroundColor = [UIColor colorWithHexString:@"#dadada"];
+//        lineView1.lineColor = [UIColor colorWithHexString:@"#dadada"];
+        [_sortView addSubview:lineView1];
+        [lineView1 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(@1);
+            make.left.right.equalTo(_sortView);
+            make.top.equalTo(_becomeVipDateButton.mas_bottom);
+        }];
+        
+        _discountSortButton = [[UIButton alloc]init];
+        _discountSortButton.backgroundColor = [UIColor clearColor];
+        [_discountSortButton setTitle:@"按照折扣降序" forState:UIControlStateNormal];
+        _discountSortButton.titleLabel.font = [UIFont systemFontOfSize:14];
+        [_discountSortButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        _discountSortButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+        [_discountSortButton addTarget:self action:@selector(clickSortButton:) forControlEvents:UIControlEventTouchUpInside];
+        [_sortView addSubview:_discountSortButton];
+        [_discountSortButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(@44);
+            make.left.right.equalTo(_becomeVipDateButton);
+            make.top.equalTo(lineView1.mas_bottom);
+        }];
+        
+        _chooseDiscountSortImage = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"VipCardManager_ChoseNow"]];
+        _chooseDiscountSortImage.hidden = YES;
+        [_becomeVipDateButton addSubview:_chooseDiscountSortImage];
+        [_chooseDiscountSortImage mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_equalTo(CGSizeMake(18, 18));
+            make.right.equalTo(_becomeVipDateButton).offset(-15);
+            make.centerY.equalTo(_discountSortButton);
+        }];
+        //单线
+        UIView *lineView2 = [[UIView alloc]init];
+        lineView2.backgroundColor = [UIColor colorWithHexString:@"dadada"];
+//        lineView2.lineColor = [UIColor colorWithHexString:@"#dadada"];
+        [_sortView addSubview:lineView2];
+        [lineView2 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(@1);
+            make.left.right.equalTo(_sortView);
+            make.top.equalTo(_discountSortButton.mas_bottom);
+        }];
+    }
+}
+
+#pragma mark - 排序方法
+
+- (void)clickSortButton:(UIButton *)btn{
+    [self setSortUIWithButtonName:btn.titleLabel.text];
+}
+
+- (void)sortTappedAction {
+    CGRect oldFrame = self.sortBGView.frame;
+    CGRect newFrame = CGRectMake(oldFrame.origin.x, oldFrame.origin.y, oldFrame.size.width, 0);
+    [UIView animateWithDuration:0.2 animations:^{
+        [self.sortBGView setFrame:newFrame];
+    } completion:^(BOOL finished) {
+        self.sortBGView.hidden = YES;
+        self.sortView.hidden = YES;
+        [self.sortBGView setFrame:oldFrame];
+    }];
+}
+
+- (void)clickShowCardTypeButton:(UIButton *)button{
+    if (button == _showSavingCardVip) {
+        _showSavingCardVip.backgroundColor = [UIColor colorWithHexString:@"5b5d69"];
+        [_showSavingCardVip setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        _showSavingCardVip.selected = YES;
+        
+        [_showCouponCardVip setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        _showCouponCardVip.backgroundColor = [UIColor colorWithHexString:@"eeeef0"];
+        _showCouponCardVip.selected = NO;
+        [UIView animateWithDuration:0.5 animations:^{
+            _scrollView.contentOffset = CGPointMake(0, 0);
+        }];
+    }else{
+        _showCouponCardVip.backgroundColor = [UIColor colorWithHexString:@"5b5d69"];
+        [_showCouponCardVip setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        _showCouponCardVip.selected = YES;
+        
+        [_showSavingCardVip setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        _showSavingCardVip.backgroundColor = [UIColor colorWithHexString:@"eeeef0"];
+        _showSavingCardVip.selected = NO;
+        [UIView animateWithDuration:0.5 animations:^{
+            _scrollView.contentOffset = CGPointMake(SCREEN_SIZE.width, 0);
+        }];
+    }
+}
+
+#pragma mark - 方法会员卡方法
+
+- (void)clickGiveCardButton{
+    if ([self.delegate respondsToSelector:@selector(didClickGiveCardButton)]) {
+        [self.delegate didClickGiveCardButton];
+    }
+}
+
+
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
+    NSLog(@"%@",NSStringFromCGPoint(scrollView.contentOffset));
+    if ([scrollView isKindOfClass:[UITableView class]]) {
+        return;
+    }
+    
+    if (fabs(scrollView.contentOffset.x) >= SCREEN_SIZE.width) {
+        [self clickShowCardTypeButton:_showCouponCardVip];
+    }else if(fabs(scrollView.contentOffset.x) < SCREEN_SIZE.width){
+        [self clickShowCardTypeButton:_showSavingCardVip];
+    }
+}
+
+#pragma mark - UITAbleViewDelegate, DataSource
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    if ([tableView isEqual:self.savingCardTableView]) {
+        return self.chuZhiKa_dataArry.count;
+    }
+    return self.youHuiKa_dataArry.count;
+    
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    if ([tableView isEqual:self.savingCardTableView]) {
+        static NSString *cellID = @"cellID1";
+        VipManageViewTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellID];
+        if (cell == nil) {
+            cell = [[VipManageViewTableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
+        }
+        cell.model = [self.chuZhiKa_dataArry objectAtIndex:indexPath.row];
+        return cell;
+    }else {
+        static NSString *cellID = @"cellID1";
+        VipManageViewTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellID];
+        if (cell == nil) {
+            cell = [[VipManageViewTableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
+        }
+        cell.model = [self.youHuiKa_dataArry objectAtIndex:indexPath.row];
+        return cell;
+    }
+    
+}
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    if ([tableView isEqual:self.savingCardTableView]) {
+        if ([self.delegate conformsToProtocol:@protocol(VipManageViewDelegate)]
+            &&
+            [self.delegate respondsToSelector:@selector(didClickTableViewCellWithModel:)]) {
+            [self.delegate didClickTableViewCellWithModel:[self.chuZhiKa_dataArry objectAtIndex:indexPath.row]];
+        }
+    }else {
+        if ([self.delegate conformsToProtocol:@protocol(VipManageViewDelegate)]
+            &&
+            [self.delegate respondsToSelector:@selector(didClickTableViewCellWithModel:)]) {
+            [self.delegate didClickTableViewCellWithModel:[self.youHuiKa_dataArry objectAtIndex:indexPath.row]];
+        }
+    }
+
+    
+    
+}
+
+#pragma mark - notification Method - refresh
+- (void)refreshMemberListViewData:(NSNotification *)notifi {
+    NSString *name = notifi.name;
+    NSDictionary *userInfo = (NSDictionary *)notifi.userInfo;
+    CardType cardType = [[userInfo objectForKey:@"cardType"] integerValue];
+    if ([name isEqualToString:@"VIPCARD_REFRESHMEMBERLIST"]) {
+        if (cardType == CardType_Chuzhika) {
+            [self.savingCardTableView.mj_header beginRefreshing];
+            NSLog(@"-----储值卡 刷新啦------");
+        }else {
+            [self.couponCardTableView.mj_header beginRefreshing];
+            NSLog(@"-----优惠卡 刷新啦------");
+        }
+    }
+}
+
+#pragma mark - 请求
+- (void)requestVipListData:(NSInteger)pageIndex cardType:(CardType)cardType descType:(DescType)descType andTBType:(TableViewType)tableViewtype {
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+//    [params setObject:@"900000000077" forKey:@"storeId"];
+    [params setObject:@(cardType) forKey:@"cardType"];
+    [params setObject:@(descType) forKey:@"descType"];
+    [params setObject:@(pageIndex) forKey:@"page"];
+    [params setObject:@"12" forKey:@"pageSize"];
+    
+    UIWindow *windew = [[UIApplication sharedApplication].windows firstObject];
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:windew animated:YES];
+    hud.mode = MBProgressHUDModeIndeterminate;
+    hud.labelText = @"请稍等...";
+    [[MallNetworkEngine vipCardMGshare] requestNotEncodeWithDate:nil requestWithPath:API_VipCardManger_VIPList Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"------->>>:%@", dic);
+        [hud hide:YES];
+        self.isConnected = YES;
+        if (Succeed(dic)) {
+            NSArray *arr = [dic objectForKey:@"data"];
+            if (arr.count > 0) {
+                //下拉刷新
+                if (tableViewtype == TableViewType_Chuzhika) {
+                    if (self.CHKpageIndex == 1) {
+                        
+                        if (self.chuZhiKa_dataArry) {
+                            [self.chuZhiKa_dataArry removeAllObjects];
+                        }else {
+                            self.chuZhiKa_dataArry = [NSMutableArray array];
+                        }
+                        
+                    }
+                    for (NSDictionary *data in arr) {
+                        VipCardVipListModel *model = [VipCardVipListModel mj_objectWithKeyValues:data];
+                        [self.chuZhiKa_dataArry addObject:model];
+                    }
+                    [self.savingCardTableView reloadData];
+                    
+                    [self.savingCardTableView.mj_header endRefreshing];
+                    [self.savingCardTableView.mj_footer endRefreshing];
+                    
+                }else {
+                    if (self.YHKpageIndex == 1) {
+                        
+                        if (self.youHuiKa_dataArry) {
+                            [self.youHuiKa_dataArry removeAllObjects];
+                        }else {
+                            self.youHuiKa_dataArry = [NSMutableArray array];
+                        }
+                        
+                    }
+                    for (NSDictionary *data in arr) {
+                        VipCardVipListModel *model = [VipCardVipListModel mj_objectWithKeyValues:data];
+                        [self.youHuiKa_dataArry addObject:model];
+                    }
+                    
+                    [self.couponCardTableView reloadData];
+                    
+                    [self.couponCardTableView.mj_header endRefreshing];
+                    [self.couponCardTableView.mj_footer endRefreshing];
+                }
+                
+
+            }else {
+                if (tableViewtype == TableViewType_Chuzhika) {
+                    [self.savingCardTableView.mj_header endRefreshing];
+                    [self.savingCardTableView.mj_footer endRefreshingWithNoMoreData];
+                    
+                }else {
+                    [self.couponCardTableView.mj_header endRefreshing];
+                    [self.couponCardTableView.mj_footer endRefreshingWithNoMoreData];
+                    
+                }
+                
+                
+            }
+            
+        }else {
+            if (tableViewtype == TableViewType_Chuzhika) {
+                [self.savingCardTableView.mj_header endRefreshing];
+                [self.savingCardTableView.mj_footer endRefreshing];
+            }else {
+                [self.couponCardTableView.mj_header endRefreshing];
+                [self.couponCardTableView.mj_footer endRefreshing];
+            }
+            
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+            [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+            [SVProgressHUD showErrorWithStatus:@"请求失败,请稍后再试！"];
+        }
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        self.isConnected = NO;
+        
+        [hud hide:YES];
+        if (tableViewtype == TableViewType_Chuzhika) {
+            [self.savingCardTableView.mj_header endRefreshing];
+            [self.savingCardTableView.mj_footer endRefreshing];
+            [self.savingCardTableView reloadEmptyDataSet];
+        }else {
+            [self.couponCardTableView.mj_header endRefreshing];
+            [self.couponCardTableView.mj_footer endRefreshing];
+            [self.couponCardTableView reloadEmptyDataSet];
+        }
+        
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD showErrorWithStatus:@"服务器繁忙,请稍后再试！"];
+    
+    }];
+    
+}
+
+#pragma mark - EmptyDataSource, Delegate
+- (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView {
+    NSString *title = @"暂无会员卡记录！";
+    NSDictionary *attributes = @{NSFontAttributeName: [UIFont systemFontOfSize:14],
+                                 NSForegroundColorAttributeName: [UIColor lightGrayColor]};
+    NSAttributedString *aStr = [[NSAttributedString alloc] initWithString:title attributes:attributes];
+    
+    NSString *error = @"请检查网络设置！";
+    NSDictionary *ERAttributes = @{NSFontAttributeName: [UIFont systemFontOfSize:14],
+                                 NSForegroundColorAttributeName: [UIColor lightGrayColor]};
+    NSAttributedString *errorStr = [[NSAttributedString alloc] initWithString:error attributes:ERAttributes];
+    
+    if (self.isConnected) {
+        return aStr;
+    }
+    return errorStr;
+}
+
+
+@end
+
+#pragma mark - 优惠卡Cell
+
+@implementation VipManageViewTableViewCell
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        
+//        BMSingleLineView *lineView = [[BMSingleLineView alloc]init];
+//        lineView.backgroundColor = [UIColor colorWithHexString:@"#e5e5e5"];
+//        lineView.lineColor = [UIColor colorWithHexString:@"#e5e5e5"];
+//        [self addSubview:lineView];
+//        [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+//            make.height.mas_lessThanOrEqualTo(@1);
+//            make.left.equalTo(self);
+//            make.top.right.equalTo(self);
+//        }];
+        
+        BMSingleLineView *lineView2 = [[BMSingleLineView alloc]init];
+        lineView2.backgroundColor = [UIColor colorWithHexString:@"#e5e5e5"];
+        lineView2.lineColor = [UIColor colorWithHexString:@"#e5e5e5"];
+        [self addSubview:lineView2];
+        [lineView2 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_lessThanOrEqualTo(@1);
+            make.left.right.equalTo(self);
+            make.bottom.equalTo(self);
+        }];
+        
+        
+        self.userPhoneNumber = [[UILabel alloc]init];
+        self.userPhoneNumber.text = @"13024526515";
+        self.userPhoneNumber.textColor = [UIColor colorWithHexString:@"666666"];
+        self.userPhoneNumber.font = [UIFont systemFontOfSize:13];
+        self.userPhoneNumber.textAlignment = NSTextAlignmentCenter;
+        [self addSubview:self.userPhoneNumber];
+        [self.userPhoneNumber mas_makeConstraints:^(MASConstraintMaker *make) {
+//            make.top.equalTo(lineView.mas_bottom);
+            make.top.equalTo(self);
+            make.left.equalTo(self).offset(15);
+            make.bottom.equalTo(lineView2.mas_top);
+            make.width.mas_equalTo(@108);
+        }];
+        
+        self.vipCardName = [[UILabel alloc]init];
+        self.vipCardName.text = @"宽连钻石卡";
+        self.vipCardName.textColor = [UIColor colorWithHexString:@"666666"];
+        self.vipCardName.font = [UIFont systemFontOfSize:13];
+        self.vipCardName.textAlignment = NSTextAlignmentCenter;
+        [self addSubview:self.vipCardName];
+        [self.vipCardName mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.userPhoneNumber.mas_right);
+            make.bottom.equalTo(lineView2.mas_top);
+//            make.top.equalTo(lineView.mas_bottom);
+            make.top.equalTo(self);
+            make.width.mas_equalTo(@108);
+        }];
+        
+        self.discount = [[UILabel alloc]init];
+        self.discount.text = @"8.0";
+        self.discount.textColor = [UIColor colorWithHexString:@"666666"];
+        self.discount.font = [UIFont systemFontOfSize:11];
+        self.discount.textAlignment = NSTextAlignmentCenter;
+        [self addSubview:self.discount];
+        [self.discount mas_makeConstraints:^(MASConstraintMaker *make) {
+//            make.righ.equalTo(self.vipCardName.mas_right);
+            make.right.equalTo(self);
+            make.bottom.equalTo(lineView2.mas_top);
+//            make.top.equalTo(lineView.mas_bottom);
+            make.top.equalTo(self);
+            make.width.mas_equalTo(@90);
+        }];
+        
+        UIImageView *rightArrowImageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"VipManager_RightArrow"]];
+        [self addSubview:rightArrowImageView];
+        [rightArrowImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_equalTo(CGSizeMake(16, 16));
+            make.right.equalTo(self).offset(-15);
+            make.centerY.equalTo(self);
+        }];
+        
+        
+    }
+    return self;
+}
+
+- (void)setModel:(VipCardVipListModel *)model {
+    _model = model;
+    self.userPhoneNumber.text = model.USER_MOBILE;
+    self.vipCardName.text = model.CARD_NAME;
+    self.discount.text = [NSString stringWithFormat:@"%@折", model.DISCOUNT];
+    
+}
+
+@end

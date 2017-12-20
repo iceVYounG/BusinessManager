@@ -1,0 +1,23 @@
+//
+//  WatchGhostMainCell.m
+//  BusinessManager
+//
+//  Created by KL on 16/7/27.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WatchGhostMainCell.h"
+
+@implementation WatchGhostMainCell
+
+- (void)awakeFromNib {
+    // Initialization code
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

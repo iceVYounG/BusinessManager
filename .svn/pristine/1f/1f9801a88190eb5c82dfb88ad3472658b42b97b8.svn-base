@@ -1,0 +1,142 @@
+//
+//  WeiZhanModel.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanModel.h"
+
+@implementation WeiZhanModel
+
+@end
+
+@implementation PhotoImageModel
+
+
+@end
+
+@implementation MyWeiZhans
+
+
+- (id)init {
+    if (self = [super init]) {
+        
+        [MyWeiZhans mj_setupObjectClassInArray:^NSDictionary *{
+            
+             return @{@"data" : @"MyWeiZhanModel"};
+        }];
+    }
+    return self;
+}
+
+@end
+
+@implementation MyWeiZhanModel
+
++ (NSDictionary *)replacedKeyFromPropertyName{
+    return @{
+             @"wzId" : @"id"
+             };
+}
+
+@end
+
+@implementation SearPartData
+
+- (id)init {
+    if (self = [super init]) {
+        
+        [SearPartData mj_setupObjectClassInArray:^NSDictionary *{
+            
+            return @{@"data" : @"PartModel"};
+        }];
+    }
+    return self;
+}
++ (NSDictionary *)replacedKeyFromPropertyName{
+    return @{
+             @"temPlate" : @"template"
+             };
+}
+@end
+@implementation TemplateData
+
+@end
+
+@implementation PartModel
+
+@end
+
+
+@implementation TemplateModelData
+- (id)init {
+    if (self = [super init]) {
+        
+        [TemplateModelData mj_setupObjectClassInArray:^NSDictionary *{
+            
+            return @{@"date" : @"TemplateModel"};
+        }];
+    }
+    return self;
+}
+
+@end
+
+@implementation TemplateModel
+- (id)init {
+    if (self = [super init]) {
+        
+        [TemplateModel mj_setupObjectClassInArray:^NSDictionary *{
+            
+            return @{ @"images": @"ImagePathModel"};
+        }];
+    }
+    return self;
+}
+
++ (NSDictionary *)replacedKeyFromPropertyName{
+    return @{
+             @"tCode" : @"code"
+             };
+}
+
+@end
+
+@implementation ImagePathModel
+
+
+
+@end
+
+@implementation PramsArryModel
+
+- (id)init {
+    if (self = [super init]) {
+        
+        [PramsArryModel mj_setupObjectClassInArray:^NSDictionary *{
+            
+            return @{@"prams" : @"PartModel"};
+        }];
+    }
+    return self;
+}
+
+
+@end
+
+@implementation ImagePath
+
+
+@end
+
+@implementation ImageUpLoadBackModel
+
+
+@end
+
+@implementation ADImageModel
+
+
+@end

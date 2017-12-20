@@ -1,0 +1,150 @@
+//
+//  EaditDrawCell.m
+//  BusinessManager
+//
+//  Created by The Only on 16/7/27.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "EaditDrawCell.h"
+
+@interface EaditDrawCell()<UITextFieldDelegate>
+
+@end
+@implementation EaditDrawCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+    self.redNameTF.delegate = self;
+    self.singleRedMoneyTF.delegate = self;
+    self.redCountTF.delegate =  self;
+    self.winningChanceTF.delegate =  self;
+    self.winningCountTF.delegate =  self;
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+-(void)setDrawModel:(activityInfoItem *)DrawModel
+{
+     _DrawModel = DrawModel;
+ 
+    if (DrawModel.chooseDrawType == nil) {
+        
+        self.infoViewHeightConstraint.constant = 0;
+        // 强制布局
+         [self layoutIfNeeded];
+        self.presentTypeView.hidden = YES;
+ 
+    }
+    else
+    {
+        if ([DrawModel.chooseDrawType isEqualToString:@"singleMoney"])
+        {
+            self.singleMoneyHeight.constant = 0;
+            self.presentTypeView.hidden = NO;
+            self.infoViewHeightConstraint.constant = 194;
+            [self layoutIfNeeded];
+            
+            self.deleteHeight.constant = 180;
+            self.HLineViewHeight.constant = 180;
+        }
+        else
+        {
+            self.infoViewHeightConstraint.constant = 240;
+            self.presentTypeView.hidden = NO;
+        }
+        
+    }
+
+    
+    [self.redTypeBtn setTitle:DrawModel.btnTitle forState:UIControlStateNormal];
+    [self.redTypeBtn setTitleColor:[UIColor colorWithHexString:@"000000"] forState:UIControlStateNormal];
+    
+    self.redNameTF.text = DrawModel.redBagName;
+    self.singleRedMoneyTF.text = DrawModel.redBagMoney;
+    self.redCountTF.text = DrawModel.redBagNumber;
+    self.winningChanceTF.text = DrawModel.redBagZJGaiLv;
+    self.winningCountTF.text = DrawModel.redBagZJCiShu;
+    self.prizInfoId = DrawModel.InfoID;
+}
+-(void)setData:(activityInfoItem *)infoItem
+{
+    if (infoItem.type == nil) {
+        
+         infoItem.btnTitle = infoItem.btnTitle;
+    }
+    else
+    {
+        
+        if (infoItem.chooseDrawType !=nil)
+        {
+            infoItem.btnTitle = infoItem.btnTitle;
+        }
+        else
+        {
+            if ([infoItem.type isEqualToString:@"1"]) {
+                
+                infoItem.btnTitle = @"实物奖品";
+                self.redMoneyLable.hidden = YES;
+                self.singleRedMoneyTF.hidden = YES;
+            }
+            else if ([infoItem.type isEqualToString:@"2"])
+            {
+                infoItem.btnTitle = @"商户红包";
+            }
+            else
+            {
+                infoItem.btnTitle = @"现金红包";
+            }
+
+        }
+        
+        infoItem.chooseDrawType = @"type";
+    }
+    
+    infoItem.redBagName = infoItem.redName;
+    infoItem.redBagMoney = infoItem.singleAmount;
+    infoItem.redBagNumber = infoItem.redNum;
+    infoItem.redBagZJGaiLv = infoItem.drawProbability;
+    infoItem.redBagZJCiShu = infoItem.singleLmLum;
+    self.DrawModel = infoItem;
+}
+- (IBAction)deleteRedBag:(id)sender
+{
+    if ([self.delegate respondsToSelector:@selector(deleteEaditDrawCell:)]) {
+        
+        [self.delegate deleteEaditDrawCell:self];
+    }
+    
+}
+- (IBAction)chooseType:(id)sender
+{
+    
+    if ([self.delegate respondsToSelector:@selector(chooseTypeOnEaditDrawCell:)])
+    {
+        [self.delegate chooseTypeOnEaditDrawCell:self];
+    }
+    
+}
+-(void)textFieldDidEndEditing:(UITextField *)textField
+{
+    NSInteger cellTags = self.cellTags;
+    
+//    if ([self.delegate respondsToSelector:@selector(eaditDrawCell:redBagNameTF:redBagCountTF:redBagNumberTF:redBagChance:redBagMoney:PrizeId:)]) {
+//        
+//        [self.delegate eaditDrawCell:self redBagNameTF:self.redNameTF redBagCountTF:self.redCountTF redBagNumberTF:self.winningCountTF redBagChance:self.winningChanceTF redBagMoney:self.singleRedMoneyTF PrizeId:self.prizInfoId];
+//    }
+    if ([self.delegate respondsToSelector:@selector(eaditDrawCell:redBagNameTF:redBagCountTF:redBagNumberTF:redBagChance:redBagMoney:PrizeId:andCellTags:)]) {
+        
+        [self.delegate eaditDrawCell:self redBagNameTF:self.redNameTF redBagCountTF:self.redCountTF redBagNumberTF:self.winningCountTF redBagChance:self.winningChanceTF redBagMoney:self.singleRedMoneyTF PrizeId:self.prizInfoId andCellTags:cellTags];
+    }
+    
+    
+}
+
+@end

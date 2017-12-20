@@ -1,0 +1,30 @@
+//
+//  GiveVipCardView.h
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/26.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@protocol VipManageViewDelegate <NSObject>
+
+- (void)didClickGiveCardButton;
+- (void)didClickTableViewCell;
+
+@end
+
+@interface VipManageView : UIView
+
+@property (nonatomic, weak) id<VipManageViewDelegate> delegate;
+
+- (id)init;
+
+@end
+
+@interface VipManageViewTableViewCell : UITableViewCell
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier;
+
+@end

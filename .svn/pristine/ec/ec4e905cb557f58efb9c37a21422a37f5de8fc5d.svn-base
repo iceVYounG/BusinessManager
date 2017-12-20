@@ -1,0 +1,49 @@
+//
+//  YuyueRecordCell.m
+//  BusinessManager
+//
+//  Created by 张心亮 on 16/8/23.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "YuyueRecordCell.h"
+
+@implementation YuyueRecordCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+}
+
+-(void)setModel:(YueyueDataModel *)model{
+    _model=model;
+    if (model) {
+        self.userName.text=model.userName;
+        self.phoneNumber.text=model.mobile;
+        self.baoyangTime.text=model.dateTime;
+        if ([model.templateModelnameCode isEqualToString:@"yyzx"]) {
+            self.yuyueType.text=@"预约装修";
+        }
+        else if ([model.templateModelnameCode isEqualToString:@"yysj"]){
+            self.yuyueType.text=@"预约试驾";
+        
+        }
+        else if ([model.templateModelnameCode isEqualToString:@"yyby"]){
+            self.yuyueType.text=@"预约保养";
+            
+        }
+        else if ([model.templateModelnameCode isEqualToString:@"yykf"]){
+            self.yuyueType.text=@"预约看房";
+        }
+    }
+    
+}
+
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

@@ -1,0 +1,35 @@
+//
+//  ChoosePrizeTypeView.h
+//  BusinessManager
+//
+//  Created by The Only on 16/7/26.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#define KWSize [UIApplication sharedApplication].keyWindow.bounds.size
+
+@class ChoosePrizeTypeView;
+typedef void (^choosePrizeTypeBlock)(NSString *typeBlock);
+@protocol ChoosePrizeTypeViewDelegate <NSObject>
+
+-(void)didFinishClickBtnTag:(NSInteger)tag chooseView:(ChoosePrizeTypeView *)view;
+
+@end
+@interface ChoosePrizeTypeView : UIView
+@property (weak, nonatomic) IBOutlet UIView *chooseTypeView;
+@property (weak, nonatomic) IBOutlet UIButton *shiWuPrizeButton;// 实物奖品View
+@property (weak, nonatomic) IBOutlet UIButton *dianZiQuanPrizeButton;// 电子券钱包
+@property (weak, nonatomic) IBOutlet UIButton *xianJinCashButton;// 现金钱包
+@property (weak, nonatomic) IBOutlet UIButton *cancleButton;// 取消按钮
+@property (weak, nonatomic) IBOutlet UIView *backGroundView;// 背景View
+@property (strong,nonatomic)choosePrizeTypeBlock prizeTypeBlock;
+@property (strong,nonatomic)id<ChoosePrizeTypeViewDelegate>delegate;
+
+//初始化方法
+- (IBAction)cancleAction:(id)sender;
+
+- (instancetype)initWithFrame:(CGRect)frame block:(choosePrizeTypeBlock)block;
+-(void)show;
+- (IBAction)btnActionClick:(id)sender;
+@end

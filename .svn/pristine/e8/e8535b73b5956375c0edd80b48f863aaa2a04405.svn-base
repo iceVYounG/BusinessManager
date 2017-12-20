@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10117" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="HomeVideoMainVC">
+            <connections>
+                <outlet property="mainTableView" destination="mOb-cy-b2g" id="mJF-BM-nud"/>
+                <outlet property="nothingView" destination="REC-V9-hvZ" id="3Kn-66-w7f"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="REC-V9-hvZ">
+                    <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                    <subviews>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="hv_noneCamera_icon" translatesAutoresizingMaskIntoConstraints="NO" id="U58-55-DeJ">
+                            <rect key="frame" x="110" y="110" width="100" height="100"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="100" id="JcS-Ep-E8W"/>
+                                <constraint firstAttribute="height" constant="100" id="x9x-rO-weI"/>
+                            </constraints>
+                        </imageView>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="您的账号中还没有绑定摄像头，点击下方按钮查看如何绑定摄像头" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kEm-X4-k3b">
+                            <rect key="frame" x="46" y="222" width="228" height="40"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="228" id="daZ-qq-a83"/>
+                                <constraint firstAttribute="height" constant="40" id="t32-zI-AeU"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                            <color key="textColor" red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="calibratedRGB"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tBZ-Zw-ww7">
+                            <rect key="frame" x="90" y="284" width="140" height="44"/>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="44" id="0DH-I6-ewn"/>
+                                <constraint firstAttribute="width" constant="140" id="RIO-y4-eRS"/>
+                            </constraints>
+                            <state key="normal" title="查看">
+                                <color key="titleColor" red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="calibratedRGB"/>
+                            </state>
+                        </button>
+                    </subviews>
+                    <color key="backgroundColor" red="0.94901960780000005" green="0.94901960780000005" blue="0.94901960780000005" alpha="1" colorSpace="calibratedRGB"/>
+                    <constraints>
+                        <constraint firstItem="kEm-X4-k3b" firstAttribute="centerX" secondItem="REC-V9-hvZ" secondAttribute="centerX" id="E6b-so-jvo"/>
+                        <constraint firstItem="tBZ-Zw-ww7" firstAttribute="centerX" secondItem="REC-V9-hvZ" secondAttribute="centerX" id="Jgh-Dc-vOC"/>
+                        <constraint firstItem="kEm-X4-k3b" firstAttribute="top" secondItem="U58-55-DeJ" secondAttribute="bottom" constant="12" id="UbP-zo-5Fn"/>
+                        <constraint firstItem="U58-55-DeJ" firstAttribute="centerX" secondItem="REC-V9-hvZ" secondAttribute="centerX" id="Ugz-PX-3va"/>
+                        <constraint firstItem="tBZ-Zw-ww7" firstAttribute="top" secondItem="kEm-X4-k3b" secondAttribute="bottom" constant="22" id="eTl-tj-DP7"/>
+                        <constraint firstItem="U58-55-DeJ" firstAttribute="top" secondItem="REC-V9-hvZ" secondAttribute="top" constant="110" id="lce-cK-9Xl"/>
+                    </constraints>
+                </view>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hMY-cK-NRv">
+                    <rect key="frame" x="0.0" y="568" width="320" height="0.0"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="height" id="sxZ-Dw-Jmx"/>
+                    </constraints>
+                </view>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="none" allowsSelection="NO" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="mOb-cy-b2g">
+                    <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <connections>
+                        <outlet property="dataSource" destination="-1" id="DI6-Yg-ZHq"/>
+                        <outlet property="delegate" destination="-1" id="49X-Vs-OoX"/>
+                    </connections>
+                </tableView>
+            </subviews>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="hMY-cK-NRv" secondAttribute="trailing" id="KQ9-9v-rtg"/>
+                <constraint firstItem="hMY-cK-NRv" firstAttribute="top" secondItem="mOb-cy-b2g" secondAttribute="bottom" id="RUc-GQ-AMC"/>
+                <constraint firstItem="mOb-cy-b2g" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="US6-Rt-S9X"/>
+                <constraint firstItem="mOb-cy-b2g" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="YF7-0t-pwO"/>
+                <constraint firstAttribute="bottom" secondItem="hMY-cK-NRv" secondAttribute="bottom" id="bwi-dG-t2w"/>
+                <constraint firstItem="REC-V9-hvZ" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="fS8-GH-wPo"/>
+                <constraint firstAttribute="trailing" secondItem="REC-V9-hvZ" secondAttribute="trailing" id="g4Z-Xy-SjQ"/>
+                <constraint firstAttribute="trailing" secondItem="mOb-cy-b2g" secondAttribute="trailing" id="mZN-Da-usZ"/>
+                <constraint firstItem="REC-V9-hvZ" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="qog-Wq-sWM"/>
+                <constraint firstItem="hMY-cK-NRv" firstAttribute="top" secondItem="REC-V9-hvZ" secondAttribute="bottom" id="uCj-W4-G4s"/>
+                <constraint firstItem="hMY-cK-NRv" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="wPK-Vr-aPr"/>
+            </constraints>
+            <point key="canvasLocation" x="213" y="357"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="hv_noneCamera_icon" width="100" height="100"/>
+    </resources>
+</document>

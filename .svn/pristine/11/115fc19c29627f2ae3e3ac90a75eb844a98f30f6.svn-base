@@ -1,0 +1,201 @@
+//
+//  WZ_AddNewFloorVCViewController.m
+//  BusinessManager
+//
+//  Created by KL on 16/9/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WZ_AddNewFloorVCViewController.h"
+#import "WZ_AddNewFloorCollectionCell.h"
+#import "JMPickCollectView.h"
+#import "STPhotoKitController.h"
+#import "UIImagePickerController+ST.h"
+#import "STConfig.h"
+#import "CLImageEditor.h"
+#import "WZ_ConfigGoooodsInfoVC.h"
+
+//Cell的宽、高
+#define NewFloorCell_Width  (KScreenWidth - 3.0) / 2.0
+#define NewFloorCell_Heigh  NewFloorCell_Width * (169.0/186.0)
+//cell中的image的高、宽
+#define NewFloorCellImg_Width (KScreenWidth - 3.0) / 2.0
+#define NewFloorCellImg_Height NewFloorCellImg_Width * (169.0/125.0)
+//CelllineSpace
+#define NewFloorCell_LineSpacing 15.0
+#define NewFloorCell_InteritemSpacing 3.0
+
+@interface WZ_AddNewFloorVCViewController ()<UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, WZ_AddNewFloorCollectionCellDelegate, STPhotoKitDelegate,CLImageEditorDelegate>
+
+@property (nonatomic, strong) NSMutableArray *dataArry;
+@property (nonatomic, strong) NSMutableArray *originImages;
+@property (nonatomic, assign) NSIndexPath *addNewGoodsCellIndexPath;
+
+@end
+
+@implementation WZ_AddNewFloorVCViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"楼层配置";
+    [self.floorCollectionView registerNib:[UINib nibWithNibName:@"WZ_AddNewFloorCollectionCell" bundle:nil] forCellWithReuseIdentifier:@"WZ_AddNewFloorCollectionCell"];
+}
+
+#pragma mark - UICollectionViewDelegate / dataSource
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return self.dataArry.count + 1;
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *cellIdentifi = @"WZ_AddNewFloorCollectionCell";
+    WZ_AddNewFloorCollectionCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:cellIdentifi forIndexPath:indexPath];
+    cell.addNewFloorCellDelegate = self;
+    cell.indexPath = indexPath;
+    if (indexPath.item == self.dataArry.count) {
+        cell.isAddNewCell = YES;
+        
+    }else {
+        cell.isAddNewCell = NO;
+        
+    }
+    
+    return cell;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
+    return CGSizeMake(NewFloorCell_Width, NewFloorCell_Heigh);
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section {
+    return NewFloorCell_LineSpacing;
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section {
+    return NewFloorCell_InteritemSpacing;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section {
+    return CGSizeMake(KScreenWidth, 15.0);
+}
+
+#pragma mark- CLImageEditor delegate
+
+- (void)imageEditor:(CLImageEditor *)editor didFinishEdittingWithImage:(UIImage *)image
+{
+    
+    WZ_AddNewFloorCollectionCell *cell=(WZ_AddNewFloorCollectionCell *)[self.floorCollectionView cellForItemAtIndexPath:self.addNewGoodsCellIndexPath];
+    
+//    [cell.goodsImgVIew setHidden:NO];
+//    [cell.goodaNameTF setHidden:NO];
+//    [cell.goodsPriceTF setHidden:NO];
+//    [cell.goodsDeleteBtn setHidden:NO];
+//    [cell.goodsMoneyTagLab setHidden:NO];
+//    [cell.goodsAddNewImgView setHidden:YES];
+    if (image) {
+        //            [self uploadMessage:mediaImage];
+//        [cell.goodsImgVIew setImage:image];
+        [self.originImages addObject:image];
+        [self.dataArry addObject:image];
+        
+    }
+    [self.floorCollectionView reloadData];
+//    else{
+//        //            [self uploadMessage:originImage];
+//        [cell.goodsImgVIew setImage:originImage];
+//        [weakSelf.originImages addObject:originImage];
+//        [weakSelf.dataArry addObject:originImage];
+//        
+//    }
+    
+    [editor dismissViewControllerAnimated:YES completion:nil];
+    
+}
+
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+    [picker dismissViewControllerAnimated:YES completion:^(){
+        
+    }];
+}
+
+
+#pragma mark - WZAddNewFloorCellDelegate
+//增加新商品
+- (void)WZ_AddNewFloorCollectionCellAddNewGoodsActionWith:(NSIndexPath *)indexPath {
+    WZ_ConfigGoooodsInfoVC *configVC = [[WZ_ConfigGoooodsInfoVC alloc] initWithNibName:@"WZ_ConfigGoooodsInfoVC" bundle:nil];
+    [self.navigationController pushViewController:configVC animated:YES];
+    
+    
+//    NSIndexPath *index=[NSIndexPath indexPathForItem:self.currentIndexPath.row-1 inSection:0];
+//    self.addNewGoodsCellIndexPath = indexPath;
+//    [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage) {
+//        
+//        CLRatio *ratio = [[CLRatio alloc] initWithValue1:NewFloorCellImg_Height value2:NewFloorCellImg_Width];
+//        ratio.isLandscape = YES;
+//        CLImageEditor *editor = [[CLImageEditor alloc] initWithImage:originImage delegate:self ratio:ratio];
+//        //CLImageEditor *editor = [[CLImageEditor alloc] initWithDelegate:self];
+//        
+//        NSLog(@"%@", editor.toolInfo);
+//        NSLog(@"%@", editor.toolInfo.toolTreeDescription);
+//        
+//        CLImageToolInfo *tool = [editor.toolInfo subToolInfoWithToolName:@"CLToneCurveTool" recursive:NO];
+//        tool.available = NO;
+//        
+//        tool = [editor.toolInfo subToolInfoWithToolName:@"CLRotateTool" recursive:YES];
+//        tool.available = NO;
+//        
+//        tool = [editor.toolInfo subToolInfoWithToolName:@"CLHueEffect" recursive:YES];
+//        tool.available = NO;
+//        
+//        tool = [editor.toolInfo subToolInfoWithToolName:@"CLAdjustmentTool" recursive:YES];
+//        tool.available = NO;
+//        
+//        tool = [editor.toolInfo subToolInfoWithToolName:@"CLBlurTool" recursive:YES];
+//        tool.available = NO;
+//        
+//        tool = [editor.toolInfo subToolInfoWithToolName:@"CLDrawTool" recursive:YES];
+//        tool.available = NO;
+//        
+//        tool = [editor.toolInfo subToolInfoWithToolName:@"CLEffectTool" recursive:YES];
+//        tool.available = NO;
+//        
+//        tool = [editor.toolInfo subToolInfoWithToolName:@"CLFilterTool" recursive:YES];
+//        tool.available = NO;
+//        
+//        [self presentViewController:editor animated:YES completion:nil];
+//        
+//    }];
+}
+
+//删除商品
+- (void)WZ_AddNewFloorCollectionCellDeleteGoodsActionWith:(NSIndexPath *)indexPath {
+    
+}
+
+#pragma mark - 保存按钮 Action
+- (IBAction)saveBtnClick:(UIButton *)sender {
+}
+
+
+#pragma mark - getter
+- (NSMutableArray *)dataArry {
+    if (!_dataArry) {
+        _dataArry = [NSMutableArray array];
+    }
+    return _dataArry;
+}
+
+- (NSMutableArray *)originImages {
+    if (!_originImages) {
+        _originImages = [NSMutableArray array];
+    }
+    return _originImages;
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+@end

@@ -1,0 +1,117 @@
+//
+//  QuestionListVC.m
+//  BusinessManager
+//
+//  Created by 朕 on 16/9/5.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "QuestionListVC.h"
+#import "QuestionListCell.h"
+#import "QuestionListBottomcell.h"
+
+@interface QuestionListVC ()<UITableViewDelegate,UITableViewDataSource>
+@property (weak, nonatomic) IBOutlet UIScrollView *mainScrollView;
+@property(nonatomic,strong)UITableView *mainTableView;
+@property(nonatomic,strong)NSMutableArray *dataArr;
+
+@property(nonatomic,assign)NSInteger sectionNum;
+
+@end
+
+@implementation QuestionListVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"调查问卷详情编辑";
+    
+    _sectionNum = 2;
+    UIView *lineView = [[UIView alloc]initWithFrame:CGRectMake(0, 14.5, SCREEN_SIZE.width, 0.5)];
+    lineView.backgroundColor = [UIColor colorWithHexString:@"#dadada"];
+    [self.mainScrollView addSubview:lineView];
+    
+    self.mainTableView = [[UITableView alloc]initWithFrame:CGRectMake(0, 15, SCREEN_SIZE.width, 414*_sectionNum - 40)];
+    self.mainTableView.delegate = self;
+    self.mainTableView.dataSource = self;
+    
+    self.mainTableView.separatorStyle =  UITableViewCellSeparatorStyleNone;
+    
+    [self.mainScrollView addSubview:self.mainTableView];
+    [self.mainTableView registerNib:[UINib nibWithNibName:@"QuestionListCell" bundle:nil] forCellReuseIdentifier:@"QuestionListCell"];
+    [self.mainTableView registerNib:[UINib nibWithNibName:@"QuestionListBottomcell" bundle:nil] forCellReuseIdentifier:@"QuestionListBottomcell"];
+    
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return _sectionNum;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    
+    return 1;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section == _sectionNum - 1) {
+        return 374;
+    }
+    return 414;
+}
+
+- (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    if (indexPath.section == _sectionNum - 1) {
+        static NSString*ID=@"QuestionListBottomcell";
+        QuestionListBottomcell *cell=[tableView dequeueReusableCellWithIdentifier:ID];
+        if (!cell) {
+            cell=[[QuestionListBottomcell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+        }
+        [cell.addBtn addTarget:self action:@selector(deleteOrAddClick:) forControlEvents:UIControlEventTouchUpInside];
+        self.mainScrollView.contentSize = CGSizeMake(SCREEN_SIZE.width, CGRectGetMaxY(_mainTableView.frame));
+        
+        return cell;
+    }
+    else
+    {
+        static NSString*ID=@"QuestionListCell";
+        QuestionListCell *cell=[tableView dequeueReusableCellWithIdentifier:ID];
+        if (!cell) {
+            cell=[[QuestionListCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:ID];
+        }
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell.deleteBtn.tag = indexPath.row;
+        [cell.deleteBtn addTarget:self action:@selector(deleteOrAddClick:) forControlEvents:UIControlEventTouchUpInside];
+        return cell;
+    }
+ 
+}
+
+- (void)deleteOrAddClick:(UIButton*)btn
+{
+    if (btn.tag == -1) {
+        self.sectionNum++;
+    }else if(_sectionNum == 2)
+    {
+        [OMGToast showWithText:@"只剩下一个问题了！"];
+    }
+    else
+    {
+        self.sectionNum--;
+    }
+    self.mainTableView.frame = CGRectMake(0, 15, SCREEN_SIZE.width, 414*_sectionNum - 40);
+    [self.mainTableView reloadData];
+}
+
+
+//保存数据
+- (void)saveData
+{
+    
+}
+
+
+@end

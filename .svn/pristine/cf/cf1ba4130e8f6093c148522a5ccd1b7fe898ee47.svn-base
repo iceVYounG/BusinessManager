@@ -1,0 +1,75 @@
+//
+//  WeiZhanBaseController.h
+//  BusinessManager
+//
+//  Created by zhaojh on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+//-----templateNo-----------//
+#define Tongyong  @"ws_base"    //通用模块
+#define DianShang @"ws001"      //电商模版
+#define SiSDian   @"ws002"      //4S店模版
+#define CanYin    @"ws003"      //餐饮模版
+#define JiaZhuang @"ws004"      //家装模板
+#define FangChan  @"ws005"      //房产模板
+
+//-----电商模板----------//
+#define BannerPic     @"dpdt"           //电商模版
+#define LiaoJWM       @"ljwm"           //了解我们
+#define WeiNTJ        @"wntj"           //为您推荐
+#define LianXWM       @"lxwm"           //联系我们
+#define WeiNDH        @"wndh"           //为您导航
+#define LunBT         @"lbt"            //轮播图
+#define LouCY         @"lc1"            //楼层一
+#define LouCE         @"lc2"            //楼层二
+#define QiangHB       @"ljq"            //抢红包
+#define DaZP          @"dzp"            //大转盘
+#define GuaGK         @"ggk"            //刮刮卡
+#define ShopName      @"shopName"       //店铺名称
+#define ShopDetail    @"storeProfile"   //商户介绍
+#define ShopService   @"storeServices"  //商户服务信息
+#define HotFood       @"hotFood"        //热菜推荐
+#define YiJFK         @"yjfk"           //意见反馈
+
+//-----4S模板----------//
+#define HotCarTuijian      @"rctj"       //热车推荐
+#define DiaochaWJ          @"dcwj"       //调查问卷
+#define YuyueSJ            @"yysj"       //预约试驾
+#define YuyueBY            @"yyby"       //预约保养
+
+//-----餐饮模板----------//
+#define FoodMenu      @"foodMenu"       //菜单
+#define About         @"about"          //关于我们
+#define Activity      @"activity"     //活动信息
+                                        //为您导航 同电商
+#define KeysArry @[@"bdLong",@"bdLat"]
+#define HB_KeysArry @[QiangHB,DaZP,GuaGK]
+
+
+//----房产模板--------
+#define LouPJJ        @"lpjj"           //楼盘简介
+#define HuXXS         @"hxxs"           //户型欣赏
+#define WeNDH         @"wndh"           //为你导航
+#define CuXHD         @"cxhd"           //促销活动
+#define YuYKF         @"yykf"           //预约看房
+#define LianXWM       @"lxwm"           //联系我们
+
+
+//------家装------
+#define ZhuangXBJ     @"zxbj"           //装修报价
+#define MoreCase      @"gdal"           //更多案例
+#define JingDianCase   @"jdal"          //经典案例
+#define NowYuYue   @"msyy"          //马上预约
+
+#import "BaseController.h"
+
+@interface WeiZhanBaseController : BaseController
+
+#pragma mark - 保存模块
+-(void)saveTemplte:(NSMutableArray*)datas succeed:(void (^)(id responseObject))succeed error:(void (^)(NSError* error))errored;
+
+#pragma mark - 保存模板
+-(void)saveTemple:(NSString*)templeNo andshopName:(NSString *)shopName;
+
+@end

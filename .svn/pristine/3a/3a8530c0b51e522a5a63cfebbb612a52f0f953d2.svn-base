@@ -1,0 +1,50 @@
+//
+//  ADCollectionViewCell.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "ADCollectionViewCell.h"
+#import "JMPickCollectView.h"
+#import "WeiZhanModel.h"
+#import "UIButton+WebCache.h"
+
+@implementation ADCollectionViewCell
+
+- (void)awakeFromNib {
+    // Initialization code
+    
+    
+}
+
+- (void)setModel:(TemplateModel *)model{
+    _model = model;
+
+    if (!_model) {
+        _nameField.text = _model.name;
+        _priceField.text = _model.type;
+        return;
+    }
+    
+    _nameField.text = _model.name;
+    _priceField.text = _model.type;
+    NSString* imagePath = [NSString stringWithFormat:@"%@%@",ImagePre,model.imgPath];
+//    [_imageSender.imageView sd_setImageWithURL:[NSURL URLWithString:imagePath] placeholderImage:[UIImage imageNamed:@"106"]];
+    
+    [_imageSender sd_setImageWithURL:[NSURL URLWithString:imagePath] forState:UIControlStateNormal placeholderImage:[UIImage imageNamed:@"106"]];
+}
+
+- (IBAction)imageSenderClick:(UIButton *)sender {
+    
+    if (self.delegate) {
+        [self.delegate jump2ImagePickerVCsender:sender];
+    }
+}
+- (IBAction)deleteAction:(UIButton *)sender {
+    if (self.delegate) {
+        [self.delegate deleteImageCell:sender];
+    }
+}
+@end

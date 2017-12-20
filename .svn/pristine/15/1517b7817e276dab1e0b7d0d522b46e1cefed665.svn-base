@@ -1,0 +1,462 @@
+//
+//  EaditDrawActivityVC.m
+//  BusinessManager
+//
+//  Created by The Only on 16/7/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "EaditDrawActivityVC.h"
+#import "EaditDrawCell.h"
+#import "MPChooseUserTypeView.h"
+#import "ChoosePrizeTypeView.h"
+#import "LuckDrawModel.h"
+#import "UIView+SDAutoLayout.h"
+#import "PrizeTypeView.h"
+#import "ChoosePrizeTypeView.h"
+#define SAVEACTIVITYTAG 34
+#define DELETEACTIVITYTAG 35
+@interface EaditDrawActivityVC ()<UITableViewDelegate,UITableViewDataSource>
+{
+    activityInfoItem *infoItem;
+    NSInteger addPrizeType;// 点击按钮增加一个活动类型的view
+    NSInteger chooseType;
+    
+    PrizeTypeView *prize_View;
+    UIView *typeView;
+    UIView *prView;
+
+     NSInteger i;
+     NSInteger j;
+}
+@property(nonatomic,strong)NSMutableArray *activityInfoArray;
+@property(nonatomic,strong)NSMutableDictionary *activityInfoDic;
+@property (strong,nonatomic)UILabel *chooseStrLable;
+
+@end
+
+@implementation EaditDrawActivityVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    self.title = @"编辑抽奖活动";
+    
+    self.activityInfoArray = [NSMutableArray array];
+     //设置圆角
+    self.saveBtn.layer.cornerRadius = 6;
+    self.saveBtn.layer.masksToBounds = YES;
+    self.deleteActivityBtn.layer.cornerRadius = 6;
+    self.deleteActivityBtn.layer.masksToBounds = YES;
+    self.continuePrizeBtn.layer.cornerRadius = 6;
+    self.continuePrizeBtn.layer.masksToBounds = YES;
+    
+    [self requestActivityInfo];
+   
+    addPrizeType = 0;
+    chooseType = 0;
+    i = 0;
+    j = 0;
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *identifierCell = @"Cell";
+    EaditDrawCell *cell = [tableView dequeueReusableCellWithIdentifier:identifierCell];
+    if (cell == nil) {
+        
+        cell = [[[NSBundle mainBundle]loadNibNamed:@"EaditDrawCell" owner:self options:nil]lastObject];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    [cell.redTypeBtn addTarget:self action:@selector(TypeBtnAction:) forControlEvents:UIControlEventTouchUpInside];
+    cell.redTypeBtn.tag = indexPath.row;
+    if (self.activityInfoArray.count >0)
+    {
+        
+        infoItem = self.activityInfoArray[indexPath.row];
+        [cell.redTypeBtn setTitle:infoItem.type forState:UIControlStateNormal];
+        cell.redNameTF.text = infoItem.redName;
+        cell.singleRedMoneyTF.text = infoItem.singleAmountY;
+        cell.redCountTF.text = infoItem.redNum;
+        cell.winningChanceTF.text = infoItem.drawProbability;
+        cell.winningCountTF.text = infoItem.singleLmLum;
+        cell.prizeDeleteBtn.tag = indexPath.row;
+        [cell.prizeDeleteBtn addTarget:self action:@selector(prizeDEleteAction:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    
+    return cell;
+}
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.activityInfoArray.count;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 270;
+}
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+}
+// 可参与活动的用户
+- (IBAction)joinPeopleAction:(id)sender
+{
+    WS(weakSelf);
+    MPChooseUserTypeView *view = [[MPChooseUserTypeView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_SIZE.width, SCREEN_SIZE.height) block:^(NSString *userType, NSString *userNum) {
+        
+        [weakSelf.takeACtivityPeopleBtn setTitle:userType forState:UIControlStateNormal];
+        [weakSelf.takeACtivityPeopleBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        
+    }];
+    
+    [view show];
+}
+-(void)TypeBtnAction:(UIButton *)btn
+{
+    ChoosePrizeTypeView *prizeView = [[ChoosePrizeTypeView alloc] initWithFrame:CGRectMake(0, 0,KWSize.width , KWSize.height) block:^(NSString *typeBlock) {
+        
+        [btn setTitle:typeBlock forState:UIControlStateNormal];
+        [btn setTitleColor:[UIColor colorWithHexString:@"000000"] forState:UIControlStateNormal];
+    }];
+    [prizeView show];
+
+}
+// 删除单个奖品
+-(void)prizeDEleteAction:(UIButton *)btn
+{
+    [self requestPrizeDeleteInfo];
+}
+// 删除活动
+- (IBAction)saveAndDeleteActivityAction:(id)sender
+{
+    UIButton *btn = (UIButton *)sender;
+    
+    switch (btn.tag) {
+        case SAVEACTIVITYTAG:// 保存
+        {
+            [self saveActivityInfo];
+        }
+            break;
+        case DELETEACTIVITYTAG://删除
+        {
+            [self requestActivityDelgteInfo];
+        }
+        default:
+            break;
+    }
+}
+// 继续添加奖品
+- (IBAction)continueAddPrizeAction:(id)sender
+{
+//    prize_View = [[[NSBundle mainBundle] loadNibNamed:@"PrizeTypeView" owner:self options:nil] lastObject];
+//    prize_View.frame = CGRectMake(0,self.presentInfoLable.frame.size.height+10, SCREEN_SIZE.width, prize_View.frame.size.height);
+//    [self.backGroundView addSubview:prize_View];
+    UIView *PView;
+    [PView removeFromSuperview];
+    addPrizeType++;
+
+//    if (addPrizeType < 1 )
+//    {
+//        
+//        PView = [self creatChooseTypeViewFrame:CGRectMake(0, self.activityInfoView.frame.size.height+self.presentInfoView.frame.size.height+prize_View.frame.size.height+typeView.frame.size.height+44*addPrizeType, SCREEN_SIZE.width, 44)];
+//        self.continueAddPrizeView.sd_layout.topSpaceToView(PView,20).heightIs(64);
+//        self.bottomView.sd_layout.topSpaceToView(self.continueAddPrizeView,20).heightIs(64);
+//    }
+//    else
+//    {
+//        j++;
+//        PView = [self creatChooseTypeViewFrame:CGRectMake(0, self.activityInfoView.frame.size.height+self.presentInfoView.frame.size.height+prize_View.frame.size.height*addPrizeType+69+74*j, SCREEN_SIZE.width, 44)];
+//    
+//        self.continueAddPrizeView.sd_layout.topSpaceToView(PView,20).heightIs(64);
+//        self.bottomView.sd_layout.topSpaceToView(self.continueAddPrizeView,20).heightIs(64);
+//        
+//    }
+    
+        PView = [self creatChooseTypeViewFrame:CGRectMake(0, self.activityInfoView.frame.size.height+self.presentInfoView.frame.size.height+prize_View.frame.size.height*addPrizeType+typeView.frame.size.height*addPrizeType+30+15*addPrizeType, SCREEN_SIZE.width, 44)];
+        self.continueAddPrizeView.sd_layout.topSpaceToView(PView,20).heightIs(64);
+        self.bottomView.sd_layout.topSpaceToView(self.continueAddPrizeView,20).heightIs(64);
+  
+ 
+    
+    prView = PView;
+}
+-(void)requestActivityInfo
+{
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    [prams setObject:self.acItemModel.storeId forKey:@"storeId"];
+    [prams setObject:self.acItemModel.ID forKey:@"id"];
+    [SVProgressHUD showWithStatus:@"数据加载中"];
+    [[MallNetworkEngine loginshare]requestNotEncodeWithDate:self.requestDate requestWithPath:API_LuckDraw_ActivityInfo Params:prams CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        [SVProgressHUD dismiss];
+        NSMutableDictionary *dic = [completedOperation responseDecodeToDic];
+        NSMutableDictionary *dataDic = [dic objectForKey:@"data"];
+        self.activityInfoDic = dataDic;
+        NSLog(@"activityInfo  ====  %@",dic);
+        NSLog(@"data  ====  %@",dataDic);
+        if (Succeed(dic)) {
+            if (![[dataDic objectForKey:@"name"] isKindOfClass:[NSNull class]]&&![[dataDic objectForKey:@"endTime"] isKindOfClass:[NSNull class]]&&![[dataDic objectForKey:@"startTime"] isKindOfClass:[NSNull class]]&&![[dataDic objectForKey:@"useDays"] isKindOfClass:[NSNull class]]&&![[dataDic objectForKey:@"singleDrawNum"] isKindOfClass:[NSNull class]])
+            {
+                self.myAvtivityLable.text = [dataDic objectForKey:@"name"];
+                self.endTimeLable.text = [dataDic objectForKey:@"endTime"];
+                self.startTimeLable.text = [dataDic objectForKey:@"startTime"];
+                self.redValidFate.text = [dataDic objectForKey:@"useDays"];
+                self.redNum.text = [dataDic objectForKey:@"singleDrawNum"];
+            }
+            
+            
+            activityInfoModel *infoModel = [activityInfoModel mj_objectWithKeyValues:dataDic];
+            
+            if (infoModel.prizes.count > 0)
+            {
+                
+                [self.activityInfoArray addObjectsFromArray:infoModel.prizes];
+
+            }
+            else
+            {
+                self.presentInfoTableView.hidden = YES;
+                
+                [typeView removeFromSuperview];
+                typeView = [self creatChooseTypeViewFrame:CGRectMake(0, self.activityInfoView.frame.size.height+self.presentInfoView.frame.size.height+30, SCREEN_SIZE.width, 44)];
+                self.continueAddPrizeView.sd_layout.topSpaceToView(typeView,20).heightIs(64);
+                
+            }
+           
+    
+        }
+        else
+        {
+            [SVProgressHUD showErrorWithStatus:@"服务器忙，请稍候再试"];
+            [SVProgressHUD dismiss];
+        }
+        
+        [self.presentInfoTableView reloadData];
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        
+        [SVProgressHUD showErrorWithStatus:@"服务器忙，请稍候再试"];
+        [SVProgressHUD dismiss];
+    }];
+    
+}
+// 删除单个奖品
+-(void)requestPrizeDeleteInfo
+{
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    [prams setObject:self.acItemModel.storeId forKey:@"storeId"];
+    [prams setObject:infoItem.InfoID forKey:@"id"];
+    [SVProgressHUD showWithStatus:@"数据加载中"];
+    [[MallNetworkEngine loginshare]requestNotEncodeWithDate:self.requestDate requestWithPath:API_LuckDraw_ActivityPrizeDelete Params:prams CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        [SVProgressHUD dismiss];
+        NSMutableDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"delete === %@",dic);
+        if (Succeed(dic)) {
+            
+            [SVProgressHUD showInfoWithStatus:@"删除成功"];
+            [self requestActivityInfo];
+        }
+        else if([[dic objectForKey:@"code"]isEqualToString:@"02-07"])
+        {
+             [SVProgressHUD showErrorWithStatus:[dic objectForKey:@"msg"]];
+            [SVProgressHUD dismiss];
+        }
+        else
+        {
+           [SVProgressHUD showErrorWithStatus:@"服务器忙，请稍候再试"];
+            [SVProgressHUD dismiss];
+        }
+        [self.presentInfoTableView reloadData];
+    
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        
+        [SVProgressHUD showErrorWithStatus:@"服务器忙，请稍候再试"];
+        [SVProgressHUD dismiss];
+    }];
+
+    
+}
+// 删除活动
+-(void)requestActivityDelgteInfo
+{
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    
+    [prams setObject:self.acItemModel.storeId forKey:@"storeId"];
+    [prams setObject:self.acItemModel.ID forKey:@"id"];
+    [SVProgressHUD showWithStatus:@"数据加载中"];
+    [[MallNetworkEngine loginshare]requestNotEncodeWithDate:self.requestDate requestWithPath:API_LuckDraw_ActivityDelete Params:prams CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        [SVProgressHUD dismiss];
+        NSMutableDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"delete === %@",dic);
+        
+        if (Succeed(dic)) {
+            
+            [SVProgressHUD showInfoWithStatus:@"删除成功"];
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+        else if([[dic objectForKey:@"code"]isEqualToString:@"02-07"])
+        {
+            [SVProgressHUD showErrorWithStatus:[dic objectForKey:@"msg"]];
+            [SVProgressHUD dismiss];
+        }
+        else
+        {
+            [SVProgressHUD showErrorWithStatus:@"服务器忙，请稍候再试"];
+            [SVProgressHUD dismiss];
+        }
+        [self.presentInfoTableView reloadData];
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        
+        [SVProgressHUD showErrorWithStatus:@"服务器忙，请稍候再试"];
+        [SVProgressHUD dismiss];
+    }];
+
+}
+// 保存修改活动
+-(void)saveActivityInfo
+{
+    
+    NSIndexPath *index = [NSIndexPath indexPathForRow:0 inSection:0];
+    EaditDrawCell *cell = (EaditDrawCell *)[self.presentInfoTableView cellForRowAtIndexPath:index];
+    NSLog(@"cell  %@",cell);
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    NSMutableArray *prizeInfo_Array = [NSMutableArray array];
+    NSMutableDictionary *PrizeDic = [NSMutableDictionary dictionary];
+    if (infoItem != nil)
+    {
+        [PrizeDic setObject:infoItem.InfoID forKey:@"id"];
+        [PrizeDic setObject:infoItem.type forKey:@"type"];
+        [PrizeDic setObject:cell.redNameTF.text forKey:@"redName"];
+        [PrizeDic setObject:cell.singleRedMoneyTF.text forKey:@"singleAmount"];
+        [PrizeDic setObject:cell.winningChanceTF.text forKey:@"drawProbability"];
+        [PrizeDic setObject:cell.redCountTF.text forKey:@"redNum"];
+        [PrizeDic setObject:cell.winningCountTF.text forKey:@"singleLmLum"];
+        [prizeInfo_Array addObject:PrizeDic];
+        [prams setObject:prizeInfo_Array forKey:@"prizes"];
+        
+    }
+    
+    [prams setObject:[self.activityInfoDic objectForKey:@"id"] forKey:@"id"];
+    [prams setObject:self.self.myAvtivityLable.text forKey:@"name"];
+    [prams setObject:self.endTimeLable.text forKey:@"endTime"];
+    [prams setObject:self.startTimeLable.text forKey:@"startTime"];
+    [prams setObject:self.redNum.text forKey:@"singleDrawNum"];
+    [prams setObject:[self.activityInfoDic objectForKey:@"storeId"] forKey:@"storeId"];
+    [prams setObject:self.redValidFate.text forKey:@"useDays"];
+    
+    NSLog(@"----- %@",PrizeDic);
+    NSLog(@"+++++++ %@",prams);
+    NSLog(@"00000000 %@",prizeInfo_Array);
+    [SVProgressHUD showWithStatus:@"数据加载中"];
+    [[MallNetworkEngine loginshare]requestNotEncodeWithDate:self.requestDate requestWithPath:API_LuckDraw_Activitysave Params:prams CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        [SVProgressHUD dismiss];
+        NSMutableDictionary *dic = [completedOperation responseDecodeToDic];
+        
+        NSLog(@"save === %@",dic);
+        if (Succeed(dic))
+        {
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+        else
+        {
+             [SVProgressHUD showErrorWithStatus:@"服务器忙，请稍候再试"];
+            [SVProgressHUD dismiss];
+        }
+      
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        
+        [SVProgressHUD showErrorWithStatus:@"服务器忙，请稍候再试"];
+        [SVProgressHUD dismiss];
+    }];
+
+}
+// 创建选择奖品类型View
+-(UIView *)creatChooseTypeViewFrame:(CGRect)frame
+{
+    prize_View = [[[NSBundle mainBundle] loadNibNamed:@"PrizeTypeView" owner:self options:nil] lastObject];
+    UIView *ChooseTypeView = [[UIView alloc] initWithFrame:frame];
+    
+    ChooseTypeView.backgroundColor = [UIColor whiteColor];
+    UIView *lineView = [[UIView alloc] initWithFrame:CGRectMake(0, self.presentInfoLable.frame.origin.y, SCREEN_SIZE.width, 0.5)];
+    [lineView setBackgroundColor:[UIColor colorWithHexString:@"#e5e5e5"]];
+    [ChooseTypeView addSubview:lineView];
+    
+    UILabel *chooseLable = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, 219, 44)];
+    chooseLable.text = @"请选择奖品类型";
+    self.chooseStrLable = chooseLable;
+    chooseLable.textColor = [UIColor colorWithHexString:@"#cccccc"];
+    chooseLable.font = [UIFont systemFontOfSize:17];
+    [ChooseTypeView addSubview:chooseLable];
+    UIButton *chooseButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [chooseButton setImage:[UIImage imageNamed:@"VipManager_DownArrow"] forState:UIControlStateNormal];
+    chooseButton.frame = CGRectMake(0, 0, SCREEN_SIZE.width, 44);
+    [chooseButton setImageEdgeInsets:UIEdgeInsetsMake(12, 12, 12, -SCREEN_SIZE.width+56)];
+    [chooseButton addTarget:self action:@selector(choosePrizeTypeAction:) forControlEvents:UIControlEventTouchUpInside];
+    chooseType++;
+    chooseButton.tag = chooseType;
+    
+    [ChooseTypeView addSubview:chooseButton];
+    
+    [self.backGroundView
+     addSubview:ChooseTypeView];
+    return ChooseTypeView;
+}
+-(void)choosePrizeTypeAction:(UIButton *)btn
+{
+ 
+    ChoosePrizeTypeView *prizeView = [[ChoosePrizeTypeView alloc] initWithFrame:CGRectMake(0, 0,KWSize.width , KWSize.height) block:^(NSString *typeBlock) {
+        self.chooseStrLable.text = typeBlock;
+        self.chooseStrLable.textColor = [UIColor colorWithHexString:@"000000"];
+        
+        if (chooseType <= 1) {
+            
+             prize_View.frame = CGRectMake(0,self.activityInfoView.frame.size.height+self.presentInfoView.frame.size.height+44+30*chooseType, SCREEN_SIZE.width, prize_View.frame.size.height);
+            self.continueAddPrizeView.sd_layout.topSpaceToView(typeView,prize_View.frame.size.height+20).heightIs(64);
+            NSLog(@"type === %@",typeView);
+        }
+        else
+        {
+           
+            if (chooseType == 2) {
+                
+                prize_View.frame = CGRectMake(0,self.activityInfoView.frame.size.height+self.presentInfoView.frame.size.height+(194+prView.frame.size.height+44*chooseType), SCREEN_SIZE.width, prize_View.frame.size.height);
+                self.continueAddPrizeView.sd_layout.topSpaceToView(prView,prize_View.frame.size.height+20).heightIs(64);
+            }
+            else
+            {
+                i ++ ;
+                prize_View.frame = CGRectMake(0,self.activityInfoView.frame.size.height+self.presentInfoView.frame.size.height+(194+prView.frame.size.height+44*chooseType)+194*i+15, SCREEN_SIZE.width, prize_View.frame.size.height);
+                self.continueAddPrizeView.sd_layout.topSpaceToView(prize_View,20).heightIs(64);
+            }
+        }
+ 
+        [self.backGroundView addSubview:prize_View];
+  
+        self.bottomView.sd_layout.topSpaceToView(self.continueAddPrizeView,15).heightIs(64);
+        self.scrollerViewHeight.constant = self.scrollerViewHeight.constant + prize_View.frame.size.height*chooseType;
+        NSLog(@"prize_view -- %f",prize_View.frame.size.height);
+    }];
+    [prizeView show];
+    
+
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

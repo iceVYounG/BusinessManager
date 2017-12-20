@@ -1,0 +1,222 @@
+//
+//  WatchGhostMainVC.m
+//  BusinessManager
+//
+//  Created by KL on 16/7/27.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WatchGhostMainVC.h"
+#import "WatchGhostMainCell.h"
+#import "WatchGhostCameraCell.h"
+#import "WatchGhostMonitorVC.h"
+#import "Masonry.h"
+
+#define topCellHeight 48.0f
+#define bottomCellHeight 86.0f
+
+@interface WatchGhostMainVC ()<UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate>
+@property (weak, nonatomic) IBOutlet UITableView *mainTableView;
+
+@end
+
+@implementation WatchGhostMainVC {
+    NSInteger rowCount;
+    BOOL isOpened;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"我的摄像头";
+    [self setUpViews];
+    rowCount = 1;
+}
+
+- (void)setUpViews {
+    [self.mainTableView registerNib:[UINib nibWithNibName:@"WatchGhostMainCell" bundle:nil] forCellReuseIdentifier:@"WatchGhostMainCell"];
+    [self.mainTableView registerNib:[UINib nibWithNibName:@"WatchGhostCameraCell" bundle:nil] forCellReuseIdentifier:@"WatchGhostCameraCell"];
+    
+    //当数据为0 时，要清除这条线
+    BMSingleLineView *view = [[BMSingleLineView alloc] initWithFrame:CGRectMake(0, 0, KScreenWidth, 1)];
+    view.lineColor = [UIColor colorWithHexString:@"#dadada"];
+    self.mainTableView.tableFooterView = view;
+    
+    UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 60, 40)];
+    [btn setTitle:@"切换账号" forState:UIControlStateNormal];
+    [btn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [btn.titleLabel setFont:[UIFont systemFontOfSize:14]];
+    [btn addTarget:self action:@selector(changeAccountClick) forControlEvents:UIControlEventTouchUpInside];
+    
+    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithCustomView:btn];
+    self.navigationItem.rightBarButtonItem = item;
+
+}
+
+#pragma mark - UITableViewDelegate, dataSource
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 5;
+    
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return rowCount;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.row == 0) {
+        WatchGhostMainCell *cell = [tableView dequeueReusableCellWithIdentifier:@"WatchGhostMainCell"];
+        
+        cell.cameraID.text = @"C1234";
+        cell.cameraNameLab.text = @"邪恶摄像头头";
+        cell.cameraStatuLab.text = @"使用中";
+        
+        return cell;
+    }else {
+        WatchGhostCameraCell *cell = [tableView dequeueReusableCellWithIdentifier:@"WatchGhostCameraCell"];
+        cell.count = 8;
+        cell.section = indexPath.section;
+        WS(weakSelf);
+        cell.chooseMonitorToView = ^(NSInteger index, NSInteger section) {
+            
+            NSLog(@">>>>>>>>>index:%ld section:%ld", index, section);
+            WatchGhostMonitorVC *vc = [[WatchGhostMonitorVC alloc] initWithNibName:@"WatchGhostMonitorVC" bundle:nil];
+            NSIndexPath *cellIndex = [NSIndexPath indexPathForRow:0 inSection:section];
+            WatchGhostMainCell *cell = [tableView cellForRowAtIndexPath:cellIndex];
+            vc.title = cell.cameraNameLab.text;
+            [weakSelf.navigationController pushViewController:vc animated:YES];
+        };
+        return cell;
+    }
+    
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.row == 0) {
+        return topCellHeight;
+    }else {
+        return bottomCellHeight;
+    }
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return CGFLOAT_MIN;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    if (section == 0) {
+        return 15.0f;
+    }else {
+        return 10.0f;
+    }
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+    if (section == 0) {
+        UIView *view = [[UIView alloc] init];
+        view.backgroundColor = [UIColor clearColor];
+        
+        BMSingleLineView *bottomLine = [[BMSingleLineView alloc] init];
+        bottomLine.lineColor = [UIColor colorWithHexString:@"#DADADA"];
+        [view addSubview:bottomLine];
+        
+        [bottomLine mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.bottom.equalTo(view);
+            make.left.equalTo(view);
+            make.right.equalTo(view);
+            make.height.mas_equalTo(@1);
+        }];
+        
+        return view;
+        
+    }else {
+        UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, KScreenWidth, 15)];
+        view.backgroundColor = [UIColor colorWithHexString:@"#F6F5FA"];
+        //    view.backgroundColor = [UIColor greenColor];
+        BMSingleLineView *topLine = [[BMSingleLineView alloc] init];
+        topLine.lineColor = [UIColor colorWithHexString:@"#DADADA"];
+        
+        BMSingleLineView *bottomLine = [[BMSingleLineView alloc] init];
+        bottomLine.lineColor = [UIColor colorWithHexString:@"#dadada"];
+        
+        [view addSubview:topLine];
+        [view addSubview:bottomLine];
+        
+        [topLine mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(view);
+            make.left.equalTo(view);
+            make.right.equalTo(view);
+            make.height.mas_equalTo(@1);
+        }];
+        [bottomLine mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.bottom.equalTo(view);
+            make.left.equalTo(view);
+            make.right.equalTo(view);
+            make.height.mas_equalTo(@1);
+        }];
+
+        return view;
+    }
+    
+    
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    if (isOpened == NO) {
+        rowCount = 2;
+        
+    }else {
+        rowCount = 1;
+        
+    }
+    
+    [self.mainTableView reloadData];
+    isOpened = !isOpened;
+    
+    
+    // Apply the updates.
+//    [self.mainTableView beginUpdates];
+//    NSIndexPath *index = [NSIndexPath indexPathForRow:1 inSection:0];
+//    NSArray *arr = [NSArray arrayWithObject:index];
+//    [self.mainTableView insertRowsAtIndexPaths:arr withRowAnimation:UITableViewRowAnimationBottom];//将之前插入到indexPathsToInsert数组中的cell都插入显示出来
+//    [self.listTableView deleteRowsAtIndexPaths:indexPathsToDelete withRowAnimation:deleteAnimation];//将之前打开得下拉菜单关闭
+    [self.mainTableView endUpdates];
+    
+}
+
+#pragma mark - Action
+- (void)changeAccountClick {
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:nil message:@"确认退出该账号登其他账号？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+    [alertView show];
+}
+
+#pragma mark - UIAlertViewDelegate
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == 1) {
+        
+    }else {
+        
+    }
+}
+
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

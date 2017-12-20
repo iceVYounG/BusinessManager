@@ -1,0 +1,17 @@
+//
+//  WZ_ConfigGooodsTopTextInfoCell.m
+//  BusinessManager
+//
+//  Created by KL on 16/9/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WZ_ConfigGooodsTopTextInfoCell.h"
+
+@implementation WZ_ConfigGooodsTopTextInfoCell
+
+- (void)awakeFromNib {
+    // Initialization code
+}
+
+@end

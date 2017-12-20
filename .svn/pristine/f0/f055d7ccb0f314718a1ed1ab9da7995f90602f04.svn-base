@@ -1,0 +1,951 @@
+//
+//  CloseliSDK.h
+//  CloseliSDK
+//
+//  Created by ArcSoft on 13-12-18.
+//  Copyright (c) 2014 ArcSoft. All rights reserved.
+//
+
+/**
+ @header CloseliSDK.h
+ @abstract CloseliSDK
+ @author Copyright (c) 2014 ArcSoft. All rights reserved.
+ @version 1.26.58 16-7-1
+ */
+
+#import "CloseliCameraUpdateInfo.h"
+#import "CloseliCameraExtraSettings.h"
+#import "CloseliCameraDevice.h"
+#import "CloseliServiceInfo.h"
+#import "CloseliProductInfo.h"
+#import "CloseliScheduleInfo.h"
+#import "CloseliTimelineData.h"
+#import "CloseliTimelineEventClip.h"
+#import "CloseliTimelineSectionClip.h"
+#import "CloseliMotionRegion.h"
+#import "CloseliCloudFileInfo.h"
+
+///Notifications
+/**
+	Notification when camera lost connection or reconnected.
+ NOTICE: The notification may not be sent by CloseliSDK, so please fill parameter with sender to nil when adding observer
+    You should receive this notification within an account Log in and Log out.
+    @param userInfo in NSNotification is a NSDictionary, which value for NSLocalizedDescriptionKey is a CloseliCameraDevice. The only usefull things in this CloseliCameraDevice is deviceUUID, bIsConnect and p2pID. Please copy bIsConnect and p2pID to your camera list(which return by [CloseliSDK getCameraList]).
+    CloseliCameraDevice *changeDevice = [[notification userInfo] valueForKey:NSLocalizedDescriptionKey];
+ */
+extern NSString *const CameraConnectionDidChangedNotification;
+
+/**
+	Notification for live preview status changing.
+ NOTICE: The notification may not be sent by CloseliSDK, so please fill parameter with sender to nil when adding observer
+    @param userInfo in NSNotification is a NSDictionary, value for NSLocalizedDescriptionKey is a NSNumber, YES means live preview is buffering, NO means live preview begin.
+    BOOL bWaiting = [[[notification userInfo] valueForKey:NSLocalizedDescriptionKey] boolValue];
+ */
+extern NSString *const CameraPlayerStatusChangedNotification;
+
+/**
+ Notification for player stopped.
+ NOTICE: The notification may not be sent by CloseliSDK, so please fill parameter with sender to nil when adding observer
+    @param userInfo in NSNotification is a NSDictionary, value for NSLocalizedFailureReasonErrorKey is a NSNumber, represent the reason why it stopped, normally 0.
+    long stopReason = [[[notification userInfo] valueForKey:NSLocalizedFailureReasonErrorKey] longValue];
+    stopReason: 0x3261-means there is another client playing in p2p mode.
+
+*/
+extern NSString *const CameraPlayerStoppedNotification;
+
+/**
+ Notification for traffic limit when playing.
+ NOTICE: The notification may not be sent by CloseliSDK, so please fill parameter with sender to nil when adding observer
+    @param userInfo
+        In p2p playing mode, userinfo is nil.
+        In fullrelay mode, value for key CameraPlayerTrafficLimitNotificationKeyType is a NSNumber, represent the limit type.
+            2 - Download side(ios device) limit.  3 - Upload side(camera) limit.
+
+*/
+extern NSString *const CameraPlayerTrafficLimitNotification;
+extern NSString *const CameraPlayerTrafficLimitNotificationKeyType;
+
+/**
+ Notification for camera magical zoom changed.
+ NOTICE: The notification may not be sent by CloseliSDK, so please fill parameter with sender to nil when adding observer
+ */
+extern NSString *const CameraPlayerMagicZoomNotification;
+
+/**
+ The key for notification, the value specify the device id, which is deviceUUID of class CloseliCameraDevice.
+ */
+extern NSString *const LogonXMPPDeviceNotificationKeyDeviceId;
+
+/**
+ Notification for camera shutter changed, you must observe the notification while change shutter, and call disposeNotification:forCamera: to update the state for camera device.
+ NOTICE: The notification may not be sent by CloseliSDK, so please fill parameter with sender to nil when adding observer
+
+ @param userInfo
+ value for key LogonXMPPDeviceNotificationKeyDeviceId is a NSString, which is deviceUUID of class CloseliCameraDevice.
+ value for key LogonXMPPDeviceNotificationShutterChangedKeyValue is a NSNumber, 0-for off, others for on.
+ 
+ */
+extern NSString *const LogonXMPPDeviceNotificationShutterChanged;
+extern NSString *const LogonXMPPDeviceNotificationShutterChangedKeyValue;
+/**
+ Notification for camera entering battery mode.
+ NOTICE: The notification may not be sent by CloseliSDK, so please fill parameter with sender to nil when adding observer
+ @param userInfo
+ value for key LogonXMPPDeviceNotificationKeyDeviceId is a NSString, which is deviceUUID of class CloseliCameraDevice.
+    value for key LogonXMPPDeviceNotificationBatteryChangedKeyMode is a NSNumber, 0-not in battery mode, 1-battery mode.
+    value for key LogonXMPPDeviceNotificationBatteryChangedKeyValue is a NSNumber, 0-100, current power of battery.
+ 
+ */
+extern NSString *const LogonXMPPDeviceNotificationBatteryChanged;
+extern NSString *const LogonXMPPDeviceNotificationBatteryChangedKeyMode;
+extern NSString *const LogonXMPPDeviceNotificationBatteryChangedKeyValue;
+
+/**
+ Notification for camera been turned on or off by other clients.
+ NOTICE: The notification may not be sent by CloseliSDK, so please fill parameter with sender to nil when adding observer
+    @param userInfo
+        value for key LogonXMPPDeviceNotificationKeyDeviceId is a NSString, which is deviceUUID of class CloseliCameraDevice.
+        value for key LogonXMPPDeviceNotificationCameraTurnedOnOffKeyValue is a NSNumber, 1-for on, others for off.
+ */
+extern NSString *const LogonXMPPDeviceNotificationCameraTurnedOnOff;
+extern NSString *const LogonXMPPDeviceNotificationCameraTurnedOnOffKeyValue;
+
+/**
+ Notification for add device result.
+ NOTICE: The notification may not be sent by CloseliSDK, so please fill parameter with sender to nil when adding observer
+    @param userInfo,
+        If succeed, the value for key NSLocalizedDescriptionKey is device id,
+            NSString *deviceId = [[notification userInfo] valueForKey:NSLocalizedDescriptionKey];
+        If failed, the value for key NSLocalizedDescriptionKey is a NSError.
+            NSError *error = [[notification userInfo] valueForKey:NSLocalizedDescriptionKey];
+ */
+extern NSString *const LogonXMPPDeviceInsertNotification;
+
+/**
+ Notification for upgrade device result.
+ NOTICE: The notification may not be sent by CloseliSDK, so please fill parameter with sender to nil when adding observer
+    @param userInfo,
+        value for key LogonXMPPDeviceNotificationKeyDeviceId is a NSString, which is deviceUUID of class CloseliCameraDevice.
+        value for key LogonXMPPDeviceUpgradeNotificationKeyServiceId is a NSNumber, which is service id.
+ */
+extern NSString *const LogonXMPPDeviceUpgradeNotification;
+extern NSString *const LogonXMPPDeviceUpgradeNotificationKeyServiceId;
+
+extern NSString *const LogonXMPPDeviceP2PIsPlayingNotification;
+
+typedef void (^AutoUpdateProgressBlock)(NSString *camerap2pID, unsigned long long size, unsigned long long total);
+
+/**
+ *  Debug flags for sdk.
+ */
+typedef NS_OPTIONS(NSUInteger, debugFlag_E)
+{
+    DebugFlag_default   = 0,
+    DebugFlag_tcpBuffer = 1 << 0,
+    DebugFlag_cloud     = 1 << 1,
+    DebugFlag_purchase  = 1 << 2,
+    DebugFlag_logon     = 1 << 3,
+    DebugFlag_all       = DebugFlag_tcpBuffer | DebugFlag_cloud | DebugFlag_purchase | DebugFlag_logon
+};
+
+/**
+ *  Specifies a wifi security type for generate qr code, 
+ *  used by - (NSArray *)generateQRCodeWithSSID:(NSString *)ssid
+ withPassword:(NSString *)password
+ withQRCodeKey:(NSString *)appKey
+ toImageSize:(CGFloat)size
+ margin:(CGFloat)margin
+ wifiSecurityType:(wifiSecurityType_E)wifiSecuritytype
+ encryptType:(encryptType_E)encryptType
+ error:(NSError **)error.
+ */
+typedef NS_ENUM(NSInteger, wifiSecurityType_E)
+{
+    WifiSecurityTypeInvalid = -1,
+    WifiSecurityTypeNone = 0,
+    WifiSecurityTypeWpa,
+    WifiSecurityTypeWpa2,
+    WifiSecurityTypeWep,
+};
+
+/**
+ *  Specifies a encrypt type for generate qr code string,
+ *  used by - (NSArray *)generateQRCodeWithSSID:(NSString *)ssid
+ withPassword:(NSString *)password
+ withQRCodeKey:(NSString *)appKey
+ toImageSize:(CGFloat)size
+ margin:(CGFloat)margin
+ wifiSecurityType:(wifiSecurityType_E)wifiSecuritytype
+ encryptType:(encryptType_E)encryptType
+ error:(NSError **)error;.
+ */
+typedef NS_ENUM(NSInteger, encryptType_E)
+{
+    EncryptTypeNone = 0,
+    EncryptTypeAll,
+};
+
+/**
+ *  Specifies a setting type used in function:setCameraSettingsWithCamera.
+ */
+typedef NS_ENUM(NSUInteger, CloseliCameraSetting_E)
+{
+    /**
+     *  Specifies a type that setting camera name.
+     */
+    CLOSELICAMERA_SETTINGS_NAME = 1,
+    /**
+     *  Specifies a type that setting camera motion detection on-off.
+     */
+    CLOSELICAMERA_SETTINGS_MOTION,
+    /**
+     *  Specifies a type that setting camera motion detection's sensitivity.
+     */
+    CLOSELICAMERA_SETTINGS_MOTION_SENSITITY,
+    /**
+     *  Specifies a type that setting camera motion detection's notification schedule.
+     */
+    CLOSELICAMERA_SETTINGS_STOP_NOTIFICATION_SCHEDULE,
+    /**
+     *  Specifies a type that setting camera sound detection on-off.
+     */
+    CLOSELICAMERA_SETTINGS_SOUNDDETECT,
+    /**
+     *  Specifies a type that setting camera sound detection's sensitivity.
+     */
+    CLOSELICAMERA_SETTINGS_SOUNDDETECT_SENSITITY,
+    /**
+     *  Specifies a type that setting camera micro phone on-off.
+     */
+    CLOSELICAMERA_SETTINGS_CAMERA_MICROPHONE,
+    /**
+     *  Specifies a type that setting camera night mode on-off.
+     */
+    CLOSELICAMERA_SETTINGS_NIGHTMODE,
+    /**
+     *  Specifies a type that setting camera led light on-off.
+     */
+    CLOSELICAMERA_SETTINGS_LED_LIGHT,
+    /** Specifies a type that setting camera's timezone. Param should be
+     
+            [NSTimeZone description];
+
+         Since you get full descritiopn @"Europe/Paris (GMT+1) offset 3600"
+            please pass @"Europe/Paris" or Abbreviation presentation(@"CEST") as the time zone value.
+         Get all available abbreviations, call [NSTimeZone abbreviationDictionary].
+     */
+    CLOSELICAMERA_SETTINGS_TIMEZONE,
+    /**
+     *  Specifies a type that setting camera video's quality.
+            For CLOSELICAMERA_SETTINGS_HDVIDEO and CLOSELICAMERA_SETTINGS_VIDEO_QUALITY, only one option is valid, depend on the camera.
+
+            Check CloseliCameraExtraSettings for setting detail
+     */
+    CLOSELICAMERA_SETTINGS_HDVIDEO,
+    /**
+    *  Specifies a type that setting camera video's quality.
+            For CLOSELICAMERA_SETTINGS_HDVIDEO and CLOSELICAMERA_SETTINGS_VIDEO_QUALITY, only one option is valid, depend on the camera.
+
+            Check CloseliCameraExtraSettings for setting detail
+    */
+    CLOSELICAMERA_SETTINGS_VIDEO_QUALITY,
+    /**
+     *  Specifies a type that setting camera frequency.
+     */
+    CLOSELICAMERA_SETTINGS_ANTIFLICKER,
+    
+    /**
+     *  Specifies a type that setting camera cloud record light on-off.
+     */
+    CLOSELICAMERA_SETTINGS_CLOUDRECORD,
+    /**
+     *  Specifies a type that setting camera schedule of cloud record.
+     */
+    CLOSELICAMERA_SETTINGS_CLOUDRECORD_SCHEDULE,
+    /**
+     *  Specifies a type that setting camera on-off.
+     */
+    CLOSELICAMERA_SETTINGS_TURNON,
+    /**
+    *  Specifies a type that setting camera schedule of turnning off.
+    */
+    CLOSELICAMERA_SETTINGS_TURNOFF_SCHEDULE,
+    /**
+    *  Specifies a type that setting camera schedule of mute.
+    */
+    CLOSELICAMERA_SETTINGS_MUTE_SCHEDULE,
+    /**
+     *  Specifies a type that setting camera image orientation.
+     */
+    CLOSELICAMERA_SETTINGS_ROTATE180,
+    /**
+     *  Specifies a type that setting camera motion region.
+     */
+    CLOSELICAMERA_SETTINGS_MOTIONREGION,
+    /**
+    *  Notify camera to zoom and offset.
+    */
+    CLOSELICAMERA_SETTINGS_MAGIC_ZOOM,
+    /**
+    *  Notify camera to turn on-off the mechanical shutter. You must register notification LogonXMPPDeviceNotificationShutterChanged and call disposeNotification:forCamera: firstly;
+    */
+    CLOSELICAMERA_SETTINGS_MECHANICAL_SHUTTER,
+    /**
+     *  Notify camera to turn on-off pir.
+     */
+    CLOSELICAMERA_SETTINGS_PIRDETECTION,
+    /**
+     *  Set self define data to camera.
+     */
+    CLOSELICAMERA_SETTINGS_SELFDEFINE,
+    /**
+    *  Turn email alerts on or off.
+    */
+    CLOSELICAMERA_SETTINGS_EMAIL_ALERTS,
+    /**
+     *  Turn tamper detection notification on or off.
+     */
+    CLOSELICAMERA_SETTINGS_TAMPER_DETECTION
+};
+typedef NS_ENUM(NSInteger, ePTZControlMode)
+{
+    PTZ_CONTROL_RESET = 0,
+    PTZ_CONTROL_LEFT = 1,
+    PTZ_CONTROL_RIGHT,
+    PTZ_CONTROL_UP,
+    PTZ_CONTROL_DOWN
+};
+
+typedef NS_ENUM(NSInteger, eTouchType)
+{
+    PTZ_TOUCH = 0,
+    PTZ_LONGPRESSED = 1
+};
+/**ArcSoft Closeli SDK for IOS API provides interfaces for Closeli service.
+ Users can easily integrate the API and customize their own UI style. ArcSoft Closeli SDK offers the following main interfaces: registration, login, logout, forget password, add/remove camera, get the camera list, playing a live preview and so on.
+ */
+@interface CloseliSDK : NSObject
+
+
+/**
+*  Initialize CloseliSDK.
+*
+*  @param productKey      product key from ArcSoft.
+*  @param productPassword product password from ArcSoft.
+*  @param serverType      Server type, case insensitive. @"cn" for ali production server, @"cn_stage" for ali stage , @"cn_ipc" for ipc ali production server, @"cn_ipc_stage" for ali ipc stage, @"cn_mobile" for cmcc hemu server, @"cn_mobile_stage" for cmcc hemu stage server.
+*
+*  @return CloseliSDK instance.
+*/
+- (id)initWithProductKey:(NSString *)productKey withPassword:(NSString *)productPassword serverType:(NSString *)serverType;
+
+/**
+ *  Enable CloseliSDK debug logs by flag.
+ *  NOTICE: It must be called after -(id)initWithProductKey:withPassword:serverType: and before any other calls of CloseliSDK.
+ *
+ *  @param flag     debug flags to set.
+ *
+ *  @return none.
+ */
+- (void)setDebugWithFlag:(debugFlag_E)flag;
+
+#pragma mark - account related
+/**
+ *  Register a new account
+ *
+ *  @param email      email account.
+ *  @param password   password of account.
+ *  @param bAutoLogin YES means auto login after register.
+ *  @param error      NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return register result. YES means register success.
+ */
+- (BOOL)registerWithEmail:(NSString *)email withPassword:(NSString *)password isAutoLogin:(BOOL)bAutoLogin error:(NSError **)error;
+
+/**
+ *  Forget password
+ *
+ *  @param email account to get password, Closeli will send a email to your email address for you to reset password.
+ *  @param error NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return return YES, means Closeli has sent an Email to user.
+ */
+- (BOOL)forgetPasswordWithEmail:(NSString *)email error:(NSError **)error;
+
+/**
+ *  Get register phone check code
+ *
+ *  @param phoneNumber phone number to get check code,Closeli will send a check code message to your phone for you to register(or retrieve password or Binding phone).
+ *  @param codeType check code type which you want,1:register  2:reset password  3:Binding phone.
+ *  @param error  NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return return YES, means Closeli has sent a check code message to the phone number.
+ */
+- (BOOL)getRegisterCheckCode:(NSString *)phoneNumber withType:(NSInteger)codeType error:(NSError **)error;
+
+/**
+ *  Register a new account use phone number and check code
+ *
+ *  @param phoneNumber phone number of account.
+ *  @param password   password of account.
+ *  @param checkCode  check code which get from Closeli message.
+ *  @param bAutoLogin YES means auto login after register.
+ *  @param error      NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return register result. YES means register success.
+ */
+- (BOOL)registerWithPhone:(NSString *)phoneNumber withPassword:(NSString *)password checkCode:(NSString *)checkCode isAutoLogin:(BOOL)bAutoLogin error:(NSError **)error;
+
+/**
+ *  reset password use phone number and check code
+ *
+ *  @param phoneNumber phone number of account.
+ *  @param password    new password of account.
+ *  @param checkCode   check code which get from Closeli message.
+ *  @param error       NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return reset result. YES means reset success.
+ */
+- (BOOL)resetPasswordByPhone:(NSString *)phoneNumber withNewPassword:(NSString *)password  checkCode:(NSString *)checkCode error:(NSError **)error;
+
+/**
+ *  Binding phone use check code
+ *
+ *  @param phoneNumber phone number of account.
+ *  @param checkCode   check code which get from Closeli message.
+ *  @param error       NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return bind result. YES means bind success.
+ */
+- (BOOL)bindWithPhone:(NSString *)phoneNumber checkCode:(NSString *)checkCode error:(NSError **)error;
+
+/**
+ *  change password for current login user.
+ *
+ *  @param oldOne old password.
+ *  @param newOne new password.
+ *  @param error NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return return YES, change password succeed.
+ */
+- (BOOL)changePasswordFromOldPassword:(NSString *)oldOne
+                        toNewPassword:(NSString *)newOne
+                                error:(NSError **)error;
+
+/**
+ *  change email for current login user.
+ *
+ *  @param newEmail new email to change to.
+ *  @param password password of current user.
+ *  @param error NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return return YES, change email succeed.
+ */
+- (BOOL)changeEmail:(NSString *)newEmail password:(NSString *)password error:(NSError **)error;
+
+/**
+ *  Login an exist account
+ *
+ *  @param email    account to login.
+ *  @param password password.
+ *  @param error    NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return login result.
+ *  @discussion after logged in, you will receive CameraConnectionDidChangedNotification when one camera online or offline.
+ *  userInfo in CameraConnectionDidChangedNotification is a NSDictionary, which value for NSLocalizedDescriptionKey is a CloseliCameraDevice. The only usefull things in this CloseliCameraDevice is deviceUUID, bIsConnect and p2pID. Please copy bIsConnect and p2pID to your camera list(which return by [CloseliSDK getCameraList]).
+ */
+- (BOOL)loginWithEmail:(NSString *)email withPassword:(NSString *)password error:(NSError **)error;
+
+/**
+ *  Login with custom's token
+ *
+ *  @param token   token in custom account system
+ *  @param account account to login
+ *  @param error   NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return access result.
+ */
+- (BOOL)loginWithToken:(NSString *)token withAccount:(NSString *)account error:(NSError **)error;
+
+/**
+ *  Log out current account.
+ */
+- (void)logout;
+
+#pragma mark - push notification.
+
+/**Used to set the device to receive notifications
+
+ To support push notification, you must
+ 
+ - Call registerForRemoteNotificationTypes in AppDelegate
+ - Because ArcSoft used distrbution APNS certification in server, only distrubution APP can receive push notifications. If your App bundle ID is new, please send the APNS certification to ArcSoft.
+ 
+ @param deviceToken device token for iDevice. Please get it from AppDelegate, didRegisterForRemoteNotificationsWithDeviceToken
+ @param bEnable     enable or disable
+ @param error       NSError object. when get config failed,you can get error message here.
+
+ @return success or not.
+ */
+- (BOOL)EnablePushNotificationWithiDeviceToken:(NSString *)deviceToken isEnable:(BOOL)bEnable error:(NSError **)error;
+
+#pragma mark - camera related
+#pragma mark camera list
+/**
+ *  Get camera list for current account.
+ *
+ *  @return NSMutableArray object with CloseliCameraDevice type. Please remember this list in your APP, database is recommanded.
+ */
+- (NSMutableArray *)getCameraListError:(NSError **)error;
+
+/**
+ *  Get thumbnail for one camera
+ *
+ *  @param device the camera to get thumbnail
+ *
+ *  @return gotten thumbnail in UIImage
+ */
+- (UIImage *)getThumbnailForCamera:(CloseliCameraDevice *)device;
+
+/**
+ *  Add a new camera.
+ *
+ *  @param deviceID new camera's device UUID.
+ *  @param password device password.
+ *  @param error    NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return bool value. YES means successed.
+ */
+- (BOOL)addCameraWithDeviceID: (NSString *)deviceID withPassword:(NSString *)password error:(NSError **)error;
+
+/**
+ *  General a QRCode image array
+ *
+ *  @param ssid     Wi-Fi network name
+ *  @param password Wi-Fi password
+ *  @param appKey   Key for QRCode add device, should same as the key in camera
+ *  @param size     Image size, pixel-related
+ *  @param margin   Image margin(refer value:1-5), point-related, it's related to an unit in qrcode.
+ *  @param wifiSecuritytype     type `wifiSecurityType_E`, used to secure the qr code. You can pass WifiSecurityTypeInvalid to invalid secure action.
+  *  @param encryptType     type `encryptType_E`, used to encrypt the qr code string. You can pass EncryptTypeAll to encrypt the qr code string.
+ *  @param error    NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return NSArray with UIImage. If settings is more than 76, we will create two QRCode image.
+ *  @discussion After scaned QRCode, you will receive LogonXMPPDeviceInsertNotification. If no notification received, please wait 60s for time out.
+ */
+- (NSArray *)generateQRCodeWithSSID:(NSString *)ssid
+                       withPassword:(NSString *)password
+                      withQRCodeKey:(NSString *)appKey
+                        toImageSize:(CGFloat)size
+                             margin:(CGFloat)margin
+                   wifiSecurityType:(wifiSecurityType_E)wifiSecuritytype
+                        encryptType:(encryptType_E)encryptType
+                              error:(NSError **)error;
+
+/**
+ *  Remove one camera.
+ *
+ *  @param cameraDevice the camera to remove.
+ *
+ *  @return bool value, remove result. YES means successed.
+ */
+- (BOOL)removeCamera: (CloseliCameraDevice *)cameraDevice;
+
+#pragma mark camera setting
+/**
+ *  Get the camera's setting configurations from the Closeli server.
+ *
+ *  @param cameraDevice a CloseliCameraDevice,which the config you wanna get.
+ *  @param error        NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return a CloseliCameraExtraSettings object.
+ */
+- (CloseliCameraExtraSettings *)getCameraSettingsWithCamera:(CloseliCameraDevice *)cameraDevice error:(NSError **)error;
+
+/**
+ *  Set settings to camera.
+ *  NOTICE:DON'T DO IT ON MAIN THREAD.
+ *
+ *  @param cameraDevice   camera to setting
+ *  @param nSettingType   setting type from CloseliCameraSetting_E
+ *  @param cameraSettings CloseliCameraExtraSettings, you can only input the configuration you want to set.
+ *  @param error          NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return setting result
+ */
+- (BOOL)setCameraSettingsWithCamera:(CloseliCameraDevice *)cameraDevice
+                          toSetting:(CloseliCameraSetting_E)nSettingType
+                       withSettings:(CloseliCameraExtraSettings *)cameraSettings
+                              error:(NSError **)error;
+
+/**
+ *  Sometimes setting will use the xmpp notification to report result, so please call it when you dispose notificaitons.
+ *  It's only used when dispose notification LogonXMPPDeviceNotificationShutterChanged
+ *
+ *  @param cameraDevice   camera to setting
+ *  @param notification   the notification .
+ *
+ *  @return none
+ */
+- (void)disposeNotification:(NSNotification *)notification forCamera:(CloseliCameraDevice *)cameraDevice;
+
+/**
+ *  Notify camera to play audio file..
+ *  NOTICE:DON'T DO IT ON MAIN THREAD.
+ *
+ *  @param pathAndFileName  Specify a file name(@"filename.wav"), it should be in default path,
+                                or specify full path with file name:(@"/path/to/filename.wav")
+ *  @param camera           camera to send
+ *  @param error            NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return If send succeed or failed.
+ */
+- (BOOL)playAudio:(NSString *)pathAndFileName OnCamera:(CloseliCameraDevice *)camera error:(NSError **)error;
+
+/**
+ *  Notify camera to power off.
+ *  NOTICE:DON'T DO IT ON MAIN THREAD.
+ *
+ *  @param camera           camera to send
+ *  @param error            NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return If send succeed or failed.
+ */
+- (BOOL)powerOff:(CloseliCameraDevice *)camera error:(NSError **)error;
+
+/**
+ *  Notify camera to reboot.
+ *  NOTICE:DON'T DO IT ON MAIN THREAD.
+ *
+ *  @param camera           camera to send
+ *  @param error            NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return If send succeed or failed.
+ */
+- (BOOL)reboot:(CloseliCameraDevice *)camera error:(NSError **)error;
+
+/**
+*  self define data send to camera(Directly to camera, will not through cloud).
+*
+*  @param cameraDevice  camera to send
+*  @param content       data to send to camera
+*  @param error         NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+*
+*  @return If send succeed or failed.
+*/
+- (BOOL)selfDefineForCamera:(CloseliCameraDevice *)cameraDevice
+                    content:(NSData *)contentData
+                      error:(NSError **)error;
+
+#pragma mark device email.
+
+/**
+ *  Get all emails which will receive notification from device.
+ *
+ *  @param device  camera device to get emails
+ *  @param error   NSError contains error code and description, get description by userInfo objectForKey:NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return If succeed, it will return a array of string of emails. Or nil for getting failed.
+ */
+- (NSArray *)getEmailListForDevice:(CloseliCameraDevice *)device error:(NSError **)error;
+
+/**
+ *  register email for receiving notifications from device.
+ *
+ *  @param email   email to register.
+ *  @param device  camera device to register to.
+ *  @param error   NSError contains error code and description, get description by userInfo objectForKey:NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return YES for succeed, and NO for failed.
+ */
+- (BOOL)addEmail:(NSString *)email toDevice:(CloseliCameraDevice *)device error:(NSError **)error;
+
+/**
+ *  unregister email for receiving notifications from device.
+ *
+ *  @param email   email to unregister.
+ *  @param device  camera device to unregister to.
+ *  @param error   NSError contains error code and description, get description by userInfo objectForKey:NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return YES for succeed, and NO for failed.
+ */
+- (BOOL)removeEmail:(NSString *)email fromDevice:(CloseliCameraDevice *)device error:(NSError **)error;
+
+#pragma mark - timeline related
+/**
+ *  Get timeline for one camera.
+ *
+ *  @param cameraDevice   camera to get timeline
+ *  @param startTime      start time, nil to get whole timeline
+ *  @param endTime        end time, nil to get whole timeline
+ *  @param timelineType   eCloseliTimelineType, you can get sections or events, use CLOSELITIMELINE_SECTIONS|CLOSELITIMELINE_EVENTS to get them together.
+ *  @param pptimelineData CloseliTimelineData to save timeline data.
+ *  @param error          NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return getting result
+ *  @discussion Please create a NSTimer(less than 30s) to get the newest data.
+ */
+- (BOOL)getTimelineWithCamera:(CloseliCameraDevice *)cameraDevice
+                withStartTime:(NSDate *)startTime
+                  withEndTime:(NSDate *)endTime
+                     withType:(eCloseliTimelineType)timelineType
+                       toData:(CloseliTimelineData **)pptimelineData
+                        error:(NSError **)error;
+
+/**
+ *  Cancel timeline getting job.
+ *
+ *  @return none.
+ */
+- (void)cancelTimelineGetting;
+
+/**
+ *  Save timeline from start time to end time to a mp4 clip.
+ *
+ *  @param cameraDevice a CloseliCameraDevice object which you wanna to save a clip.
+ *  @param startTime    the start time to save a clip.
+ *  @param endTime      the end time to save a clip.
+ *  @param fileName     the name of this clip file.
+ *  @param pulFileIDArray   the file ids of clips returned by server.
+ *  @param bSync        0: asynchronized, 1: synchronized file list of pulFileIDArray
+ *  @param error        NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return success or not.
+ */
+- (BOOL)makeTimelineClipWithCamera:(CloseliCameraDevice *)cameraDevice withStartTime:(NSDate *)startTime withEndTime:(NSDate *)endTime withName:(NSString *)fileName outFileID:(NSMutableArray**)pulFileIDArray withSync:(BOOL)bSync  error:(NSError **)error;
+
+/**
+ *  Get saved mp4 video files from Closeli Server
+ *
+ *  @param cameraDevice camera 
+ *  @param error        NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return an array with CloseliCloudFileInfo.
+ */
+- (NSMutableArray *)getSavedClipListWithCamera:(CloseliCameraDevice *)cameraDevice error:(NSError **)error;
+
+/**
+ *  Remove a mp4 video file in Closeli server. This action is non-reversible.
+ *
+ *  @param fileInfo a CloseliCloudFileInfo object,include name, url,and other infomation.
+ *  @param error    NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return success or not.
+ */
+- (BOOL)removeSavedClipByFileInfo:(CloseliCloudFileInfo *)fileInfo error:(NSError **)error;
+
+/**
+ *  Delete all timeline section video file in Closeli server. This action is non-reversible.The deleted video file
+ *  will be marked for the event ,which type is KEventTypeDelete
+ *
+ *  @param cameraDevice camera
+ *  @param error        NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return success or not.
+ */
+- (BOOL)deleteAllTimelineSectionWithCamera:(CloseliCameraDevice *)cameraDevice error:(NSError **)error;
+
+/**
+ *  Delete timeline section video file in Closeli server from start time to end time. This action is non-reversible.
+ *The deleted video file will be marked for the event ,which type is KEventTypeDelete
+ *
+ *  @param cameraDevice camera
+ *  @param startTime    video start time
+ *  @param endTime      video end time
+ *  @param error        NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return success or not.
+ */
+- (BOOL)deleteTimeLineSectionWithCamera:(CloseliCameraDevice *)cameraDevice from:(NSDate *)startTime to:(NSDate *)endTime error:(NSError **)error;
+
+#pragma mark - player related
+/**
+ *  Prepare to begin live preview.
+ *
+ *  @param deviceToPlay a CloseliCameraDevice, which camera should begin to live preview, please make sure the camera is ONLINE and p2pID in CloseliCameraDevice is set.
+ *  @param view the UIImageView object you want to show live preview scene. This view can only be used for live preview, please don't add other functions in it.
+ *  @discussion after live preview beginning, you will receive CameraPlayerStatusChangedNotification.
+ *  CameraPlayerStatusChangedNotification in NSNotification is a NSDictionary, value for NSLocalizedDescriptionKey is a NSNumber, YES means live preview is buffering, NO means live preview begin.
+ */
+- (void)preparetoLivePreview:(CloseliCameraDevice *)deviceToPlay withUI:(UIImageView *)view;
+
+/**
+ *  Prepare to play timeline.
+ *
+ *  @param deviceToPlay a CloseliCameraDevice, which camera should begin to see timeline.
+ *  @param view         the UIImageView object you want to show timeline video scene. This view can only be used for live preview, please don't add other functions in it.
+ *  @param startTime    time you wanna play.
+ *  @param endTime     end time for current play, if you don't want to stop, please set endTime to nil
+ *  @param timelineData data in timeline. Please make sure the arraySections in timelineData is valid.
+ */
+- (void)preparetoPlayTimeline:(CloseliCameraDevice *)deviceToPlay
+                       withUI:(UIImageView *)view
+                fromStartTime:(NSDate *)startTime
+                    toEndTime:(NSDate *)endTime
+             withTimelineData:(CloseliTimelineData *)timelineData;
+
+/**
+ *  Prepare to preview video file in cloud.
+ *
+ *  @param sourceURL the video file's url that you wanna clip.
+ *  @param view      the view used for presenting clip
+ */
+- (void)preparetoPlayClipFile:(NSString *)sourceURL withUI:(UIImageView *)view;
+
+/**
+ *  Reset frame for the UIImageView of live preview scene when rotating.
+ *
+ *  @param windowFrame  The new frame of current screen.
+ *  @param newFrame  The new frame for the UIImageView after rotate.
+ */
+- (void)resetPlayerViewWithWindow:(CGRect)windowFrame andFrame:(CGRect)newFrame;
+
+/**
+ *  Talk back to camera, you can only start audio talk during live preview
+ *
+ *  @param error    NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return success or not.
+ */
+- (BOOL)startAudioTalkDuringLive:(NSError **)error;
+
+/**
+ *  Stop audio talk
+ *
+ *  @param error    NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return success or not.
+ */
+- (BOOL)stopAudioTalkDuringLive:(NSError **)error;
+
+/**
+ *  Mute current player
+ *
+ *  @param muted Should mute or not
+ */
+- (void)playerMute:(BOOL)muted;
+
+/**
+ *  Current playing time
+ *
+ *  @return Current playing time
+ */
+- (double)playerCurrentTime;
+
+/**
+ *  Destory current player.
+ */
+- (void)destoryPlayer;
+
+#pragma mark - purchase related
+/**
+ *  Get avliable Closeli services list
+ *
+ *  @param cameraDevice the camera to get services list
+ *  @param error        NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return NSMutableArray object with CloseliProductInfo type.
+ */
+- (NSMutableArray *)getAvaliableCloseliServicesWithCamera:(CloseliCameraDevice *)cameraDevice error:(NSError **)error;
+
+/**
+ *  Get detail service information for one camera
+ *
+ *  @param cameraDevice the camera to get service detail information
+ *  @param error        NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *
+ *  @return CloseliServiceInfo
+ */
+- (CloseliServiceInfo *)getCloseliServiceDetailInfoWithCamera:(CloseliCameraDevice *)cameraDevice error:(NSError **)error;
+
+/**
+ *  IAP a product.
+ *
+ *  @param cameraDevice  The camera for purchasing the service.
+ *  @param product       The product to purchase.
+ *  @param completeBlock Result block, will be called on main thread.
+ */
+typedef void (^purchaseCompleteBlock)(BOOL result, NSError *error);
+- (void)purchaseWithCamera:(CloseliCameraDevice *)cameraDevice
+                   product:(CloseliProductInfo *)product
+                  complete:(purchaseCompleteBlock)completeBlock;
+
+- (void)purchaseRestore;
+
+#pragma mark - update related
+/**
+ *  Check update info for cameras
+ *
+ *  @param cameras cameras(CloseliCameraDevice *) to check, max count should be
+ *
+ *  @return An array of update infos(CloseliCameraUpdateInfo *) for cameras
+ */
+- (NSArray *)checkUpdateInfoForCameras:(NSArray *)cameras;
+
+/**
+ *  Begin upgrade one camera.
+ *
+ *  @param cameraDevice         camera to upgrade
+ *  @param updateInfo         update info get from checkUpdateInfoForCameras
+ *  @param downloadProcessBlock the progress for camera downloading upgrade patch
+ *  @param error                NSError contains error code and description, get description by userInfo objectForKey: NSLocalizedFailureReasonErrorKey.
+ *  @discussion: This function only sends a command to camera. After calling this function, you can get camera downloading progress by "downloadProcessBlock". After Downloading, camera will restart and still need 3 to 5 minutes to install. You can finish waiting as soon as camera online.
+ *  @return success or not.
+ */
+- (BOOL)beginUpgradeCamera:(CloseliCameraDevice *)cameraDevice
+            withUpdateInfo:(CloseliCameraUpdateInfo *)updateInfo
+             progressBlock:(AutoUpdateProgressBlock)downloadProcessBlock
+                     error:(NSError **)error;
+
+
+#pragma mark - inlan mode related
+/**
+ *  Turn on or off in-lan mode(In which, it can communicate with camera in the same Lan, without WAN support).
+ *
+ *  @param inLanModeOn      YES to turn on in-lan mode, while NO to turn off
+ *  @param error            error info when set failed.
+ *  @return Switch succeed or not.
+*/
+- (BOOL)setInLanMode:(BOOL)inLanModeOn error:(NSError **)error;
+
+/**
+*  Get current state of in-lan mode(In which, it can communicate with camera in the same Lan, without WAN support).
+*  @return If in-lan mode is on.
+*/
+- (BOOL)inLanMode;
+#pragma mark - ptz
+/**
+ *  request PTZ information from camera,you shoud addObserver CameraPTZInformationNotification
+ *
+ *  @param cameraDevice cameraDevice a CloseliCameraDevice object which you want to get PTZ information,camera must be connectting
+ *
+ *  @return p2pID which you should check when you get the CameraPTZInformationNotification
+ */
+- (NSString *)requestCameraPTZInformation:(CloseliCameraDevice *)cameraDevice;
+/**
+ *  reset PTZ information to camera
+ *
+ *  @param cameraDevice a CloseliCameraDevice object which you want to set PTZ information,camera must be connectting
+ *  @param string       PTZ information
+ *
+ *  @return  YES /NO
+ */
+- (BOOL)setCameraPTZInformation:(CloseliCameraDevice *)cameraDevice
+                     withString:(NSString *)string;
+/**
+ *  pan camera to reset, left, right, up, down with touch or longpressed.
+ *
+ *  @param mode         control camera left right up down
+ *  @param touchType    touch or longpressed
+ *  @param cameraDevice a CloseliCameraDevice object which you want to pan,camera must be connectting
+ *
+ *  @return YES /NO
+ */
+- (BOOL)panCameraTo:(ePTZControlMode)mode withTouchType:(eTouchType)touchType onCameraDevice:(CloseliCameraDevice *)cameraDevice;
+
+/**
+ *  get Closeli Libs Version
+ *
+ *  @return version strings
+ */
+- (NSString *)getCloseliLibsVersion;
+@end

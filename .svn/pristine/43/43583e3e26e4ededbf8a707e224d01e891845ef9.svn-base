@@ -1,0 +1,206 @@
+//
+//  VipCardManagerView.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "VipCardManagerView.h"
+#import "VipCardModel.h"
+
+@interface VipCardManagerView ()
+
+@property (nonatomic, strong) UIImageView *backGroundImageView;
+@property (nonatomic, strong) UILabel *cardNameLabel;
+@property (nonatomic, strong) UILabel *cardType;
+@property (nonatomic, strong) UILabel *cardLevelLabel;
+@property (nonatomic, strong) UILabel *cardContentLabel;
+@property (nonatomic, strong) UILabel *cardUsedDateLabel;
+@property (nonatomic, strong) UILabel *peopleNumber;
+
+@end
+
+@implementation VipCardManagerView
+
+- (id)init{
+    self = [super init];
+    if (self) {
+        
+        _backGroundImageView = [[UIImageView alloc]init];
+        [self addSubview:_backGroundImageView];
+        [_backGroundImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.left.top.bottom.equalTo(self);
+        }];
+        
+        _cardNameLabel = [[UILabel alloc]init];
+        _cardNameLabel.text = @"金牌储值卡";
+        _cardNameLabel.textColor = [UIColor whiteColor];
+        _cardNameLabel.font = [UIFont systemFontOfSize:17];
+        _cardNameLabel.textAlignment = NSTextAlignmentLeft;
+        [self addSubview:_cardNameLabel];
+        [_cardNameLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.right.equalTo(self);
+            make.left.equalTo(self).offset(15);
+            make.height.mas_equalTo(@48);
+        }];
+        
+        _cardType = [[UILabel alloc]init];
+        _cardType.text = @"卡类型:  优惠卡";
+        _cardType.textColor = [UIColor whiteColor];
+        _cardType.font = [UIFont systemFontOfSize:13];
+        _cardType.textAlignment = NSTextAlignmentLeft;
+        [self addSubview:_cardType];
+        [_cardType mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(_cardNameLabel.mas_bottom).offset(15);
+            make.left.equalTo(_cardNameLabel);
+            make.height.mas_equalTo(@(56/3));
+        }];
+        
+        _cardLevelLabel = [[UILabel alloc]init];
+        _cardLevelLabel.text = @"卡级别:  钻石";
+        _cardLevelLabel.textColor = [UIColor whiteColor];
+        _cardLevelLabel.font = [UIFont systemFontOfSize:13];
+        _cardLevelLabel.textAlignment = NSTextAlignmentLeft;
+        [self addSubview:_cardLevelLabel];
+        [_cardLevelLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(_cardType.mas_bottom);
+            make.left.equalTo(self).offset(15);
+            make.height.equalTo(_cardType);
+        }];
+        
+        _cardContentLabel = [[UILabel alloc]init];
+        _cardContentLabel.text = @"持卡用户享受8折优惠,包厢、酒水费用除";
+        _cardContentLabel.textColor = [UIColor whiteColor];
+        _cardContentLabel.font = [UIFont systemFontOfSize:13];
+        _cardContentLabel.textAlignment = NSTextAlignmentLeft;
+        [self addSubview:_cardContentLabel];
+        [_cardContentLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(_cardLevelLabel.mas_bottom);
+            make.left.equalTo(_cardNameLabel);
+            make.height.equalTo(_cardType);
+            make.width.mas_lessThanOrEqualTo(KScreenWidth - 55);
+        }];
+        
+        _cardUsedDateLabel = [[UILabel alloc]init];
+        _cardUsedDateLabel.text = @"有效期:  自用户领卡之日起30天内有效";
+        _cardUsedDateLabel.textColor = [UIColor whiteColor];
+        _cardUsedDateLabel.font = [UIFont systemFontOfSize:13];
+        _cardUsedDateLabel.textAlignment = NSTextAlignmentLeft;
+        [self addSubview:_cardUsedDateLabel];
+        [_cardUsedDateLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.bottom.equalTo(self);
+            make.left.equalTo(_cardNameLabel);
+            make.height.mas_equalTo(@44);
+        }];
+        
+        UILabel *alreadyGetCard = [[UILabel alloc]init];
+        alreadyGetCard.text = @"人已领取";
+        alreadyGetCard.textColor = [UIColor whiteColor];
+        alreadyGetCard.font = [UIFont systemFontOfSize:13];
+        alreadyGetCard.textAlignment = NSTextAlignmentLeft;
+        [self addSubview:alreadyGetCard];
+        [alreadyGetCard mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.bottom.equalTo(_cardType.mas_bottom);
+            make.right.equalTo(self.mas_right).offset(-15);
+            make.height.equalTo(_cardType);
+        }];
+        
+        _peopleNumber = [[UILabel alloc]init];
+        _peopleNumber.text = @"89人";
+        _peopleNumber.textColor = [UIColor colorWithHexString:@"f1594b"];
+        _peopleNumber.font = [UIFont systemFontOfSize:16];
+        _peopleNumber.textAlignment = NSTextAlignmentLeft;
+        [self addSubview:_peopleNumber];
+        [_peopleNumber mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.bottom.equalTo(_cardType.mas_bottom);
+            make.right.equalTo(alreadyGetCard.mas_left);
+        }];
+    }
+    return self;
+}
+
+- (void)setModel:(VipCardModel *)model{
+    _model = model;
+//    if (model.businessType == NULL || [model.businessType isEqualToString:@""]) {
+//        model.businessType = @"1";
+//    }
+    if ([model.businessType isEqualToString:@"1"]) {
+        _backGroundImageView.image = [UIImage imageNamed:@"VipCardManager_GoldCard"];
+        _cardType.text = [NSString stringWithFormat:@"卡类型:  储值卡"];
+    }else if([model.businessType isEqualToString:@"2"]){
+        _backGroundImageView.image = [UIImage imageNamed:@"VipCardManager_DiamondCard"];
+        _cardType.text = [NSString stringWithFormat:@"卡类型:  优惠卡"];
+    }else{
+        //保护没type情况
+        _backGroundImageView.image = [UIImage imageNamed:@"VipCardManager_GoldCard"];
+    }
+    _cardNameLabel.text = self.model.cardName;
+    _cardLevelLabel.text = [NSString stringWithFormat:@"卡级别:  %@",self.model.cardLevel];
+    
+    if (![self isNullString:self.model.discount]) {
+        double discount = [self.model.discount doubleValue];
+        //discount < 10,显示打折多少的信息
+        if (discount < 10.0) {
+            if (![self isNullString:self.model.remarks]) {
+                _cardContentLabel.text = [NSString stringWithFormat:@"持卡用户享受%@折优惠,%@", self.model.discount, self.model.remarks];
+            }else {
+                _cardContentLabel.text = [NSString stringWithFormat:@"持卡用户享受%@折优惠", self.model.discount];
+            }
+        //discount == 10.0 则无优惠
+        }else{
+            if (![self isNullString:self.model.remarks]) {
+                _cardContentLabel.text = [NSString stringWithFormat:@"无折扣,%@", self.model.remarks];
+            }else {
+                _cardContentLabel.text = [NSString stringWithFormat:@"无折扣"];
+            }
+            
+        }
+    }
+    
+    if ([self.model.validityTime isEqualToString:@"0"]) {
+        _cardUsedDateLabel.text = [NSString stringWithFormat:@"有效期:  长期有效"];
+    }else{
+        _cardUsedDateLabel.text = [NSString stringWithFormat:@"有效期:  自用户领卡之日起%@天内有效",self.model.validityTime];
+    }
+    _peopleNumber.text = self.model.number;
+}
+
+- (BOOL)isNullString:(NSString *)str {
+    if ([str isEqual:[NSNull null]]) {
+        return YES;
+    }
+    if ([str isKindOfClass:[NSNull class]]) {
+        return YES;
+    }
+    if (str == nil || str == NULL) {
+        return YES;
+    }
+    if ([[str stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] length] == 0) {
+        return YES;
+    }
+    
+    return NO;
+}
+
+@end
+
+@implementation VipCardManagerTableViewCell
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        _vipCardView = [[VipCardManagerView alloc]init];
+//        [goldCard addTarget:self sel:@selector(editCard:)];
+        [self addSubview:_vipCardView];
+        [_vipCardView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self).offset(12);
+            make.left.equalTo(self).offset(16);
+            make.right.equalTo(self).offset(-16);
+            make.height.mas_equalTo(@178);
+        }];
+    }
+    return self;
+}
+
+@end

@@ -1,0 +1,135 @@
+//
+//  PrepaidSavingCardView.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/25.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "PrepaidSavingCardView.h"
+#import "SelectedButton.h"
+
+@implementation PrepaidSavingCardView
+
+- (id)init{
+    self = [super init];
+    if (self) {
+        self.backgroundColor = [UIColor colorWithHexString:@"f6f5fa"];
+        [self setUI];
+    }
+    return self;
+}
+
+- (void)setUI{
+    UILabel *moneyTitleLabel = [[UILabel alloc]init];
+    moneyTitleLabel.text = @"您的账户余额:";
+    moneyTitleLabel.textAlignment = NSTextAlignmentLeft;
+    moneyTitleLabel.textColor = [UIColor colorWithHexString:@"666666"];
+    moneyTitleLabel.font = [UIFont systemFontOfSize:13];
+    moneyTitleLabel.backgroundColor = [UIColor clearColor];
+    [self addSubview:moneyTitleLabel];
+    [moneyTitleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self).offset(15);
+        make.height.mas_equalTo(@48);
+        make.top.equalTo(self);
+    }];
+    
+    UILabel *moneyLabel = [[UILabel alloc]init];
+    moneyLabel.text = @"140.00元";
+    moneyLabel.textAlignment = NSTextAlignmentLeft;
+    moneyLabel.textColor = [UIColor colorWithHexString:@"f1594b"];
+    moneyLabel.font = [UIFont systemFontOfSize:13];
+    moneyLabel.backgroundColor = [UIColor clearColor];
+    [self addSubview:moneyLabel];
+    [moneyLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(moneyTitleLabel.mas_right);
+        make.height.mas_equalTo(@48);
+        make.top.equalTo(self);
+    }];
+    
+    UIView *whiteView = [[UIView alloc]init];
+    whiteView.backgroundColor = [UIColor whiteColor];
+    whiteView.layer.borderColor = [UIColor colorWithHexString:@"dadada"].CGColor;
+    whiteView.layer.borderWidth = 1;
+    [self addSubview:whiteView];
+    [whiteView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.left.equalTo(self);
+        make.top.equalTo(self).offset(49);
+        make.height.mas_equalTo(@221);
+    }];
+    
+    SelectedButton *button50 = [[SelectedButton alloc]initWithTitle:@"50"];
+    [whiteView addSubview:button50];
+    [button50 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(whiteView).offset(15);
+        make.top.equalTo(whiteView).offset(18);
+        make.height.mas_equalTo(@50);
+        make.right.equalTo(whiteView.mas_centerX).offset(-15);
+    }];
+    
+    SelectedButton *button100 = [[SelectedButton alloc]initWithTitle:@"100"];
+    [whiteView addSubview:button100];
+    [button100 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(whiteView).offset(-15);
+        make.top.equalTo(whiteView).offset(18);
+        make.height.mas_equalTo(@50);
+        make.left.equalTo(whiteView.mas_centerX).offset(15);
+    }];
+    
+    SelectedButton *button500 = [[SelectedButton alloc]initWithTitle:@"500"];
+    [whiteView addSubview:button500];
+    [button500 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(button50);
+        make.top.equalTo(button50.mas_bottom).offset(15);
+        make.height.mas_equalTo(@50);
+        make.right.equalTo(whiteView.mas_centerX).offset(-15);
+    }];
+    
+    SelectedButton *button1000 = [[SelectedButton alloc]initWithTitle:@"1000"];
+    [whiteView addSubview:button1000];
+    [button1000 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(whiteView).offset(-15);
+        make.top.equalTo(button500);
+        make.height.mas_equalTo(@50);
+        make.left.equalTo(whiteView.mas_centerX).offset(15);
+    }];
+    
+    UITextField *moneyTF = [[UITextField alloc]init];
+    moneyTF.placeholder = @"手动输入金额";
+    moneyTF.font = [UIFont systemFontOfSize:13];
+    moneyTF.layer.borderWidth = 1;
+    moneyTF.layer.cornerRadius = 4;
+    moneyTF.layer.borderColor = [UIColor colorWithHexString:@"dadada"].CGColor;
+    [whiteView addSubview:moneyTF];
+    [moneyTF mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(164, 46));
+        make.top.equalTo(button500.mas_bottom).offset(24);
+        make.left.equalTo(button50);
+    }];
+    
+    UILabel *afterMoneyTFLabel = [[UILabel alloc]init];
+    afterMoneyTFLabel.text = @"元(最小支持的充值金额为0.01)";
+    afterMoneyTFLabel.textColor = [UIColor colorWithHexString:@"666666"];
+    afterMoneyTFLabel.textAlignment = NSTextAlignmentLeft;
+    afterMoneyTFLabel.font = [UIFont systemFontOfSize:13];
+    [whiteView addSubview:afterMoneyTFLabel];
+    [afterMoneyTFLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(moneyTF.mas_right);
+        make.centerY.equalTo(moneyTF);
+    }];
+    
+    UIButton *perpaidButton = [[UIButton alloc]init];
+    [perpaidButton setTitle:@"立即充值" forState:UIControlStateNormal];
+    [perpaidButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    perpaidButton.layer.cornerRadius = 4;
+    perpaidButton.backgroundColor = [UIColor colorWithHexString:@"01aaef"];
+    [self addSubview:perpaidButton];
+    [perpaidButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(whiteView.mas_bottom).offset(15);
+        make.left.equalTo(self).offset(15);
+        make.right.equalTo(self).offset(-15);
+        make.height.mas_equalTo(@44);
+    }];
+}
+
+@end

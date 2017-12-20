@@ -1,0 +1,55 @@
+//
+//  VipManagerChildViewController.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "VipManagerChildViewController.h"
+#import "VipManageView.h"
+#import "GiveVipCardViewController.h"
+#import "VipDetailViewController.h"
+
+@interface VipManagerChildViewController ()<VipManageViewDelegate>
+
+@end
+
+@implementation VipManagerChildViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    self.title = @"会员管理";
+    VipManageView *vc = [[VipManageView alloc]init];
+    vc.delegate = self;
+    [self.view addSubview:vc];
+    [vc mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.bottom.equalTo(self.view);
+    }];
+}
+
+- (void)didClickGiveCardButton{
+    [self.navigationController pushViewController:[[GiveVipCardViewController alloc]init] animated:YES];
+}
+
+- (void)didClickTableViewCell{
+    [self.navigationController pushViewController:[[VipDetailViewController alloc]init] animated:YES];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

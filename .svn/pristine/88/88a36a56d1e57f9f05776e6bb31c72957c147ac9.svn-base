@@ -1,0 +1,129 @@
+//
+//  WeiZhanCollectView.m
+//  BusinessManager
+//
+//  Created by zhaojh on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanCollectView.h"
+#import "UIView+UIViewController.h"
+#import "FoodWeiZhanVC.h"
+#import "WC_GeneralVC.h"
+#import "HouseWeiZhanVC.h"
+#import "E_Commerce.h"
+#import "FourSWeiZhanVC.h"
+static NSString* identfier = @"WeiZhanCollectViewCellId";
+
+@implementation WeiZhanCollectView
+
+-(id)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout select:(SelectIndex)block{
+    
+    
+    if (self = [super initWithFrame:frame collectionViewLayout:layout]) {
+        _block = block;
+        self.dataSource = self;
+        self.delegate = self;
+        self.backgroundColor = [UIColor whiteColor];
+        
+        [self registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:identfier];
+        
+    }
+    return self;
+}
+-(NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView{
+
+    return 1;
+}
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
+
+    return 6;
+}
+
+-(UICollectionViewCell*)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+    UICollectionViewCell* cell = [collectionView dequeueReusableCellWithReuseIdentifier:identfier forIndexPath:indexPath];
+    
+    if (indexPath.item % 2 == 0) {
+        
+        cell.contentView.layer.contents = (__bridge id _Nullable)([UIImage imageNamed:@"weizhanpic1.jpg"].CGImage);
+    }else {
+       cell.contentView.layer.contents = (__bridge id _Nullable)([UIImage imageNamed:@"weizhanpic2.jpg"].CGImage);
+    }
+    
+    return cell;
+}
+-(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+
+    switch (indexPath.item) {
+        case 0:{
+            WC_GeneralVC* vc = [[WC_GeneralVC alloc]init];
+            [self.viewController.navigationController pushViewController:vc animated:YES];
+        }
+        case 1:{
+            FourSWeiZhanVC* vc = [[FourSWeiZhanVC alloc]init];
+            [self.viewController.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case 2:{
+            FoodWeiZhanVC* vc = [[FoodWeiZhanVC alloc]initWithNibName:@"FoodWeiZhanVC" bundle:nil];
+            [self.viewController.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case 4:{
+            HouseWeiZhanVC* vc = [[HouseWeiZhanVC alloc]initWithNibName:@"HouseWeiZhanVC" bundle:nil];
+            [self.viewController.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        case 5:{
+            E_Commerce *vc = [[E_Commerce alloc]init];
+            [self.viewController.navigationController pushViewController:vc animated:YES];
+        }
+            break;
+        default:{
+        
+        }
+            break;
+    }
+}
+
+-(UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section{
+    
+    return UIEdgeInsetsMake(SpaceH, SpaceW, SpaceH, SpaceH);
+}
+
+-(CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+    return CGSizeMake(self.width - SpaceW*2, self.height - SpaceH*2);
+}
+
+-(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
+
+    CGFloat targetX = scrollView.contentOffset.x;
+    
+    NSInteger index = (targetX + SCREEN_SIZE.width / 2) / SCREEN_SIZE.width;
+    
+    if (index < 0) {
+        index = 0;
+    }else if(index >= 6){
+        index = 6 - 1;
+    }
+    if (self.block) {
+        
+        _block(index);
+    }
+}
+
+
+#pragma mark - 初始化
+@synthesize datasArry = _datasArry;
+
+-(NSMutableArray *)datasArry{
+
+    if (!_datasArry) {
+        _datasArry = [NSMutableArray array];
+    }
+    return _datasArry;
+}
+
+@end

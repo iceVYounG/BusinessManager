@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10117" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="67" id="KGk-i7-Jjw" customClass="EC_proTabCell">
+            <rect key="frame" x="0.0" y="0.0" width="422" height="67"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="422" height="66"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="M4t-5L-uPH">
+                        <rect key="frame" x="15" y="8" width="50" height="50"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="50" id="fde-BL-Xda"/>
+                            <constraint firstAttribute="height" constant="50" id="pfr-4i-hde"/>
+                        </constraints>
+                    </imageView>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SNp-PW-IFp">
+                        <rect key="frame" x="75" y="13" width="42" height="15"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="15" id="s5c-lk-SGU"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                        <color key="textColor" red="0.25490196078431371" green="0.25490196078431371" blue="0.25490196078431371" alpha="1" colorSpace="calibratedRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="q6B-vD-bnT">
+                        <rect key="frame" x="75" y="35" width="42" height="15"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="15" id="6o2-K4-2G2"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                        <color key="textColor" red="0.54117647058823526" green="0.54117647058823526" blue="0.54117647058823526" alpha="1" colorSpace="calibratedRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uh0-f0-jLq">
+                        <rect key="frame" x="404" y="0.0" width="18" height="18"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="18" id="kXo-ly-QBe"/>
+                            <constraint firstAttribute="width" constant="18" id="nZh-g2-azi"/>
+                        </constraints>
+                        <state key="normal" backgroundImage="cancel"/>
+                    </button>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="SNp-PW-IFp" firstAttribute="leading" secondItem="M4t-5L-uPH" secondAttribute="trailing" constant="10" id="9mJ-sD-oGe"/>
+                    <constraint firstItem="q6B-vD-bnT" firstAttribute="leading" secondItem="M4t-5L-uPH" secondAttribute="trailing" constant="10" id="Fvm-T6-uLG"/>
+                    <constraint firstItem="q6B-vD-bnT" firstAttribute="top" secondItem="SNp-PW-IFp" secondAttribute="bottom" constant="7" id="JGh-V5-FHC"/>
+                    <constraint firstItem="M4t-5L-uPH" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="KSd-cX-BCC"/>
+                    <constraint firstItem="M4t-5L-uPH" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="15" id="Vwn-bJ-5gr"/>
+                    <constraint firstItem="uh0-f0-jLq" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="WSK-Kp-huW"/>
+                    <constraint firstItem="SNp-PW-IFp" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="13" id="e7a-t1-rZo"/>
+                    <constraint firstAttribute="trailing" secondItem="uh0-f0-jLq" secondAttribute="trailing" id="rYx-ai-adz"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="cancelBtn" destination="uh0-f0-jLq" id="ffp-Jy-yY4"/>
+                <outlet property="imgV" destination="M4t-5L-uPH" id="CFf-cY-C0s"/>
+                <outlet property="priceLb" destination="q6B-vD-bnT" id="cny-GI-rlf"/>
+                <outlet property="titleLB" destination="SNp-PW-IFp" id="rVi-Ej-rfj"/>
+            </connections>
+            <point key="canvasLocation" x="165" y="268.5"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="cancel" width="18" height="18"/>
+    </resources>
+</document>

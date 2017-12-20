@@ -1,0 +1,96 @@
+//
+//  LuckDrawModel.m
+//  BusinessManager
+//
+//  Created by The Only on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "LuckDrawModel.h"
+
+@implementation LuckDrawModel
+
+@end
+// 活动列表
+@implementation activityListModel
+
+-(id)init
+{
+    if (self = [super init]) {
+        
+        [activityListModel mj_setupObjectClassInArray:^NSDictionary *{
+            
+            return @{@"data":@"avtivityListItem"};
+        }];
+    }
+    return self;
+}
+@end
+
+@implementation avtivityListItem
+ 
++(NSDictionary *)replacedKeyFromPropertyName
+{
+    return @{@"ID":@"id"};
+}
+@end
+
+
+//现金红包充值记录
+@implementation RechargeDetailModel
+
+-(id)init
+{
+    if (self = [super init]) {
+        
+        [RechargeDetailModel mj_setupObjectClassInArray:^NSDictionary *{
+            
+            return @{@"data":@"RechargeDetailItemModel"};
+        }];
+    }
+    return self;
+}
+@end
+
+@implementation RechargeDetailItemModel
+
++(NSDictionary *)replacedKeyFromPropertyName
+{
+    return @{@"ID":@"id"};
+}
+@end
+//活动详情
+@implementation activityInfoModel
+
+-(id)init
+{
+    if (self = [super init]) {
+        
+        [activityInfoModel mj_setupObjectClassInArray:^NSDictionary *{
+            
+            return @{@"prizes":@"activityInfoItem"};
+        }];
+    }
+    return self;
+}
+
+@end
+
+@implementation activityInfoItem
+
+
++(NSDictionary *)replacedKeyFromPropertyName
+{
+    return @{@"InfoID":@"id"};
+}
+// 防止KVC找不到对应的key报错
+//- (void)setValue:(id)value forUndefinedKey:(NSString *)key {
+//    
+//}
+//- (id)valueForUndefinedKey:(NSString *)key {
+//    return nil;
+//}
+
+
+@end
+

@@ -1,0 +1,53 @@
+//
+//  WinportToolsVC.m
+//  BusinessManager
+//
+//  Created by 周迎春 on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WinportToolsVC.h"
+#import "DrawActivityManageVC.h"
+#import "MessagePushMainVC.h"
+#import "WatchGhostMainVC.h"
+@interface WinportToolsVC ()
+
+@end
+
+@implementation WinportToolsVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+}
+- (IBAction)pushLuckyDraw:(id)sender {
+        DrawActivityManageVC *dvc = [[DrawActivityManageVC alloc]initWithNibName:@"DrawActivityManageVC" bundle:nil];
+        [self.navigationController pushViewController:dvc animated:YES];
+}
+- (IBAction)pushMessagePush:(id)sender {
+
+    MessagePushMainVC *mainVC = [[MessagePushMainVC alloc] initWithNibName:@"MessagePushMainVC" bundle:nil];
+    [self.navigationController pushViewController:mainVC animated:YES];
+}
+
+- (IBAction)watchGhostClick:(UIButton *)sender {
+    WatchGhostMainVC *vc = [[WatchGhostMainVC alloc] initWithNibName:@"WatchGhostMainVC" bundle:nil];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

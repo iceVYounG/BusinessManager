@@ -1,0 +1,305 @@
+//
+//  WeiZhanBaseController.m
+//  BusinessManager
+//
+//  Created by zhaojh on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanBaseController.h"
+#import "WeiZhanModel.h"
+#import "MyWeiZhanVC.h"
+#import "HomeController.h"
+
+//最大照片体积限制 1 M
+#define BM_MaxImageDataLimited (1024 * 1024)
+
+@interface WeiZhanBaseController ()<UIAlertViewDelegate>
+
+@end
+
+@implementation WeiZhanBaseController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+
+    // Do any additional setup after loading the view.
+}
+
+-(void)saveTemplte:(NSMutableArray*)datas succeed:(void (^)(id responseObject))succeed error:(void (^)(NSError* error))errored{
+
+    [SVProgressHUD showWithStatus:@"数据处理中..."];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeGradient];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    
+    [[MallNetManager share] request:API_TemplateSave parameters:[datas jm_ArryPrams] success:^(NSURLSessionDataTask *task, id responseObject) {
+         [SVProgressHUD dismiss];
+        
+        if (Succeed(responseObject)) {
+            if (succeed) {
+                succeed(responseObject);
+                NSLog(@"保存成功");
+            }
+        }else{
+         
+          [OMGToast showWithText:responseObject[@"msg"]];
+        }
+       
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        [SVProgressHUD dismiss];
+        [SVProgressHUD showErrorWithStatus:@"网络异常"];
+        if (errored) {
+             errored(error);
+        }
+    }];
+}
+
+-(void)saveTemple:(NSString*)templeNo andshopName:(NSString *)shopName{
+
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    [prams setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    [prams setObject:NoNullStr(templeNo, @"") forKey:@"templateNo"];
+    [prams setObject:NoNullStr(shopName, @"") forKey:@"shopName"];
+    
+    [[MallNetManager share] request:API_storeTemplateSave prams:prams succeed:^(id responseObject) {
+        
+        [OMGToast showWithText:@"模板保存成功"];
+        if ([self.isFlower isEqualToString:@"1"]) {
+            MyWeiZhanVC* wzVC = [[MyWeiZhanVC alloc]init];
+            
+            if (wzVC.refreshBlock) {
+                wzVC.refreshBlock();
+            }
+            [self.navigationController pushViewController:wzVC animated:YES];
+        }
+        for (UIViewController* vc in self.navigationController.viewControllers) {
+            
+            if ([vc isKindOfClass:[MyWeiZhanVC class]]) {
+                
+                MyWeiZhanVC* wzVC = (MyWeiZhanVC*)vc;
+                
+                if (wzVC.refreshBlock) {
+                    wzVC.refreshBlock();
+                }
+                [self.navigationController popToViewController:wzVC animated:YES];
+            }
+        }
+    } showHUD:YES];
+
+
+}
+
+BOOL isHongBaoVC;
+NSString *tempNo;
+-(void)quickRegister:(NSString *)linkePhone smsCode:(NSString *)smscode store:(NSString *)storeName withHongBao:(BOOL)isHongBao withTempNo:(NSString *)str{
+    isHongBaoVC=isHongBao;
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    [prams setObject:NoNullStr(storeName, @"") forKey:@"storeName"];
+    [prams setObject:NoNullStr(linkePhone, @"") forKey:@"linkPhone"];
+    [prams setObject:NoNullStr(smscode, @"") forKey:@"smsCode"];
+    tempNo=str;
+    
+    
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+    [SVProgressHUD showWithStatus:@"数据请求中..."];
+    [[MallNetManager share]request:API_fastRegister parameters:prams success:^(NSURLSessionDataTask *task, id responseObject) {
+        NSDictionary *dic = responseObject;
+        
+        NSString *code = [dic objectForKey:@"code"];
+        NSString *msg = [dic objectForKey:@"msg"];
+        
+        if ([code isEqualToString:@"00-00"]) {
+            [SVProgressHUD dismiss];
+            NSDictionary *data = [dic objectForKey:@"data"];
+            if ([data isKindOfClass:[NSDictionary class]]) {
+                
+               int storeFlag = [[data objectForKey:@"storeFlag"] intValue];
+                self.targetStoreId = [data objectForKey:@"storeId"];
+                AccountInfo.storeId=self.targetStoreId;
+                AccountInfo.linkPhone=[data objectForKey:@"linkPhone"];
+                AccountInfo.storeName=[data objectForKey:@"storeName"];
+                AccountInfo.isLogin=YES;
+                
+                //已存在商户
+                if (storeFlag ==0) {
+                    UIAlertView *alter = [ [UIAlertView alloc] initWithTitle:@"" message:@"该账号下已有模板是否覆盖" delegate:self cancelButtonTitle:@"否" otherButtonTitles:@"是", nil];
+                    [alter show];
+                }else{
+                    if (isHongBaoVC) {
+                        [[NSNotificationCenter defaultCenter]postNotificationName:@"HongBaoVC" object:@(1)];
+                    }
+                    else{
+                        [[NSNotificationCenter defaultCenter]postNotificationName:@"MainVC" object:@(1)];
+                    }
+                    [self updateStoreInforRequest:AccountInfo.tempStoreId targetId:self.targetStoreId withTempNo:tempNo];
+                    
+                }
+                
+                
+            }
+            
+            
+        }else{
+            
+            [SVProgressHUD showInfoWithStatus:msg];
+            
+        }
+        
+        
+        NSLog(@"%@",dic);
+
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        
+    }];
+
+    
+}
+
+
+-(void)requestGetSeqno{
+    
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+    [SVProgressHUD showWithStatus:@"数据请求中..."];
+    [[MallNetworkEngine vipCardMGshare]requestNotEncodeWithDate:self.requestDate requestWithPath:API_getSeqno Params:prams CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        
+        NSString *code = [dic objectForKey:@"code"];
+        NSString *msg = [dic objectForKey:@"msg"];
+        
+        if ([code isEqualToString:@"00-00"]) {
+             [SVProgressHUD dismiss];
+            NSDictionary *data = [dic objectForKey:@"data"];
+            if ([data isKindOfClass:[NSDictionary class]]) {
+                
+                NSString *seqno = [data objectForKey:@"seqno"];
+                AccountInfo.tempStoreId=seqno;
+//                self.tempStoreId = seqno;
+                
+            }else{
+                [SVProgressHUD dismiss];
+                
+            }
+            
+        }else{
+            [SVProgressHUD showInfoWithStatus:msg];
+            
+        }
+        
+        
+        NSLog(@"%@",dic);
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        [SVProgressHUD showInfoWithStatus:@"数据请求失败"];
+    }];
+}
+
+
+-(void)updateStoreInforRequest:(NSString *)sourceId targetId:(NSString *)targetId withTempNo:(NSString *)str{
+    NSMutableDictionary *prams = [NSMutableDictionary dictionary];
+    [prams setObject:NoNullStr(sourceId, @"") forKey:@"sourceId"];
+    [prams setObject:NoNullStr(targetId, @"") forKey:@"targetId"];
+    [prams setObject:NoNullStr(tempNo, @"") forKey:@"templateNo"];
+    
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+    [SVProgressHUD showWithStatus:@"数据请求中..."];
+    [[MallNetManager share]request:API_updateStoreInfo  parameters:prams success:^(NSURLSessionDataTask *task, id responseObject) {
+        NSDictionary *dic = responseObject;
+        
+        NSString *code = [dic objectForKey:@"code"];
+        NSString *msg = [dic objectForKey:@"msg"];
+        
+        if ([code isEqualToString:@"00-00"]) {
+            [SVProgressHUD dismiss];
+            NSMutableArray *vcs = [NSMutableArray arrayWithArray:self.navigationController.viewControllers];
+            [vcs removeLastObject];
+            HomeController* homeVC = [[HomeController alloc]init];
+
+            [vcs addObject:homeVC];
+            
+            MyWeiZhanVC *weizhan  = [[MyWeiZhanVC alloc]init];
+            
+            [vcs addObject:weizhan];
+            
+            self.navigationController.viewControllers = vcs;
+            
+        }else{
+            [SVProgressHUD showInfoWithStatus:msg];
+            
+        }
+        
+        
+        NSLog(@"%@",dic);
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        [SVProgressHUD showInfoWithStatus:@"数据请求失败"];
+
+    }];
+}
+
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    if (isHongBaoVC) {
+       [[NSNotificationCenter defaultCenter]postNotificationName:@"HongBaoVC" object:@(buttonIndex)];
+    }
+    else{
+     [[NSNotificationCenter defaultCenter]postNotificationName:@"MainVC" object:@(buttonIndex)];
+    }   
+     [self updateStoreInforRequest:AccountInfo.tempStoreId targetId:self.targetStoreId withTempNo:tempNo];
+}
+
+/**
+ * @ 最大图片体积限制
+ * @ param image: 要裁剪的图片
+ * @ return: 图片
+ */
+
+- (UIImage *)getMaxImageDataLimitedWithImage:(UIImage *)image {
+    CGFloat compression = 0.7f;
+    CGFloat maxCompression = 0.3f;
+    NSData *imageData = UIImageJPEGRepresentation(image, compression);
+    while (imageData.length > BM_MaxImageDataLimited && compression > maxCompression) {
+        compression -= 0.1f;
+        imageData = UIImageJPEGRepresentation(image, compression);
+    }
+    UIImage *compressImage = [[UIImage alloc] initWithData:imageData];
+    return compressImage;
+}
+
+/**
+ * @ 最大图片体积限制 UIImage --> NSData
+ * @ param image: 要裁剪的图片
+ * @ return: 图片Data
+ */
+- (NSData *)transformImageToDataLimited:(UIImage *)image {
+    CGFloat compression = 0.7f;
+    CGFloat maxCompression = 0.3f;
+    NSData *imageData = UIImageJPEGRepresentation(image, compression);
+    while (imageData.length > BM_MaxImageDataLimited && compression > maxCompression) {
+        compression -= 0.1f;
+        imageData = UIImageJPEGRepresentation(image, compression);
+    }
+    return imageData;
+}
+
+/**
+ * @ 最大图片体积限制 NSData --> NSData
+ * @ param imageData: 要裁剪的图片data
+ * @ return: 图片data;
+ */
+- (NSData *)getMaxImageDataLimitedWithData:(NSData *)imageData {
+    CGFloat compression = 0.7f;
+    CGFloat maxCompression = 0.3f;
+    UIImage *image = [UIImage imageWithData:imageData];
+    while (imageData.length > BM_MaxImageDataLimited && compression > maxCompression) {
+        compression -= 0.1f;
+        imageData = UIImageJPEGRepresentation(image, compression);
+    }
+    return imageData;
+}
+
+
+@end

@@ -1,0 +1,33 @@
+//
+//  CreateActivityVC.h
+//  BusinessManager
+//
+//  Created by smile apple on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "BaseController.h"
+
+@interface CreateActivityVC : BaseController
+- (IBAction)goToAddMacket:(id)sender;
+@property (weak, nonatomic) IBOutlet UITextField *activityNameTF; //活动名称
+@property (weak, nonatomic) IBOutlet UITextField *beginTimeTF;  //开始时间
+
+@property (weak, nonatomic) IBOutlet UITextField *endTimeTF;   //结束时间
+
+@property (weak, nonatomic) IBOutlet UITextField *luckyTimesTF;  //抽奖次数
+
+@property (weak, nonatomic) IBOutlet UITextField *effectDaysTF;   //有效天数
+
+@property (weak, nonatomic) IBOutlet UIButton *userBtn;
+
+- (IBAction)selectUserBtn:(id)sender;//选择目标用户
+
+
+@property (weak, nonatomic) IBOutlet UIButton *nextBtn;
+
+@property (weak, nonatomic) IBOutlet UIButton *beginBtn;  //开始时间按钮
+@property (weak, nonatomic) IBOutlet UIButton *endBtn;    //结束时间按钮
+
+
+@end

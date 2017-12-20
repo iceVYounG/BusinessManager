@@ -1,0 +1,132 @@
+//
+//  GiveVipCardView.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/26.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "GiveVipCardChildView.h"
+
+@implementation GiveVipCardChildView
+
+- (id)init{
+    self = [super init];
+    if (self) {
+        self.backgroundColor = [UIColor colorWithHexString:@"f6f5fa"];
+        [self setUI];
+    }
+    return self;
+}
+
+- (void)setUI{
+    UIView *whiteBackgroundView = [[UIView alloc]init];
+    whiteBackgroundView.backgroundColor = [UIColor whiteColor];
+    whiteBackgroundView.layer.borderColor = [UIColor colorWithHexString:@"dadada"].CGColor;
+    whiteBackgroundView.layer.borderWidth = 1;
+    [self addSubview:whiteBackgroundView];
+    [whiteBackgroundView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.equalTo(self);
+        make.top.equalTo(self).offset(12);
+        make.height.equalTo(@146);
+    }];
+    
+    UITextField *phoneNumberTF = [[UITextField alloc]init];
+    phoneNumberTF.placeholder = @"请输入领卡人手机号码";
+    [phoneNumberTF setValue:[UIColor colorWithHexString:@"aaaaaa"] forKeyPath:@"_placeholderLabel.textColor"];
+    phoneNumberTF.font = [UIFont systemFontOfSize:14];
+    [whiteBackgroundView addSubview:phoneNumberTF];
+    [phoneNumberTF mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(whiteBackgroundView).offset(16);
+        make.top.equalTo(whiteBackgroundView);
+        make.height.mas_equalTo(@48);
+        make.right.equalTo(whiteBackgroundView);
+    }];
+    
+    UIView *lineView1 = [[UIView alloc]init];
+    lineView1.backgroundColor = [UIColor colorWithHexString:@"e5e5e5"];
+    [whiteBackgroundView addSubview:lineView1];
+    [lineView1 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(@1);
+        make.left.right.equalTo(phoneNumberTF);
+        make.top.equalTo(phoneNumberTF.mas_bottom);
+    }];
+    
+    UIButton *vipCardTypeButton = [[UIButton alloc]init];
+    vipCardTypeButton.titleLabel.font = [UIFont systemFontOfSize:14];
+    [vipCardTypeButton setTitle:@"请选择电子会员卡类型" forState:UIControlStateNormal];
+    [vipCardTypeButton setTitleColor:[UIColor colorWithHexString:@"aaaaaa"] forState:UIControlStateNormal];
+    vipCardTypeButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+    [vipCardTypeButton addTarget:self action:@selector(clickVipCardType) forControlEvents:UIControlEventTouchUpInside];
+    [whiteBackgroundView addSubview:vipCardTypeButton];
+    [vipCardTypeButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.height.equalTo(phoneNumberTF);
+        make.top.equalTo(lineView1.mas_bottom);
+    }];
+    
+    UIImageView *downArrowImageView1 = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"VipManager_DownArrow"]];
+    [vipCardTypeButton addSubview:downArrowImageView1];
+    [downArrowImageView1 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(18, 18));
+        make.centerY.equalTo(vipCardTypeButton);
+        make.right.equalTo(vipCardTypeButton).offset(-15);
+    }];
+    
+    UIView *lineView2 = [[UIView alloc]init];
+    lineView2.backgroundColor = [UIColor colorWithHexString:@"e5e5e5"];
+    [whiteBackgroundView addSubview:lineView2];
+    [lineView2 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.height.mas_equalTo(@1);
+        make.left.right.equalTo(phoneNumberTF);
+        make.top.equalTo(vipCardTypeButton.mas_bottom);
+    }];
+    
+    UIButton *vipCardButton = [[UIButton alloc]init];
+    vipCardButton.titleLabel.font = [UIFont systemFontOfSize:14];
+    [vipCardButton setTitle:@"请选择电子会员卡" forState:UIControlStateNormal];
+    [vipCardButton setTitleColor:[UIColor colorWithHexString:@"aaaaaa"] forState:UIControlStateNormal];
+    vipCardButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+    [vipCardTypeButton addTarget:self action:@selector(clickVipCard) forControlEvents:UIControlEventTouchUpInside];
+    [whiteBackgroundView addSubview:vipCardButton];
+    [vipCardButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.height.equalTo(phoneNumberTF);
+        make.top.equalTo(lineView2.mas_bottom);
+    }];
+    
+    UIImageView *downArrowImageView2 = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"VipManager_DownArrow"]];
+    [vipCardButton addSubview:downArrowImageView2];
+    [downArrowImageView2 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.mas_equalTo(CGSizeMake(18, 18));
+        make.centerY.equalTo(vipCardButton);
+        make.right.equalTo(vipCardButton).offset(-15);
+    }];
+    
+    UIButton *giveButton = [[UIButton alloc]init];
+    giveButton.backgroundColor = [UIColor colorWithHexString:@"01aaef"];
+    giveButton.titleLabel.font = [UIFont systemFontOfSize:17];
+    giveButton.layer.cornerRadius = 4;
+    [giveButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [giveButton setTitle:@"发放" forState:UIControlStateNormal];
+    [giveButton addTarget:self action:@selector(clickGiveButton) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:giveButton];
+    [giveButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self).offset(16);
+        make.right.equalTo(self).offset(-16);
+        make.top.equalTo(whiteBackgroundView.mas_bottom).offset(12);
+        make.height.mas_equalTo(@44);
+    }];
+}
+
+- (void)clickVipCardType{
+
+}
+
+- (void)clickVipCard{
+
+}
+
+- (void)clickGiveButton{
+
+}
+
+@end

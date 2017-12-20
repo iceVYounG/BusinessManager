@@ -1,0 +1,75 @@
+//
+//  BaseNavigationController.m
+//  BusinessManager
+//
+//  Created by zhaojh on 16/7/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "BaseNavigationController.h"
+
+#define NaviBarColor    HexColor(@"#3a3a3a") //导航栏背景颜色
+#define TitleFont      [UIFont systemFontOfSize:18] //标题字体
+
+@interface BaseNavigationController ()
+
+@end
+
+@implementation BaseNavigationController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self settingMyBar]; 
+    
+    [self setBackGesture];
+}
+
+-(void)settingMyBar{
+//YQNavifationController
+    [self.navigationBar setTitleTextAttributes:@{
+                                                 NSFontAttributeName:TitleFont,
+                                                 NSForegroundColorAttributeName:[UIColor whiteColor]
+                                                 }];
+    [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
+    
+    [self.navigationBar setBarTintColor:NaviBarColor];
+    self.navigationBar.tintColor = [UIColor whiteColor];
+    //    [self.navigationController.navigationBar setBackgroundImage:[UIImage imageNamed:@"UserBG@2x.jpg"] forBarMetrics:UIBarMetricsDefault];
+    self.navigationBar.translucent = YES;
+    if(IOS7){ self.navigationBar.translucent = NO; }
+}
+
+-(void)setBackGesture{
+
+    id target = self.interactivePopGestureRecognizer.delegate;
+    
+    // 创建全局侧滑手势
+    UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:target action:@selector(handleNavigationTransition:)];
+    [self.view addGestureRecognizer:panGestureRecognizer];
+    
+    // 禁止系统侧滑手势
+    self.interactivePopGestureRecognizer.enabled = NO;
+}
+
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
+{
+    // 注意：只有非根控制器才有滑动返回功能，根控制器没有。
+    // 判断导航控制器是否只有一个子控制器，如果只有一个子控制器，肯定是根控制器
+    if (self.childViewControllers.count == 1) {
+        // 表示用户在根控制器界面，就不需要触发滑动手势，
+        return NO;
+    }
+    return YES;
+}
+-(void)handleNavigationTransition:(UIPanGestureRecognizer*)pan{
+
+}
+
+-(UIStatusBarStyle)preferredStatusBarStyle{
+    
+    return UIStatusBarStyleLightContent;
+}
+
+
+@end

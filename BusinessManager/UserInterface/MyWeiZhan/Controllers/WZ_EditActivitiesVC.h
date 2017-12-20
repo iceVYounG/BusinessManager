@@ -1,0 +1,45 @@
+//
+//  WZ_EditActivitiesVC.h
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/29.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+
+typedef enum{
+    FourButtonStatus,
+    SixButtonStatus,
+    
+}buttonStatus;
+
+typedef enum{
+    FoodMenusStatus,//菜单
+    AboutStatus,// 关于我们
+    ActivityStatus,// 活动信息
+    WeiNDHStatus // 为您导航
+}menuStatus;
+
+
+
+typedef enum{
+    LouPanJJ,
+    HuxingXS,
+    WeiniDH,// 为你导航
+    CuxiaoActive,//促销活动
+    YuyueKF,// 预约看房
+    LianXiWM
+   }lookRoomStatus;
+
+
+
+
+@class SearPartData;
+#import "WeiZhanBaseController.h"
+
+@interface WZ_EditActivitiesVC : WeiZhanBaseController
+
+@property (nonatomic, strong) SearPartData *dataSource;
+@property (nonatomic, assign) buttonStatus status;
+@property (nonatomic,strong) NSString *templeNo;
+@end

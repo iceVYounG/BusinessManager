@@ -1,0 +1,352 @@
+//
+//  MPChooseUserTypeView.m
+//  BusinessManager
+//
+//  Created by KL on 16/7/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "MPChooseUserTypeView.h"
+#import "AppDelegate.h"
+#import "Masonry.h"
+#import "VipCardModel.h"
+#import "BMSingleLineView.h"
+
+#define KWSize [UIApplication sharedApplication].keyWindow.bounds.size
+
+#define titleWidth 200
+#define imgViewOKWidth 20
+#define cellHeight 48.5
+
+@implementation MPChooseUserTypeView {
+    NSString *userType;//选择的用户类型
+    NSString *userNum; //选择的用户等级编号
+    
+    NSInteger selectedCount;//选择的个数
+}
+
+- (instancetype)initWithFrame:(CGRect)frame block:(ChooseTypeBlock)block {
+    
+    if (self = [super initWithFrame:frame]) {
+        
+        self = [[[NSBundle mainBundle] loadNibNamed:@"MPChooseUserTypeView" owner:nil options:nil] firstObject];
+        [self setFrame:frame];
+        
+        self.chooseView.layer.cornerRadius = 16.0f;
+        self.chooseView.layer.borderColor = [UIColor colorWithHexString:@"#474747"].CGColor;
+        self.chooseView.layer.borderWidth = 1.0f;
+        self.chooseView.layer.masksToBounds = YES;
+        //消除锯齿
+//        self.chooseView.layer.allowsEdgeAntialiasing = YES;
+//        self.layer.allowsEdgeAntialiasing = YES;
+        
+        //Block
+        self.chooseTypeBlock = block;
+        
+        userType = [NSString stringWithFormat:@""];
+        userNum = [NSString stringWithFormat:@""];
+        
+        selectedCount = 0;
+        //tableview
+        self.userTypetableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        self.userTypetableView.bounces = NO;
+        NSInteger storeId = [AccountInfo.storeId integerValue];
+        [self requestTargetUserNumWith:storeId];
+        
+    }
+    
+    return self;
+    
+}
+
++ (MPChooseUserTypeView *)initWithFrame:(CGRect)frame block:(ChooseTypeBlock)block {
+    
+    
+        
+    MPChooseUserTypeView *view = [[[NSBundle mainBundle] loadNibNamed:@"MPChooseUserTypeView" owner:self options:nil] firstObject];
+    
+    [view setFrame:frame];
+    
+    view.chooseView.layer.cornerRadius = 8.0f;
+    view.chooseView.layer.borderColor = [UIColor colorWithHexString:@"#474747"].CGColor;
+    view.chooseView.layer.borderWidth = 1.0f;
+        
+    view.quitBtn.layer.borderColor = [UIColor colorWithHexString:@"e5e5e5"].CGColor;
+    view.quitBtn.layer.cornerRadius = 6.0f;
+    view.quitBtn.layer.borderWidth = 1.0f;
+    view.confirmBtn.layer.masksToBounds = YES;
+    
+    view.confirmBtn.layer.cornerRadius = 6.0f;
+    view.confirmBtn.layer.masksToBounds = YES;
+    
+    view.layer.cornerRadius = 10.0f;
+    view.layer.borderWidth = 1.0f;
+    view.layer.borderColor = [UIColor colorWithHexString:@"#474747"].CGColor;
+    
+    //Block
+    view.chooseTypeBlock = block;
+    
+    return view;
+}
+
+
+#pragma mark - Action
+//取消按钮
+- (IBAction)quitBtnClick:(UIButton *)sender {
+    [self close];
+}
+
+//确认按钮
+- (IBAction)confirmBtnClick:(UIButton *)sender {
+    
+//    if (selectedCount <= 0) {
+    if (!userNum || userNum.length == 0) {
+        return;
+    }
+    
+    
+    if (userType == nil || [userType isEqualToString:@""] || userType.length == 0) {
+        return;
+    }
+    
+    NSLog(@">>>>最终的>>>>>>userType:%@", userType);
+    NSLog(@">>>>>>>最终的>>>>userNum:%@", userNum);
+
+    if (self.chooseTypeBlock) {
+        userNum = [userNum substringToIndex:userNum.length - 1];
+        userType = [userType substringToIndex:userType.length - 1];
+        
+        self.chooseTypeBlock(userType, userNum);
+    }
+    
+    [self close];
+}
+
+#pragma mark - show
+
+- (void)show {
+    
+    self.layer.transform = CATransform3DMakeScale(1.4f, 1.4f, 1.0);
+    
+    [[[[UIApplication sharedApplication] windows] firstObject] addSubview:self];
+
+    [UIView animateWithDuration:0.2f delay:0.0 options:UIViewAnimationOptionCurveEaseInOut
+                 animations:^{
+
+                     self.layer.transform = CATransform3DMakeScale(1, 1, 1);
+                 }
+                 completion:NULL
+    ];
+
+}
+
+#pragma mark - close
+
+- (void)close {
+    
+    CATransform3D currentTransform = self.layer.transform;
+
+    [UIView animateWithDuration:0.2f delay:0.0 options:UIViewAnimationOptionTransitionNone
+                     animations:^{
+                         self.backGDView.backgroundColor = [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.0f];
+                         self.chooseView.layer.transform = CATransform3DConcat(currentTransform, CATransform3DMakeScale(0.6f, 0.6f, 1.0));
+                         self.chooseView.alpha = 0.0;
+
+                     }
+                     completion:^(BOOL finished) {
+                         for (UIView *v in [self subviews]) {
+                             [v removeFromSuperview];
+                         }
+                         [self removeFromSuperview];
+                     }
+     ];
+}
+
+
+#pragma mark - 请求
+- (void)requestTargetUserNumWith:(NSInteger)storeId {
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:@(storeId) forKey:@"storeId"];
+    [params setObject:@(100) forKey:@"pageSize"];
+    
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self animated:YES];
+    hud.mode = MBProgressHUDModeIndeterminate;
+    hud.labelText = @"请稍等...";
+    
+    [[MallNetworkEngine loginshare] requestNotEncodeWithDate:nil requestWithPath:API_VipCardManger_memberCardLevelList Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@">>>>>>>>>>>:%@", dic);
+        [hud hide:YES];
+        if (Succeed(dic)) {
+            VipCardLevelListModel *listModel = [VipCardLevelListModel mj_objectWithKeyValues:dic];
+            NSLog(@"-------->>>>>:%@", listModel);
+            self.dataArray = listModel.data;
+            [self.userTypetableView reloadData];
+        }
+        
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        [hud hide:YES];
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeGradient];
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD showErrorWithStatus:@"服务器繁忙！请稍后再试"];
+    }];
+    
+}
+
+
+#pragma mark - UITableViewDelegate, DataSource
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return self.dataArray.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UserTypeTableCell *cell = [tableView dequeueReusableCellWithIdentifier:@"userTypeTableCell"];
+    if (cell == nil) {
+        cell = [[UserTypeTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"userTypeTableCell"];
+//        cell.isSelected = NO;
+        cell.backgroundColor = [UIColor colorWithHexString:@"#fafafa"];
+    }
+    
+    cell.model = [self.dataArray objectAtIndex:indexPath.row];
+    
+    return cell;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return cellHeight;
+}
+
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return CGFLOAT_MIN;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return CGFLOAT_MIN;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    UserTypeTableCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+    VipCardLevelItemModel *item = [self.dataArray objectAtIndex:indexPath.row];
+    item.isSelectedItem = !item.isSelectedItem;
+
+    if (item.isSelectedItem) {
+        cell.imgViewOK.image = [UIImage imageNamed:@"msgPushSelecct_ok"];
+//        selectedCount++;
+        
+        if (!userNum || [userNum isEqualToString:@""] || userNum.length == 0) {
+            userNum = [NSString stringWithFormat:@"%ld,", cell.tag];
+            
+        }else {
+            userNum = [userNum stringByAppendingFormat:@"%ld,", cell.tag];
+        }
+        
+        if (!userType || [userType isEqualToString:@""] || userType.length == 0) {
+            userType = [NSString stringWithFormat:@"%@,", cell.titleLab.text];
+            
+        }else {
+            userType = [userType stringByAppendingFormat:@"%@,", cell.titleLab.text];
+        }
+        NSLog(@"---->>userNum:%@", userNum);
+        NSLog(@"---->>userType:%@", userType);
+    }else {
+        cell.imgViewOK.image = nil;
+//        selectedCount--;
+        if (userNum && ![userNum isEqualToString:@""] && userNum.length > 0) {
+            NSString *str = [NSString stringWithFormat:@"%ld,", cell.tag];
+            userNum = [userNum stringByReplacingOccurrencesOfString:str withString:@""];
+        }
+        if (userType && ![userType isEqualToString:@""] && userType.length > 0) {
+            NSString *str = [NSString stringWithFormat:@"%@,", cell.titleLab.text];
+            userType = [userType stringByReplacingOccurrencesOfString:str withString:@""];
+        }
+        NSLog(@"---->>userNum:%@", userNum);
+        NSLog(@"---->>userType:%@", userType);
+        
+    }
+    
+    
+}
+
+
+@end
+
+
+#pragma mark - userType
+
+@implementation UserTypeTableCell
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+        [self setUpView];
+    }
+    return self;
+}
+
+- (void)setUpView {
+    //titleLab
+    self.titleLab = [[UILabel alloc] init];
+    [self.titleLab setTextAlignment:NSTextAlignmentLeft];
+    [self.titleLab setTextColor:[UIColor colorWithHexString:@"#666666"]];
+    [self.titleLab setFont:[UIFont systemFontOfSize:15]];
+    [self addSubview:self.titleLab];
+    [self.titleLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self).with.offset(20);
+        make.centerY.equalTo(self);
+        make.width.mas_lessThanOrEqualTo(titleWidth);
+        make.height.mas_equalTo(@20);
+    }];
+    
+    //imgView
+    self.imgViewOK = [[UIImageView alloc] init];
+    [self addSubview:self.imgViewOK];
+    
+    [self.imgViewOK mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(self).with.offset(-10);
+        make.centerY.equalTo(self);
+        make.width.mas_equalTo(imgViewOKWidth);
+        make.height.mas_equalTo(imgViewOKWidth);
+    }];
+    
+    //lineView
+    BMSingleLineView *line = [[BMSingleLineView alloc] initWithFrame:CGRectMake(0, cellHeight - 1, self.bounds.size.width, 1.0)];
+    line.lineColor = [UIColor colorWithHexString:@"#E5E5E5"];
+    [self addSubview:line];
+    
+    
+//    [line mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.bottom.equalTo(self);
+//        make.right.equalTo(self);
+//        make.left.equalTo(self);
+//    }];
+    
+}
+
+
+- (void)setModel:(VipCardLevelItemModel *)model {
+    _model = model;
+    
+    self.titleLab.text = NoNullStr(model.levelName, @"");
+    self.tag = [model.ID integerValue];
+
+//    if (self.isSelected) {
+//        self.imgViewOK.image = [UIImage imageNamed:@"msgPushSelecct_ok"];
+//    }else {
+//        self.imgViewOK.image = nil;
+//    }
+    
+    if (model.isSelectedItem) {
+        self.imgViewOK.image = [UIImage imageNamed:@"msgPushSelecct_ok"];
+    }else {
+        self.imgViewOK.image = nil;
+    }
+
+    
+}
+
+
+@end

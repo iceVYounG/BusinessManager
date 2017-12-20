@@ -1,0 +1,311 @@
+//
+//  MPBuyNotesVC.m
+//  BusinessManager
+//
+//  Created by 周迎春 on 16/7/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+#import "KxMenu.h"
+#import "MPBuyNotesVC.h"
+#import "BuyNotesTableViewCell.h"
+#import "MsgPushModel.h"
+#import "UIScrollView+EmptyDataSet.h"
+
+@interface MPBuyNotesVC ()<UITableViewDataSource, UITableViewDelegate, DZNEmptyDataSetDelegate, DZNEmptyDataSetSource>
+@property (weak, nonatomic) IBOutlet UITableView *NotesTableview;
+@property (nonatomic, strong) UILabel *sortLB;
+@property (nonatomic, assign) BOOL isOpen;
+@property (nonatomic, strong) NSMutableArray *dataArray;
+@property (nonatomic, assign) NSInteger pageIndex;
+@property (nonatomic, strong) UIView *bottomLineView;
+@property (nonatomic, assign) BOOL isNetWorkAvailable;//是否网络连通
+@property (nonatomic, assign) BOOL isGetRightData;//是否获取到正确数据
+@end
+
+@implementation MPBuyNotesVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+//    self.leftTitle = @"短信购买记录";
+    self.title = @"短信购买记录";
+    self.isNetWorkAvailable = YES;
+    self.isGetRightData = YES;
+    self.NotesTableview.backgroundColor = [UIColor colorWithHexString:@"#f6f5fa"];
+    UIButton *rightItem = [self creatRightBtn];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithCustomView:rightItem];
+    //注册buyNotescell
+    [self.NotesTableview registerNib:[UINib nibWithNibName:@"BuyNotesTableViewCell" bundle:nil] forCellReuseIdentifier:@"notescell"];
+    self.NotesTableview.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+    self.NotesTableview.separatorColor = [UIColor colorWithHexString:@"#e5e5e5"];
+    self.bottomLineView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, KScreenWidth, 1.0)];
+    self.bottomLineView.backgroundColor = [UIColor colorWithHexString:@"#dadada"];
+    self.NotesTableview.tableFooterView = self.bottomLineView;
+    self.NotesTableview.emptyDataSetDelegate = self;
+    self.NotesTableview.emptyDataSetSource = self;
+    
+    self.pageIndex = 1;
+    WS(weakSelf);
+    //添加下拉 头部件
+    self.NotesTableview.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+        weakSelf.pageIndex = 1;//重置为1
+        if ([self.sortLB.text isEqualToString:@"全部"]) {
+            [self requestBuyNotesDataWithPage:weakSelf.pageIndex selectTime:0];
+        }else if ([self.sortLB.text isEqualToString:@"今日"]){
+            [self requestBuyNotesDataWithPage:weakSelf.pageIndex selectTime:1];
+        }else if ([self.sortLB.text isEqualToString:@"最近7天"]){
+            [self requestBuyNotesDataWithPage:weakSelf.pageIndex selectTime:7];
+        }else{
+            [self requestBuyNotesDataWithPage:weakSelf.pageIndex selectTime:30];
+        }
+    } ];
+    //添加上啦 尾部件
+    self.NotesTableview.mj_footer = [MJRefreshBackNormalFooter footerWithRefreshingBlock:^{
+        weakSelf.pageIndex++;//先加加在使用
+        if ([self.sortLB.text isEqualToString:@"全部"]) {
+            [self requestBuyNotesDataWithPage:weakSelf.pageIndex selectTime:0];
+        }else if ([self.sortLB.text isEqualToString:@"今日"]){
+            [self requestBuyNotesDataWithPage:weakSelf.pageIndex selectTime:1];
+        }else if ([self.sortLB.text isEqualToString:@"最近7天"]){
+            [self requestBuyNotesDataWithPage:weakSelf.pageIndex selectTime:7];
+        }else{
+            [self requestBuyNotesDataWithPage:weakSelf.pageIndex selectTime:30];
+        }
+    } ];
+    //开始刷新
+    [self.NotesTableview.mj_header beginRefreshing];
+    
+    
+}
+#pragma mark - 请求购买记录数据 -
+- (void)requestBuyNotesDataWithPage:(NSInteger)index selectTime:(NSInteger)selectTime{
+    NSMutableDictionary *paras = [NSMutableDictionary dictionary];
+    NSString *account = NoNullStr(AccountInfo.storeId, @"");
+    double storeId = [account doubleValue];
+    [paras setObject:@(storeId) forKey:@"storeId"];
+    [paras setObject:@(index)forKey:@"page"];
+    [paras setObject:@(15) forKey:@"pageSize"];
+    [paras setObject:@(selectTime) forKey:@"selectTime"];
+
+//    [SVProgressHUD showInfoWithStatus:@"稍等啊马上就来..."];
+    
+
+    [[MallNetworkEngine loginshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_MPBuyNotes_SMSForBuyList Params:paras CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@"%@",dic[@"msg"]);
+        
+        if (Succeed(dic))
+        {
+            if (index == 1)
+            {
+                if (self.dataArray) {
+                    [self.dataArray removeAllObjects];
+                }else{
+                    self.dataArray = [NSMutableArray array];
+                }
+            }
+            NSArray *arr = dic[@"data"];
+            self.isGetRightData = YES;
+            self.isNetWorkAvailable = YES;
+        //如果有数据
+        if (arr.count > 0)
+        {
+            for (NSDictionary *tempDic in arr)
+            {
+                MsgBuyNotesModel *model = [MsgBuyNotesModel getModelWithDic:tempDic];
+                double amount = [model.amount doubleValue];
+                model.amount = [NSString stringWithFormat:@"%.2f", (amount / 100.0)];
+                [self.dataArray addObject:model];
+            }
+            //刷新界面
+            [self.NotesTableview reloadData];
+            [self.NotesTableview.mj_header endRefreshing];
+            [self.NotesTableview.mj_footer endRefreshing];
+            
+        }else{
+            if (self.dataArray) {
+                [self.dataArray removeAllObjects];
+            }else{
+                self.dataArray = [NSMutableArray array];
+            }
+            [self.NotesTableview reloadData];
+            [self.NotesTableview.mj_header endRefreshing];
+            [self.NotesTableview.mj_footer endRefreshingWithNoMoreData];
+             }
+            
+            [self.NotesTableview reloadEmptyDataSet];
+            
+    }else{
+        self.isGetRightData = NO;
+        self.isNetWorkAvailable = YES;
+        [self.NotesTableview.mj_header endRefreshing];
+        [self.NotesTableview.mj_footer endRefreshing];
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD showErrorWithStatus:@"获取数据失败，请稍后再试！"];
+        [self.NotesTableview reloadEmptyDataSet];
+        
+        }
+        
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        self.isNetWorkAvailable = NO;
+        self.isGetRightData = NO;
+        [self.NotesTableview.mj_header endRefreshing];
+        [self.NotesTableview.mj_footer endRefreshing];
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD showErrorWithStatus:@"服务器繁忙，请稍后再试！"];
+        [self.NotesTableview reloadEmptyDataSet];
+
+    }];
+}
+
+#pragma mark - 自定义导航右键 -
+- (UIButton *)creatRightBtn{
+    UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+    btn.frame = CGRectMake(0, 0, 80, 20);
+    [btn setImage:[UIImage imageNamed:@"msgBuyNotes_sort"]forState:(UIControlStateNormal)];
+    [btn setImageEdgeInsets:(UIEdgeInsetsMake(0, 0, 0, -80))];
+    [btn addTarget:self action:@selector(showMenu:) forControlEvents:(UIControlEventTouchUpInside)];
+    self.sortLB = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 70, 20)];
+    self.sortLB.text = @"全部";
+    self.sortLB.textAlignment = NSTextAlignmentRight;
+    self.sortLB.textColor = [UIColor colorWithHexString:@"#FFFFFF"];
+    self.sortLB.font = [UIFont systemFontOfSize:15];
+    [btn addSubview:self.sortLB];
+    return btn;
+}
+#pragma mark - 排序点击事件 -
+- (void)btnAction:(UIButton *)sender{
+//    if (self.isOpen) {
+//        [KxMenu dismissMenu];
+//        self.isOpen = NO;
+//    }else{
+//        [self showMenu:sender];
+//        self.isOpen = YES;
+//    }
+    [self showMenu:sender];
+}
+#pragma mark - 弹出菜单 -
+- (void)showMenu:(UIButton *)sender
+{
+    NSArray *menuItems =
+    @[
+      [KxMenuItem menuItem:@"全部"
+                     image:nil
+                    target:self
+                    action:@selector(selectAllAction:)],
+      [KxMenuItem menuItem:@"今日"
+                     image:nil
+                    target:self
+                    action:@selector(selectTodayAction:)],
+      [KxMenuItem menuItem:@"最近7天"
+                     image:nil
+                    target:self
+                    action:@selector(selectRecent7Action:)],
+      [KxMenuItem menuItem:@"最近30天"
+                     image:nil
+                    target:self
+                    action:@selector(selectRecent30Action:)],
+      ];
+
+    [KxMenu showMenuInView:self.navigationController.view
+                  fromRect:CGRectMake(KScreenWidth - sender.frame.size.width - 8, -sender.frame.size.height - 10, 40, 60)
+                 menuItems:menuItems];
+}
+#pragma mark - 弹出菜单 点击事件 -
+- (void)selectAllAction:(UIMenuItem *)menuItem{
+    self.isOpen = NO;
+    self.sortLB.text = @"全部";
+    [self requestBuyNotesDataWithPage:self.pageIndex selectTime:0];
+    NSLog(@"全部");
+}
+- (void)selectTodayAction:(UIMenuItem *)menuItem{
+    self.isOpen = NO;
+    self.sortLB.text = @"今天";
+     NSLog(@"今天");
+    [self requestBuyNotesDataWithPage:self.pageIndex selectTime:1];
+}
+- (void)selectRecent7Action:(UIMenuItem *)menuItem{
+    self.isOpen = NO;
+    self.sortLB.text = @"最近7天";
+     NSLog(@"最近7天");
+    [self requestBuyNotesDataWithPage:self.pageIndex selectTime:7];
+}
+- (void)selectRecent30Action:(UIMenuItem *)menuItem{
+    self.isOpen = NO;
+    self.sortLB.text = @"最近30天";
+     NSLog(@"最近30天");
+    [self requestBuyNotesDataWithPage:self.pageIndex selectTime:30];
+}
+#pragma mark - tableview代理方法 -
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    if (self.dataArray.count == 0) {
+        self.bottomLineView.backgroundColor = [UIColor clearColor];
+    }else {
+        self.bottomLineView.backgroundColor = [UIColor colorWithHexString:@"#dadada"];
+    }
+    return self.dataArray.count;
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+//    static NSString *notescell = @"notescell";
+    BuyNotesTableViewCell *notesCell = [tableView dequeueReusableCellWithIdentifier:@"notescell"];
+//    if (!notesCell) {
+//        notesCell = [[BuyNotesTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"notescell"];
+        notesCell.separatorInset = UIEdgeInsetsMake(0, 15, 0, 15);
+//    }
+    notesCell.model = self.dataArray[indexPath.row];
+    
+    return notesCell;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return CGFLOAT_MIN;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return CGFLOAT_MIN;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return 48.0;
+}
+
+#pragma mark - DZNEmptyDataSource / delegate
+- (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView {
+    NSString *str;
+    if (self.isNetWorkAvailable) {
+        if (self.isGetRightData) {
+            if (self.dataArray.count == 0) {
+                str = @"暂无数据";
+            }
+        }else {
+            str = @"获取数据失败！请重试";
+        }
+    }else {
+        str = @"请检查网络设置";
+    }
+    NSDictionary *attribute = @{NSFontAttributeName : [UIFont systemFontOfSize:14],
+                                NSForegroundColorAttributeName : [UIColor lightGrayColor]};
+    NSAttributedString *atttibuteString = [[NSAttributedString alloc] initWithString:str attributes:attribute];
+    return atttibuteString;
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

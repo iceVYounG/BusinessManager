@@ -1,0 +1,48 @@
+//
+//  ChangDoorImageCell.m
+//  BusinessManager
+//
+//  Created by 张心亮 on 16/9/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "ChangDoorImageCell.h"
+
+@implementation ChangDoorImageCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    [self.imageBtn addTarget:self action:@selector(imageSelect) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self.deleteBtn addTarget:self action:@selector(deleteAction) forControlEvents:UIControlEventTouchUpInside];
+    
+    
+}
+
+
+-(void)imageSelect{
+
+    if ([self.delegate respondsToSelector:@selector(selectImage)]) {
+        [self.delegate selectImage];
+    }
+    
+}
+
+
+-(void)deleteAction{
+    if ([self.delegate respondsToSelector:@selector(deleteImage)]) {
+        [self.delegate deleteImage];
+    }
+    
+
+
+
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

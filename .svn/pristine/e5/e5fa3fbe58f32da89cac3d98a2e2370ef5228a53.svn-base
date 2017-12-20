@@ -1,0 +1,716 @@
+//
+//  WZ_ConfigGoooodsInfoVC.m
+//  BusinessManager
+//
+//  Created by KL on 16/9/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WZ_ConfigGoooodsInfoVC.h"
+#import "WZ_ConfigGoodsImageViewCell.h"
+#import "WZ_ConfigGoodsInfoBottomBtnCell.h"
+#import "WZ_ConfigGooodsTopTextInfoCell.h"
+#import "JMPickCollectView.h"
+#import "STPhotoKitController.h"
+#import "UIImagePickerController+ST.h"
+#import "STConfig.h"
+#import "CLImageEditor.h"
+
+//#define WZ_ConfigGoodsCell_Width (KScreenWidth - 60.0) / 4.0
+//#define WZ_ConfigGoodsCell_Heiget  WZ_ConfigGoodsCell_Width
+
+#define ConfigGoooodsInfoCell_Width (KScreenWidth - 15.0) / 3.0
+#define ConfigGoooodsInfoCell_Height ConfigGoooodsInfoCell_Width * (125.0 / 186.0)
+//最大照片数量限制
+#define ConfigGoooodsInfoCell_MaxImageLimited 15
+//最大照片体积限制 1 M
+#define ConfigGoooodsInfoCell_MaxImageData (1024 * 100)
+
+#define appendingImgStr @"/newmovie/storeimg/"
+
+@interface WZ_ConfigGoooodsInfoVC ()<UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, WZ_ConfigGoodsImageViewCellDelegate, WZ_ConfigGoodsInfoBottomBtnCellDelegate, STPhotoKitDelegate, CLImageEditorDelegate>
+
+@property (nonatomic, strong) NSMutableArray *dataArray;
+@property (nonatomic, strong) NSMutableArray *imgPathArray;
+@property (nonatomic, strong) NSMutableArray *imageArr;
+@property (nonatomic, strong) NSIndexPath *addNewGoodsCellIndexPath;
+/*选中的Cell*/
+@property (nonatomic, strong) NSIndexPath *choosedCellIndexPath;
+/*是否成功上传图片*/
+@property (nonatomic, assign) BOOL isSucceedUpLoadImages;
+/*商品信息params*/
+@property (nonatomic, strong) NSMutableDictionary *goodsInfoDic;
+
+@end
+
+@implementation WZ_ConfigGoooodsInfoVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"配置商品信息";
+    self.isSucceedUpLoadImages = NO;
+    
+    [self.gooodsCollectionView registerNib:[UINib nibWithNibName:@"WZ_ConfigGoodsImageViewCell" bundle:nil] forCellWithReuseIdentifier:@"WZ_ConfigGoodsImageViewCell"];
+    [self.gooodsCollectionView registerNib:[UINib nibWithNibName:@"WZ_ConfigGoodsInfoBottomBtnCell" bundle:nil] forCellWithReuseIdentifier:@"WZ_ConfigGoodsInfoBottomBtnCell"];
+    [self.gooodsCollectionView registerNib:[UINib nibWithNibName:@"WZ_ConfigGooodsTopTextInfoCell" bundle:nil] forCellWithReuseIdentifier:@"WZ_ConfigGooodsTopTextInfoCell"];
+    //请求数据
+    [self requestGoooodsDetailInfoData];
+}
+
+static NSString *topCellIdentify = @"WZ_ConfigGooodsTopTextInfoCell";
+static NSString *imageViewCellIdentify = @"WZ_ConfigGoodsImageViewCell";
+static NSString *bottomCellIdentify = @"WZ_ConfigGoodsInfoBottomBtnCell";
+
+#pragma mark - UICollectionViewDelegate / DataSource
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    return 3;
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    if (section == 0) {
+        return 1;
+    }else if (section == 1) {
+        if (self.dataArray.count < ConfigGoooodsInfoCell_MaxImageLimited) {
+            return self.dataArray.count + 1;
+        }else {
+            return self.dataArray.count;
+        }
+        
+    }else if (section == 2) {
+        return 1;
+    }else {
+        return 0;
+    }
+    
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (indexPath.section == 0) {
+        WZ_ConfigGooodsTopTextInfoCell *topCell = [collectionView dequeueReusableCellWithReuseIdentifier:topCellIdentify forIndexPath:indexPath];
+        topCell.itemModel = self.mainModel;
+        return topCell;
+    }else if (indexPath.section == 1) {
+        WZ_ConfigGoodsImageViewCell *imageViewCell = [collectionView dequeueReusableCellWithReuseIdentifier:imageViewCellIdentify forIndexPath:indexPath];
+        imageViewCell.imageViewCellDelegate = self;
+        imageViewCell.indexPath = indexPath;
+        if (indexPath.item == self.dataArray.count) {
+            if (indexPath.item > ConfigGoooodsInfoCell_MaxImageLimited) {
+                imageViewCell.isAddNewGoodsCell = NO;
+            }else {
+                imageViewCell.isAddNewGoodsCell = YES;
+            }
+            
+        }else {
+            imageViewCell.isAddNewGoodsCell = NO;
+        }
+        if (indexPath.item < self.dataArray.count) {
+//            if ([[self.dataArray objectAtIndex:indexPath.item] isKindOfClass:[NSString class]]) {
+//                NSString *imageStr = [self.dataArray objectAtIndex:indexPath.item];
+//                imageViewCell.imgPathStr = imageStr;
+//            }else {
+//                UIImage *image = [self.dataArray objectAtIndex:indexPath.item];
+//                imageViewCell.image = image;
+//            }
+            NSString *imageStr = [self.dataArray objectAtIndex:indexPath.item];
+            imageViewCell.imgPathStr = imageStr;
+        }else{
+            [imageViewCell.goodsImgView setImage:[UIImage imageNamed:@"jiahao.png"]];
+            [imageViewCell.deleteBtn setHidden:YES];
+
+        }
+        
+        return imageViewCell;
+    }else {
+        WZ_ConfigGoodsInfoBottomBtnCell *bottomCell = [collectionView dequeueReusableCellWithReuseIdentifier:bottomCellIdentify forIndexPath:indexPath];
+        bottomCell.bottomBtnCellDelegate = self;
+        return bottomCell;
+    }
+    
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section {
+    if (section == 0) {
+        return 15.0;
+    }else if (section == 1) {
+        return 10.0;
+    }else {
+        return CGFLOAT_MIN;
+    }
+    
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section {
+    if (section == 1) {
+        return 5.0;
+    }else {
+        return CGFLOAT_MIN;
+    }
+    
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section {
+    if (section == 1) {
+        return CGSizeMake(KScreenWidth, 20.0);
+    }else if (section == 2) {
+        return CGSizeMake(KScreenWidth, 15.0);
+    }
+    else {
+        return CGSizeMake(CGFLOAT_MIN, CGFLOAT_MIN);
+    }
+    
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == 0) {
+        return CGSizeMake(KScreenWidth, 260.0);
+    }else if (indexPath.section == 1) {
+        return CGSizeMake(ConfigGoooodsInfoCell_Width, ConfigGoooodsInfoCell_Height);
+    }else {
+        return CGSizeMake(KScreenWidth, 64.0);
+    }
+    
+}
+
+#pragma mark- CLImageEditor delegate
+
+- (void)imageEditor:(CLImageEditor *)editor didFinishEdittingWithImage:(UIImage *)image
+{
+
+    if (image) {
+        
+//        NSData* imageData = UIImageJPEGRepresentation(image, 1.0);
+//        NSLog(@"orageImage = %d", imageData.length);
+//        UIImage *compressionImage = [self getMaxImageDataLimitedWithImage:image];
+//        NSData* afterData = UIImageJPEGRepresentation(compressionImage, 1.0);
+//         NSLog(@"afterImage = %d", afterData.length);
+        NSData *imageData = [self transformImageToDataLimited:image];
+        [self uploadImageData:imageData];
+//        if (self.choosedCellIndexPath.item == self.dataArray.count) {
+//            [self.dataArray addObject:compressionImage];
+//        }else {
+//            [self.dataArray replaceObjectAtIndex:self.choosedCellIndexPath.item withObject:compressionImage];
+//        }
+        
+    }
+    
+    [editor dismissViewControllerAnimated:YES completion:nil];
+    
+    ///****************************************************************************
+//    NSIndexSet *section = [[NSIndexSet alloc] initWithIndex:1];
+//    [self.gooodsCollectionView reloadSections:section];
+//    [self.gooodsCollectionView reloadData];
+    
+}
+
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+    [picker dismissViewControllerAnimated:YES completion:^(){
+        
+    }];
+}
+
+
+#pragma mark - WZ_ConfigGoodsImageViewCellDelegate
+- (void)WZ_ConfigGoodsImageViewCell_ChoosePhotoWithIndexPath:(NSIndexPath *)indexpath {
+    self.choosedCellIndexPath = indexpath;
+    
+//    NSIndexPath *index=[NSIndexPath indexPathForItem:self.currentIndexPath.row-1 inSection:0];
+    WS(weakSelf);
+    [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage) {
+
+        CLRatio *ratio = [[CLRatio alloc] initWithValue1:ConfigGoooodsInfoCell_Height value2:ConfigGoooodsInfoCell_Width];
+        ratio.isLandscape = YES;
+        CLImageEditor *editor = [[CLImageEditor alloc] initWithImage:originImage delegate:weakSelf ratio:ratio];
+        //CLImageEditor *editor = [[CLImageEditor alloc] initWithDelegate:self];
+
+        NSLog(@"%@", editor.toolInfo);
+        NSLog(@"%@", editor.toolInfo.toolTreeDescription);
+
+        CLImageToolInfo *tool = [editor.toolInfo subToolInfoWithToolName:@"CLToneCurveTool" recursive:NO];
+        tool.available = NO;
+
+        tool = [editor.toolInfo subToolInfoWithToolName:@"CLRotateTool" recursive:YES];
+        tool.available = NO;
+
+        tool = [editor.toolInfo subToolInfoWithToolName:@"CLHueEffect" recursive:YES];
+        tool.available = NO;
+
+        tool = [editor.toolInfo subToolInfoWithToolName:@"CLAdjustmentTool" recursive:YES];
+        tool.available = NO;
+
+        tool = [editor.toolInfo subToolInfoWithToolName:@"CLBlurTool" recursive:YES];
+        tool.available = NO;
+
+        tool = [editor.toolInfo subToolInfoWithToolName:@"CLDrawTool" recursive:YES];
+        tool.available = NO;
+
+        tool = [editor.toolInfo subToolInfoWithToolName:@"CLEffectTool" recursive:YES];
+        tool.available = NO;
+
+        tool = [editor.toolInfo subToolInfoWithToolName:@"CLFilterTool" recursive:YES];
+        tool.available = NO;
+        
+        [weakSelf presentViewController:editor animated:YES completion:nil];
+        
+    }];
+
+}
+
+- (void)WZ_ConfigGoodsImageViewCell_DeleteGoodsWithIndexPath:(NSIndexPath *)indexpath {
+    [self.dataArray removeObjectAtIndex:indexpath.item];
+//    [self.gooodsCollectionView deleteItemsAtIndexPaths:@[indexpath]];
+//    [self.gooodsCollectionView performBatchUpdates:^{
+//        [self.gooodsCollectionView deleteItemsAtIndexPaths:@[indexpath]];
+//    } completion:nil];
+    
+    ///****************************************************************************
+//    [self.gooodsCollectionView reloadSections:[NSIndexSet indexSetWithIndex:1]];
+    [self.gooodsCollectionView reloadData];
+    
+}
+
+#pragma mark - WZ_ConfigGoodsInfoBottomBtnCellDelegate
+- (void)WZ_ConfigGoodsInfoBottomBtnCell_SaveAction:(UIButton *)saveBtn {
+    saveBtn.enabled = NO;
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+    
+    WZ_ConfigGooodsTopTextInfoCell *topCell = (WZ_ConfigGooodsTopTextInfoCell *)[self.gooodsCollectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+    if ([topCell.goodsNameTV.text isEmpty] || [topCell.goodsNameTV.text isEqualToString:@"请输入商品名称"]) {
+        [SVProgressHUD showErrorWithStatus:@"请输入商品名称"];
+        [topCell.goodsNameTV becomeFirstResponder];
+        saveBtn.enabled = YES;
+        return;
+    }else if ([topCell.goodsPriceTF.text isEmpty]) {
+        [SVProgressHUD showErrorWithStatus:@"请输入商品价格"];
+        [topCell.goodsPriceTF becomeFirstResponder];
+        saveBtn.enabled = YES;
+        return;
+    }else if ([topCell.goodsDescribeTV.text isEmpty] || [topCell.goodsDescribeTV.text isEqualToString:@"请输入商品的详细介绍"]) {
+        [SVProgressHUD showErrorWithStatus:@"请输入商品的详细介绍,少于200字"];
+        [topCell.goodsDescribeTV becomeFirstResponder];
+        saveBtn.enabled = YES;
+        return;
+    }
+    
+    if (self.dataArray.count == 0) {
+        [SVProgressHUD showErrorWithStatus:@"至少需要一张图片"];
+        saveBtn.enabled = YES;
+        return;
+    }
+    
+    [self.goodsInfoDic setObject:NoNullStr(topCell.goodsDescribeTV.text, @"") forKey:@"content"];
+    [self.goodsInfoDic setObject:NoNullStr(topCell.goodsNameTV.text, @"") forKey:@"name"];
+    NSString *moneyStr = [NSString transformMoneyFormatter:NoNullStr(topCell.goodsPriceTF.text, @"") andTransformDirection:NO];
+    [self.goodsInfoDic setObject:NoNullStr(moneyStr, @"") forKey:@"price"];
+//    NSMutableArray *imageArr = [NSMutableArray array];
+//    for (int i = 0; i < self.dataArray.count; i++) {
+//        id item = [self.dataArray objectAtIndex:i];
+//        if ([item isKindOfClass:[UIImage class]]) {
+//            [imageArr addObject:item];
+//        }
+//    }
+//    self.imageArr = imageArr;
+    //发起请求
+    [self sendRequestToSaveDatas];
+    saveBtn.enabled = YES;
+    
+}
+
+
+#pragma mark - 请求商品详情
+- (void)requestGoooodsDetailInfoData {
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    if (self.mainModel && self.mainModel.id.length > 0) {
+        [params setObject:NoNullStr(self.mainModel.id, @"") forKey:@"id"];
+    }else {
+        return;
+    }
+    
+    [[MallNetManager share] request:API_WZ_FloorGoodsInfo prams:params succeed:^(id responseObject) {
+        NSLog(@"--responseObject-->>>:%@", responseObject);
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            self.mainModel = nil;
+            [self.dataArray removeAllObjects];
+            self.mainModel = [TemplateModel mj_objectWithKeyValues:responseObject[@"data"]];
+            
+        });
+    } showHUD:YES];
+    
+}
+
+#pragma mark - upload Image Data
+
+- (void)uploadImageData:(NSData *)imageData{
+    
+    //    NSData *imageData = [self transformImageToDataLimited:image];
+    NSString* imageDataStr = [imageData base64EncodedString];
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    [params setObject:NoNullStr(imageDataStr, @"") forKey:@"code"];
+    if (self.isTiYanAccount) {
+        [params setObject:NoNullStr(AccountInfo.tempStoreId, @"") forKey:@"storeId"];
+    }else {
+        [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+    }
+    
+    [params setObject:@"png" forKey:@"suffix"];
+    
+    [[MallNetManager share] request:API_ImageUpload prams:params succeed:^(id responseObject)   {
+        
+        ImageUpLoadBackModel* rsp = [ImageUpLoadBackModel mj_objectWithKeyValues:responseObject];
+        
+        if (Succeed(rsp)) {
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+            [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+            [SVProgressHUD showSuccessWithStatus:@"保存成功！"];
+            //            TemplateModel* model = [[TemplateModel alloc] init];
+            //            model.imgPath = rsp.data.imgPath;
+            ////            [self.tempArr addObject:model];
+            //            [self.gooodsCollectionView  reloadData];
+
+            [self.dataArray addObject:rsp.data.imgPath];
+            [self.gooodsCollectionView reloadData];
+        }
+        
+    } showHUD:(YES)];
+}
+
+//- (void)uploadImageData:(UIImage*)image{
+//    
+////    NSData *imageData = [self transformImageToDataLimited:image];
+//    NSData *imageData = UIImageJPEGRepresentation(image, 1.0);
+//    NSString* imageDataStr = [imageData base64EncodedString];
+//    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+//    [params setObject:NoNullStr(imageDataStr, @"") forKey:@"code"];
+//    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+//    [params setObject:@"png" forKey:@"suffix"];
+//    
+//    [[MallNetManager share] request:API_ImageUpload prams:params succeed:^(id responseObject)   {
+//        
+//        ImageUpLoadBackModel* rsp = [ImageUpLoadBackModel mj_objectWithKeyValues:responseObject];
+//        
+//        if (Succeed(rsp)) {
+////            TemplateModel* model = [[TemplateModel alloc] init];
+////            model.imgPath = rsp.data.imgPath;
+//////            [self.tempArr addObject:model];
+////            [self.gooodsCollectionView  reloadData];
+//            [self.dataArray addObject:rsp.data.imgPath];
+//            [self.gooodsCollectionView reloadData];
+//        }
+//        
+//    } showHUD:(YES)];
+//}
+
+
+-(void)upLoadPhotos:(NSMutableArray *)photos withSectionModel:(ModelSection *)model {
+    
+    if (model.type == ModelSectionTypeFooter) {
+        return;
+    }
+    WS(weakSelf);
+    __block NSInteger requestIndex = 0;
+    __block NSInteger failureRequestIndex = 0;
+    NSRecursiveLock *lock=[[NSRecursiveLock alloc]init];
+    [photos enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        
+        [lock lock];
+        UIImage* image = (UIImage*)obj;
+        NSData *imageData = [self transformImageToDataLimited:image];
+        
+        NSMutableDictionary* params = [NSMutableDictionary dictionary];
+        [params setObject:NoNullStr([imageData base64EncodedString], @"") forKey:@"code"];
+        [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+        [params setObject:@"png" forKey:@"suffix"];
+        
+        [[MallNetManager share] request:API_ImageUpload parameters:params success:^(NSURLSessionDataTask *task, id responseObject) {
+            
+            if (Succeed(responseObject)) {
+                if ([responseObject objectForKey:@"data"]) {
+                    
+                    NSDictionary* data = [responseObject objectForKey:@"data"];
+                    if ([data objectForKey:@"imgPath"]) {
+                        NSString *imgPath = [NSString stringWithFormat:@"%@%@", appendingImgStr,[data objectForKey:@"imgPath"]];
+                        for (int i = 0; i < weakSelf.dataArray.count; i++) {
+                            id image = [weakSelf.dataArray objectAtIndex:i];
+                            if ([image isKindOfClass:[UIImage class]]) {
+                                [weakSelf.dataArray replaceObjectAtIndex:i withObject:imgPath];
+                                
+                                break;
+                                
+                            }
+                        }
+                    }
+                }
+            }
+            requestIndex++;
+            [lock unlock];
+//            NSString *str = [NSString stringWithFormat:@"数据上传成功:%d", requestIndex];
+//            [SVProgressHUD showErrorWithStatus:str];
+            [weakSelf judgeFinish:requestIndex failureIndex:failureRequestIndex fromePhotos:photos.count];
+        } failure:^(NSURLSessionDataTask *task, NSError *error) {
+            failureRequestIndex++;
+            [lock unlock];
+            [SVProgressHUD showErrorWithStatus:@"数据上传失败"];
+//            [self judgeFinish:requestIndex fromePhotos:photos.count];
+        }];
+    }];
+}
+
+-(void)judgeFinish:(NSInteger)index failureIndex:(NSInteger)failureIndex fromePhotos:(NSInteger)photosCount {
+    
+    if (index == photosCount && failureIndex == 0) {
+//        [OMGToast showWithText:@"图片上传成功，正在保存商品信息..."];
+        [self sendRequestToSaveDatas];
+    }else if (failureIndex > 0) {
+        [SVProgressHUD showErrorWithStatus:@"数据上传失败"];
+    }
+}
+
+
+#pragma mark - 上传数据
+- (void)sendRequestToSaveDatas {
+    
+    if (self.mainModel.id && self.mainModel.id.length > 0) {
+        [self.goodsInfoDic setObject:NoNullStr(self.mainModel.id, @"0") forKey:@"id"];
+    }else {
+        [self.goodsInfoDic setObject:@(0) forKey:@"id"];
+    }
+    if (self.dataArray.count == 0) {
+        [SVProgressHUD showErrorWithStatus:@"保存失败！"];
+        return;
+    }
+    
+    NSString *contentString = [self.goodsInfoDic objectForKey:@"content"];
+    if (self.dataArray.count > 0) {
+        for (int i = 0; i < self.dataArray.count; i++) {
+            NSString *imgStr = [self.dataArray objectAtIndex:i];
+            NSString *htmlString;
+            if ([imgStr containsString:@"storeimg/"]) {
+                htmlString = [NSString stringWithFormat:@"<img src=\"%@\" alt=\"\" />", imgStr];
+
+            }else{
+                htmlString = [NSString stringWithFormat:@"<img src=\"/storeimg/%@\" alt=\"\" />", imgStr];
+
+            }
+            contentString = [contentString stringByAppendingString:htmlString];
+        }
+    }
+    [self.goodsInfoDic setObject:NoNullStr(contentString, @"") forKey:@"content"];
+    NSString *firstImg = [self.dataArray objectAtIndex:0];
+    if([firstImg containsString:@"storeimg/"]){
+        firstImg = [firstImg replace:@"storeimg/" withString:@""];
+    }
+    [self.goodsInfoDic setObject:NoNullStr(firstImg, @"") forKey:@"imgPath"];
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    NSArray *arr = [NSArray arrayWithObject:self.goodsInfoDic];
+    [params setObject:arr forKey:@"date"];
+    [[MallNetManager share] NewFloorRequest:API_WZ_FloorGoodsEdit params:params succeed:^(id responseObject) {
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD setMinimumDismissTimeInterval:1.5];
+//        NSDictionary *data = (NSDictionary *)responseObject;
+        
+        
+        if (responseObject) {
+            WZ_FloorGooodsItemModel *itemModel = [WZ_FloorGooodsItemModel mj_objectWithKeyValues:[responseObject objectForKey:@"data"]];
+            if (itemModel && itemModel.id.length > 0) {
+                if ([self.delegate conformsToProtocol:@protocol(WZ_ConfigGoooodsInfoVCDelegate)]
+                    &&
+                    [self.delegate respondsToSelector:@selector(WZ_ConfigGoooodsInfoVCPopActionWithModel:andSelectedIndexPath:)]) {
+                    if (!self.mainModel) {
+                        self.mainModel = [[TemplateModel alloc] init];
+                    }
+                    self.mainModel.id = itemModel.id;
+                    self.mainModel.name = itemModel.name;
+                    self.mainModel.price = itemModel.price;
+                    self.mainModel.content = itemModel.content;
+                    self.mainModel.imgPath = itemModel.imgPath;
+                    [self.delegate WZ_ConfigGoooodsInfoVCPopActionWithModel:self.mainModel andSelectedIndexPath:self.selectedIndexPath];
+                }
+                [SVProgressHUD showSuccessWithStatus:@"保存成功！"];
+                [self.navigationController popViewControllerAnimated:YES];
+            }else {
+                [SVProgressHUD showErrorWithStatus:@"保存失败！"];
+            }
+            
+        }else {
+            [SVProgressHUD showErrorWithStatus:@"保存失败！"];
+        }
+        
+        
+    } showHUD:YES];
+}
+
+
+//- (void)uploadMultiImage {
+//    
+//    NSMutableURLRequest *request = [[AFHTTPRequestSerializer serializer] multipartFormRequestWithMethod:@"POST" URLString:@"http://183.207.110.93:8085/bfsh-ws-inter/storecenter/imgUpload.chtml" parameters:nil constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
+//        for (int i = 0; i < self.imageArr.count; i++) {
+//            UIImage *image = [self.imageArr objectAtIndex:i];
+//            NSData *imageData = UIImageJPEGRepresentation(image, 0.5);
+//            NSString *name = [NSString stringWithFormat:@"%d", i];
+//            [formData appendPartWithFormData:imageData name:name];
+//        }
+//        
+//    } error:nil];
+//    
+//    AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
+////    manager.responseSerializer.acceptableContentTypes =  [manager.responseSerializer.acceptableContentTypes setByAddingObjectsFromSet:[NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", @"text/plain",@"application/atom+xml",@"application/xml",@"text/xml",nil]];
+//    
+//    NSURLSessionUploadTask *uploadTask;
+//    uploadTask = [manager
+//                  uploadTaskWithStreamedRequest:request
+//                  progress:^(NSProgress * _Nonnull uploadProgress) {
+//                      // This is not called back on the main queue.
+//                      // You are responsible for dispatching to the main queue for UI updates
+//                      dispatch_async(dispatch_get_main_queue(), ^{
+//                          //Update the progress view
+////                          [progressView setProgress:uploadProgress.fractionCompleted];
+//                      });
+//                  }
+//                  completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
+//                      if (error) {
+//                          NSLog(@"Error: %@", error);
+//                      } else {
+//                          NSLog(@"%@ %@", response, responseObject);
+//                      }
+//                  }];
+//    
+//    [uploadTask resume];
+//}
+
+//- (void)sendRequestToUploadImage {
+//    // 需要上传的数据
+//    NSArray* images = self.imageArr.copy;
+//    
+//    // 准备保存结果的数组，元素个数与上传的图片个数相同，先用 NSNull 占位
+//    NSMutableArray* result = [NSMutableArray array];
+//    for (UIImage* image in images) {
+//        [result addObject:[NSNull null]];
+//    }
+//    
+//    dispatch_group_t group = dispatch_group_create();
+//    
+//    for (NSInteger i = 0; i < images.count; i++) {
+//        
+//        dispatch_group_enter(group);
+//        
+//        NSURLSessionUploadTask* uploadTask = [self uploadTaskWithImage:images[i] completion:^(NSURLResponse *response, NSDictionary* responseObject, NSError *error) {
+//            if (error) {
+//                NSLog(@"第 %d 张图片上传失败: %@", (int)i + 1, error);
+//                dispatch_group_leave(group);
+//            } else {
+//                NSLog(@"第 %d 张图片上传成功: %@", (int)i + 1, responseObject);
+//                @synchronized (result) { // NSMutableArray 是线程不安全的，所以加个同步锁
+//                    result[i] = responseObject;
+//                }
+//                dispatch_group_leave(group);
+//            }
+//        }];
+//        [uploadTask resume];
+//    }
+//    
+//    dispatch_group_notify(group, dispatch_get_main_queue(), ^{
+//        NSLog(@"上传完成!");
+//        for (id response in result) {
+//            NSLog(@"%@", response);
+//        }
+//    });
+//}
+//
+//
+//- (NSURLSessionUploadTask*)uploadTaskWithImage:(UIImage*)image completion:(void (^)(NSURLResponse *response, id responseObject, NSError *error))completionBlock {
+//    // 构造 NSURLRequest
+//    NSError* error = NULL;
+//    NSData* imageData = UIImageJPEGRepresentation(image, 0.5);
+//    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+//    [params setObject:@"1.0" forKey:@"VERSION"];
+//    [params setObject:NoNullStr([imageData base64EncodedString], @"") forKey:@"code"];
+//    [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+//    [params setObject:@"png" forKey:@"suffix"];
+//    
+//    NSMutableURLRequest *request = [[AFHTTPRequestSerializer serializer] multipartFormRequestWithMethod:@"POST" URLString:@"http://183.207.110.93:8085/bfsh-ws-inter/storecenter/imgUpload.chtml" parameters:params constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
+////        NSData* imageData = UIImageJPEGRepresentation(image, 1.0);
+////        [formData appendPartWithFileData:imageData name:@"file" fileName:@"someFileName" mimeType:@"multipart/form-data"];
+//    } error:&error];
+//    NSString *now = [NSDate nowString];
+//    NSString* str;
+//    if (now.length > 12) {
+//        str = [now substringWithRange:NSMakeRange(0, now.length - 2)];
+//    }
+//    [request setValue:str forHTTPHeaderField:@"timeStr"];
+//    [request setValue:@"ios900" forHTTPHeaderField:@"clientName"];
+//    
+//    NSString* pwdStr = [NSString stringWithFormat:@"%@%@%@",@"ios900",str,@"q#9asdjasj"];
+//    [request setValue:[pwdStr md5] forHTTPHeaderField:@"pwd"];
+//    
+//    // 可在此处配置验证信息
+//    
+//    // 将 NSURLRequest 与 completionBlock 包装为 NSURLSessionUploadTask
+//    AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
+//    
+//    NSURLSessionUploadTask *uploadTask = [manager uploadTaskWithStreamedRequest:request progress:^(NSProgress * _Nonnull uploadProgress) {
+//    } completionHandler:completionBlock];
+//    
+//    return uploadTask;
+//}
+
+
+#pragma mark - Setter
+- (void)setMainModel:(TemplateModel *)mainModel {
+    _mainModel = mainModel;
+    if (mainModel && mainModel.id) {
+        NSString *firstImgPath;
+        if (mainModel.imgPath) {
+            firstImgPath = mainModel.imgPath;
+        }
+        NSArray *tempArr = [NSString WZ_NewFloorFilterTheImageUrlArrFromFatherString:mainModel.content];
+        if (tempArr.count==0) {
+            [self.dataArray addObject:firstImgPath];
+        }else{
+            [self.dataArray addObjectsFromArray:tempArr];
+        }
+        [self.gooodsCollectionView reloadData];
+
+    }
+
+}
+
+#pragma mark - Getter
+- (NSMutableArray *)dataArray {
+    if (!_dataArray) {
+        _dataArray = [NSMutableArray array];
+    }
+    return _dataArray;
+}
+
+- (NSMutableArray *)imgPathArray {
+    if (!_imgPathArray) {
+        _imgPathArray = [NSMutableArray array];
+    }
+    return _imgPathArray;
+}
+
+- (NSMutableArray *)imageArr {
+    if (!_imageArr) {
+        _imageArr = [NSMutableArray array];
+    }
+    return _imageArr;
+}
+
+- (NSMutableDictionary *)goodsInfoDic {
+    if (!_goodsInfoDic) {
+        _goodsInfoDic = [NSMutableDictionary dictionary];
+    }
+    return _goodsInfoDic;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
+
+- (void)dealloc {
+    NSLog(@"已释放--%@", NSStringFromClass([self class]));
+}
+
+@end

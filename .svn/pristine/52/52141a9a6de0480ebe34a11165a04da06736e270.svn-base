@@ -1,0 +1,62 @@
+//
+//  WebViewController.m
+//  BusinessManager
+//
+//  Created by zhaojh on 16/7/25.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WebViewController.h"
+
+@interface WebViewController ()<UIWebViewDelegate>
+
+@property(nonatomic,strong) NSString* urlStr;
+
+@end
+
+@implementation WebViewController
+
+-(instancetype)initWithUrl:(NSString*)urlStr{
+
+    if (self = [super init]) {
+        
+        _urlStr = urlStr;
+    }
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    
+    UIWebView* webView = [[UIWebView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, KScreenHeight - NavigationH)];
+    
+    NSURLRequest* request = [[NSURLRequest alloc]initWithURL:[NSURL URLWithString:self.urlStr] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60];
+    
+    webView.delegate = self;
+    
+    [webView loadRequest:request];
+    
+    [self.view addSubview:webView];
+}
+
+- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType{
+ 
+    [SVProgressHUD showWithStatus:@"加载中..."];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    return YES;
+}
+- (void)webViewDidStartLoad:(UIWebView *)webView{
+
+
+}
+- (void)webViewDidFinishLoad:(UIWebView *)webView{
+
+    [SVProgressHUD dismiss];
+}
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(nullable NSError *)error{
+   [SVProgressHUD dismiss];
+   [SVProgressHUD showWithStatus:@"加载失败!"];
+}
+    
+@end

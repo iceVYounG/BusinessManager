@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10116" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="AbountUS">
+            <connections>
+                <outlet property="abountUSTableView" destination="xph-HG-3sp" id="W6y-C5-fFS"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="xph-HG-3sp">
+                    <rect key="frame" x="0.0" y="284" width="320" height="284"/>
+                    <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
+                    <connections>
+                        <outlet property="dataSource" destination="-1" id="PtD-36-VPz"/>
+                        <outlet property="delegate" destination="-1" id="gqe-l2-3E2"/>
+                    </connections>
+                </tableView>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="business" translatesAutoresizingMaskIntoConstraints="NO" id="0TZ-sF-2ww">
+                    <rect key="frame" x="135" y="36" width="50" height="50"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="50" id="soA-xQ-MJd"/>
+                        <constraint firstAttribute="height" constant="50" id="zFI-dT-9EO"/>
+                    </constraints>
+                </imageView>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Oh0-0c-X68">
+                    <rect key="frame" x="15" y="103" width="290" height="151"/>
+                    <attributedString key="attributedText">
+                        <fragment content="      商户宝以快速创建H5手机微站为基础，开发模块化、实用的商户营销管理工具，并接入移动特色化服务功能和实用的外部平台应用，以满足商户/企业不同层次的经营需求，实现商户/企业管理能力的提升，以达到商户/企业运用电子商务实现业务发展和盈利提升的目的。">
+                            <attributes>
+                                <color key="NSColor" red="0.53333333333333333" green="0.53333333333333333" blue="0.53333333333333333" alpha="1" colorSpace="calibratedRGB"/>
+                                <font key="NSFont" size="12" name="PingFangSC-Regular"/>
+                                <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="natural" lineSpacing="10" tighteningFactorForTruncation="0.0"/>
+                            </attributes>
+                        </fragment>
+                    </attributedString>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="xph-HG-3sp" secondAttribute="bottom" id="CyR-dd-ymr"/>
+                <constraint firstItem="Oh0-0c-X68" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="15" id="OgN-JZ-q1A"/>
+                <constraint firstItem="Oh0-0c-X68" firstAttribute="top" secondItem="0TZ-sF-2ww" secondAttribute="bottom" constant="17" id="XYx-EL-b0P"/>
+                <constraint firstItem="xph-HG-3sp" firstAttribute="top" secondItem="Oh0-0c-X68" secondAttribute="bottom" constant="30" id="bJL-05-C5t"/>
+                <constraint firstItem="0TZ-sF-2ww" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="beo-e2-LV4"/>
+                <constraint firstItem="xph-HG-3sp" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="cLs-cX-Cke"/>
+                <constraint firstAttribute="trailing" secondItem="xph-HG-3sp" secondAttribute="trailing" id="h7S-KD-uaN"/>
+                <constraint firstAttribute="trailing" secondItem="Oh0-0c-X68" secondAttribute="trailing" constant="15" id="tiM-FO-wrf"/>
+                <constraint firstItem="0TZ-sF-2ww" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="36" id="xhv-iy-lvz"/>
+            </constraints>
+            <point key="canvasLocation" x="282" y="212"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="business" width="50" height="50"/>
+    </resources>
+</document>

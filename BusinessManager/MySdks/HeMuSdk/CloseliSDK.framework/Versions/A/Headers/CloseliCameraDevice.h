@@ -1,0 +1,174 @@
+//
+//  CloseliCameraDevice.h
+//  HomeRunManager
+//
+//  Created by Arcsoft on 11-6-29.
+//  Copyright 2013 Arcsoft. All rights reserved.
+//
+
+#define DEVICE_FEATURE_WIFI		0x0001
+#define DEVICE_FEATURE_IMAGE_FLIPMIRROR	0x0002
+#define DEVICE_FEATURE_IMAGE_ROTATE  0x0004
+#define DEVICE_FEATURE_LENS_PAN      	0x0010
+#define DEVICE_FEATURE_LENS_TILT      	0x0020
+#define DEVICE_FEATURE_LENS_ZOOM      	0x0040
+#define DEVICE_FEATURE_LENS_PATROL    0x0080
+
+#define DETAIL_JSON_KEY_AUDIOTYPE @"audioType"          //DeviceAudioType, 1 means g726, 2 means g711
+
+#define MV2_CODEC_TYPE_AAC 1633772320
+#define MV2_CODEC_TYPE_G726 926037536
+#define MV2_CODEC_TYPE_G711A 925970785
+#define MV2_CODEC_TYPE_G711U 925970805
+
+#define AUDIO_TALK_SAMPLE_RATE 48000
+#define AUDIO_TALK_SAMPLE_RATE_G726 16000
+#define AUDIO_TALK_SAMPLE_RATE_G711A 8000
+#define AUDIO_TALK_SAMPLE_RATE_G711U 8000
+
+typedef enum _DeviceType 
+{
+	DeviceType_Dlna	= 0, 
+	DeviceType_Remote	= 1, 
+    DeviceType_Friend = 2,
+    DeviceType_InLan = 3
+} DeviceType;
+/**
+ *  camera on-off state.
+ */
+typedef NS_ENUM(NSUInteger, eDeviceState)
+{
+    /**
+     *  camera on-off setting not initialized
+     */
+    DeviceState_NotSet,
+    /**
+     *  camera is on.
+     */
+    DeviceState_On,
+    /**
+     *  camera state is automatic.
+     */
+    DeviceState_Auto,
+    /**
+     *  camera is turned off by schedule.
+     */
+    DeviceState_OffbySchedule,
+    /**
+     *  camera is turned off by manual.
+     */
+    DeviceState_OffbyManual,
+    /**
+     *  camera is turned off since update.
+     */
+    DeviceState_OffbyUpdate,
+    /**
+     *  camera shutter is off.
+     */
+    DeviceState_ShutterOff = DeviceState_OffbyUpdate+10,
+};
+typedef enum _DeviceAudioType
+{
+    DeviceAudio_AAC = 0,
+    DeviceAudio_G726 = 1,
+    DeviceAudio_G711ALAW = 2,
+    DeviceAudio_G711ULAW = 3,
+}DeviceAudioType;
+/**---------------------------------------------------------------------------------------
+ *  A CloseliCameraDevice object represents a camera device's property.
+ CloseliCameraDevice object manages a collection of property and provides some functions that can be used to get camera infomation and camera status,such as camera deviceUUID,camera name,thumbnail url,whether camera is connected,etc.
+ */
+@interface CloseliCameraDevice : NSObject<NSCopying>
+{
+}
+
+///indicates whether camera is connected.
+@property(nonatomic, assign) BOOL bIsConnect;
+
+///indicates camera is on or off. see more in eDeviceState.
+@property(nonatomic, assign) int cameraState;
+
+///Not used for client,it contains camera hardware info.
+@property(nonatomic, strong) NSString *comments;
+
+///camera create time.
+@property(nonatomic, assign) unsigned long long createTime;
+
+///camera device UUID.
+@property(strong, nonatomic) NSString *  deviceUUID;
+
+///Camera serial number in purchase server, you can use this ID to get Closeli services information from purchase server.
+@property(strong, nonatomic) NSString *  purchaseDID;
+
+///camera mac address.
+@property(strong, nonatomic) NSString *  macAddressID;
+
+///camera name.
+@property(strong, nonatomic) NSString * name;
+
+///indicates camera connection type, friend device or device for my own .etc. see more in CloseliCameraDevice.h.
+@property(nonatomic, assign) int nDeviceType;
+
+///camera p2p ID, you can get it when received CameraConnectionDidChangedNotification
+@property(strong, nonatomic) NSString * p2pID;
+
+///camera purchased service ID.
+@property(nonatomic, assign) int serviceID;
+
+///camera purchase state.  0:no service(no CVR/expired), 1:trial, 2:paid(has CVR)
+@property(nonatomic, assign) int serviceState;
+
+///camera thumbnail server URL, please don't use it directly.
+@property(strong, nonatomic) NSString * thumbnailURL;
+
+//camera region url
+@property(strong, nonatomic) NSString * regionUrl;
+
+//camera audio type
+@property(assign, nonatomic) DeviceAudioType audioType;
+
+
+/**
+ *  Create a CloseliCameraDevice object with camera UUID.
+ *
+ *  @param strDeviceUUID camera UUID.
+ *
+ *  @return a CloseliCameraDevice object.
+ */
+- (id)initByDeviceUUID:(NSString *)strDeviceUUID;
+/**
+ *  get CloseliCameraDevice object's play url.
+ *
+ *  @return url to play.
+ */
+- (NSString *)GetLivePreviewURL;
+/**
+ *  Detect whether can begin live preview.
+ *
+ *  @return bool value ,YES means camera is able to begin live preview,NO means camera can't live preview.
+ */
+- (BOOL)CanBeginPreview;
+/**
+ *  Detect whether is Support Full Relay.
+ *
+ *  @return bool value. Support or not.
+ *
+ *  @discussion YES means camera is supporting full relay,NO means camera don't support.
+ */
+- (BOOL)isSupportFullRelay;
+/**
+ *  whether the camera is support PTZ Setting.
+ *
+ *  @param nFeatureID the parameter of PTZ Feature.
+ *
+ *  @return bool value. Support or not.
+ *
+ *  @discussion YES means camera support PTZ settings,No means camera don't support.
+ */
+- (BOOL)isSupportPTZFeature: (int)nFeatureID;
+
+
+- (DeviceAudioType)audioType;
+- (long)audioEncoderType;
+- (int)audioTalkSampleRate;
+@end

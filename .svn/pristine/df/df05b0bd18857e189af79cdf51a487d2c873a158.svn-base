@@ -1,0 +1,13 @@
+//
+//  HZCaseDetailCell.h
+//  BusinessManager
+//
+//  Created by 牛志胜 on 16/8/26.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface HZCaseDetailCell : UITableViewCell
+
+@end

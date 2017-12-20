@@ -1,0 +1,381 @@
+//
+//  MPMsgEditVC.m
+//  BusinessManager
+//
+//  Created by 周迎春 on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "MPMsgEditVC.h"
+#import "MPChooseUserTypeView.h"
+#import "MsgPushModel.h"
+
+#define KWSize [UIApplication sharedApplication].keyWindow.bounds.size
+#define MAX_STARWORDS_LENGTH 140 //字数限制
+
+@interface MPMsgEditVC ()<UITextFieldDelegate, UITextViewDelegate>
+
+@property (weak, nonatomic) IBOutlet UIButton *choosePushType;
+@property (weak, nonatomic) IBOutlet UILabel *msgNumberLB;
+@property (weak, nonatomic) IBOutlet UITextField *smsIDLab;
+
+@property (weak, nonatomic) IBOutlet UILabel *pushUserLab;
+@property (weak, nonatomic) IBOutlet UILabel *msgNeedsLB;
+@property (weak, nonatomic) IBOutlet UILabel *msgTitleLB;
+@property (weak, nonatomic) IBOutlet UITextField *needSmsCount;
+@property (weak, nonatomic) IBOutlet UITextField *smsTitleLab;
+
+@property (weak, nonatomic) IBOutlet UITextView *detailTextF;
+@property (weak, nonatomic) IBOutlet UILabel *limitNumLab;
+
+@property (weak, nonatomic) IBOutlet UILabel *placeHolderLab;
+
+@property (weak, nonatomic) IBOutlet UIButton *saveBtn;
+
+@property (weak, nonatomic) IBOutlet UIButton *deleteMsgBtn;
+
+@property (nonatomic, strong) MsgPushManagerList *dataModel;
+
+@property (nonatomic, strong) NSString *userNum; //选择用户的等级的Id
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *scrollerviewHeight;
+
+- (IBAction)saveBtnClick:(UIButton *)sender;
+- (IBAction)deleteBtnClick:(UIButton *)sender;
+- (IBAction)choosePushTypeClick:(UIButton *)sender;
+
+
+@end
+
+@implementation MPMsgEditVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+//    self.leftTitle = @"短彩信推送详情";
+    self.title= @"短彩信推送详情";
+    [self setUpViews];
+    
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(textFiledEditChanged:)
+                                                name:UITextViewTextDidChangeNotification
+                                              object:self.detailTextF];
+    //请求数据
+    [self requestSMSDetailData];
+    self.scrollerviewHeight.constant =  516;
+    
+    
+}
+
+- (void)setUpViews {
+    
+    self.detailTextF.delegate = self;
+    
+    //pushUserLab
+    self.pushUserLab.text = @"请选择推送用户";
+    [self.pushUserLab setTextColor:[UIColor colorWithHexString:@"#CCCCCC"]];
+    
+    //detailTextF
+    self.detailTextF.layer.borderColor = [UIColor colorWithHexString:@"#e5e5e5"].CGColor;
+    self.detailTextF.layer.borderWidth = 1.0f;
+    
+    //limitLab
+    self.limitNumLab.text = [NSString stringWithFormat:@"%d", MAX_STARWORDS_LENGTH];
+    
+    //saveBtn
+    self.saveBtn.layer.cornerRadius = 5.0f;
+    self.saveBtn.layer.masksToBounds = YES;
+    
+    //deleteBtn
+    self.deleteMsgBtn.layer.cornerRadius = 5.0f;
+    self.deleteMsgBtn.layer.masksToBounds = YES;
+    self.deleteMsgBtn.layer.borderColor = [UIColor colorWithHexString:@"#5e5e5e"].CGColor;
+    self.deleteMsgBtn.layer.borderWidth = 1.0f;
+    
+}
+
+
+- (void)reloadUIData {
+    //model赋值
+    self.smsIDLab.text = NoNullStr(self.dataModel.ID, @"");
+    self.pushUserLab.text = NoNullStr(self.dataModel.targetUserName, @"");
+    self.needSmsCount.text = NoNullStr(self.dataModel.targetUserNum, @"");
+    self.smsTitleLab.text = NoNullStr(self.dataModel.title, @"");
+    self.detailTextF.text = NoNullStr(self.dataModel.content, @"");
+    [self.needSmsCount setEnabled:NO];
+    self.limitNumLab.text = [NSString stringWithFormat:@"%u" ,(140 - self.model.content.length)];
+    if (![self.detailTextF.text isEqualToString:@""] && self.detailTextF.text.length > 0) {
+        [self.placeHolderLab setHidden:YES];
+    }
+}
+
+#pragma mark - UITextFieldDelegate
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
+    if ([text isEqualToString:@"\n"]) {
+        [textView resignFirstResponder];
+        return NO;
+    }
+    
+    if (textView.text.length == 0) {
+        
+        if ([text isEqualToString:@""]) {
+            [self.placeHolderLab setHidden:NO];
+        }else {
+            [self.placeHolderLab setHidden:YES];
+        }
+        
+    }else {
+        
+        if (textView.text.length == 1) {
+            if ([text isEqualToString:@""]) {
+                [self.placeHolderLab setHidden:NO];
+            }else {
+                [self.placeHolderLab setHidden:YES];
+            }
+        }else {
+            [self.placeHolderLab setHidden:YES];
+        }
+    }
+    
+    return YES;
+
+}
+
+- (void)textViewDidChange:(UITextView *)textView {
+    
+    if (textView.text.length > 0 || ![textView.text isEqualToString:@""]) {
+        [self.placeHolderLab setHidden:YES];
+    }else {
+        [self.placeHolderLab setHidden:NO];
+    }
+    
+    [self textLength];//计算剩余字数
+}
+
+//计算剩余字数
+- (void)textLength {
+    NSLog(@"%@", self.detailTextF.text);
+    
+    NSInteger length = MAX_STARWORDS_LENGTH - self.detailTextF.text.length;
+    
+    if (length <= 0) {
+        self.limitNumLab.text = @"0";
+    }else {
+        self.limitNumLab.text = [NSString stringWithFormat:@"%ld", length];
+    }
+    
+}
+
+
+#pragma mark - Notification Method
+-(void)textFiledEditChanged:(NSNotification *)obj
+{
+    UITextView *textField = (UITextView *)obj.object;
+    NSString *toBeString = textField.text;
+    
+    //获取高亮部分
+    UITextRange *selectedRange = [textField markedTextRange];
+    UITextPosition *position = [textField positionFromPosition:selectedRange.start offset:0];
+    
+    // 没有高亮选择的字，则对已输入的文字进行字数统计和限制
+    if (!position)
+    {
+        if (toBeString.length > MAX_STARWORDS_LENGTH)
+        {
+            NSRange rangeIndex = [toBeString rangeOfComposedCharacterSequenceAtIndex:MAX_STARWORDS_LENGTH];
+            if (rangeIndex.length == 1)
+            {
+                textField.text = [toBeString substringToIndex:MAX_STARWORDS_LENGTH];
+            }
+            else
+            {
+                NSRange rangeRange = [toBeString rangeOfComposedCharacterSequencesForRange:NSMakeRange(0, MAX_STARWORDS_LENGTH)];
+                textField.text = [toBeString substringWithRange:rangeRange];
+            }
+        }
+    }
+}
+
+#pragma mark - 请求
+//请求详情数据
+- (void)requestSMSDetailData {
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD showWithStatus:@"请稍等..."];
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:NoNullStr(self.model.ID, @"") forKey:@"id"];
+    
+    [[MallNetworkEngine loginshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_MessagePush_smsView Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@">>>>>>>>>>>:%@", dic);
+        if (Succeed(dic)) {
+            [SVProgressHUD dismiss];
+            NSDictionary *data = [dic objectForKey:@"data"];
+            if (data) {
+                self.dataModel = [MsgPushManagerList mj_objectWithKeyValues:data];
+                [self reloadUIData]; //页面数据填充...
+            }
+        }else {
+            [SVProgressHUD showErrorWithStatus:@"请求失败,请稍后再试！"];
+        }
+        
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        [SVProgressHUD showErrorWithStatus:@"服务器繁忙,请稍后再试！"];
+    }];
+}
+
+//修改保存
+#pragma mark - 编辑保存接口 -
+- (void)sendRequestToSaveOrModifyWithMsgId:(NSInteger)msgId storeId:(NSString *)storeId {
+    NSString *userNum;
+    if (self.userNum && ![self.userNum isEqualToString:@""] && self.userNum.length > 0) {
+        if ([self.userNum isEqualToString:self.model.targetUserNum]) {
+            userNum = self.model.targetUserNum;
+        }else {
+            userNum = self.userNum;
+        }
+    }else {
+        userNum = self.model.targetUserNum;
+    }
+    
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:@(msgId) forKey:@"id"];
+    [params setObject:NoNullStr(storeId, @"") forKey:@"storeId"];
+//    [params setObject:NoNullStr(self.smsTitleLab.text, @"") forKey:@"title"];
+    [params setObject:self.model.title forKey:@"title"];
+    [params setObject:NoNullStr(self.model.msgType, @"") forKey:@"msgType"];
+//    [params setObject:NoNullStr(self.detailTextF.text, @"") forKey:@"content"];
+    [params setObject:self.model.content forKey:@"content"];
+//    [params setObject:NoNullStr(userNum, @"") forKey:@"targetUser"];
+    [params setObject:self.model.targetUser forKey:@"targetUser"];
+    
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.navigationController.view animated:YES];
+    hud.mode = MBProgressHUDModeIndeterminate;
+    hud.labelText = @"请稍等...";
+    [[MallNetworkEngine loginshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_MessagePush_smsSave Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@">>>>>>>>>>:%@", dic);
+        NSLog(@"-------params-->>>%@", params);
+        [hud hide:YES];
+        if (Succeed(dic)) {
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+            [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+            [SVProgressHUD showSuccessWithStatus:@"保存成功！"];
+        }else {
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+            [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+            [SVProgressHUD showErrorWithStatus:[NSString stringWithFormat:@"%@", [dic objectForKey:@"msg"]]];
+        }
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        [hud hide:YES];
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeGradient];
+        [SVProgressHUD showErrorWithStatus:@"服务器繁忙！请稍后再试"];
+    }];
+    
+}
+
+//删除
+#pragma mark - 编辑页面删除接口 -
+- (void)sendRequestToDeleteSMS:(NSInteger)msgId {
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:@(msgId) forKey:@"id"];
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.navigationController.view animated:YES];
+    hud.mode = MBProgressHUDModeIndeterminate;
+    hud.labelText = @"请稍等...";
+    [[MallNetworkEngine loginshare] requestNotEncodeWithDate:self.requestDate requestWithPath:API_MessagePush_smsDelete Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        NSLog(@">>>>>>>>>>:%@", dic);
+        [hud hide:YES];
+        if (Succeed(dic)) {
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+            [SVProgressHUD showSuccessWithStatus:@"删除成功！"];
+            [self.navigationController popViewControllerAnimated:YES];
+        }else {
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+            [SVProgressHUD showErrorWithStatus:@"删除失败！"];
+        }
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        [hud hide:YES];
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD showErrorWithStatus:@"服务器繁忙！请稍后再试"];
+        
+    }];
+    
+}
+
+#pragma mark - Action
+//保存
+
+- (IBAction)saveBtnClick:(UIButton *)sender {
+    if (self.pushUserLab.text.length == 0 || [self.pushUserLab.text isEqualToString:@""]) {
+        return;
+    }
+    if (self.detailTextF.text.length == 0 || [self.detailTextF.text isEqualToString:@""]) {
+        return;
+    }
+    if (self.smsTitleLab.text.length == 0 || [self.smsTitleLab.text isEqualToString:@""]) {
+        return;
+    }
+    if (self.needSmsCount.text == 0 || self.needSmsCount.text.length == 0 || [self.needSmsCount.text isEqualToString:@""]) {
+        return;
+    }
+    if (self.model.storeId && ![self.model.storeId isEqualToString:@""] && self.model.storeId.length > 0
+        &&
+        self.model.ID && ![self.model.ID isEqualToString:@""] && self.model.ID.length > 0) {
+        
+        [self sendRequestToSaveOrModifyWithMsgId:[self.model.ID integerValue] storeId:NoNullStr(AccountInfo.storeId, @"")];
+        
+    }
+    NSInteger count = [AccountInfo.storeId integerValue];
+    NSLog(@"----storeID>>>%ld", count);
+    
+}
+
+//删除
+
+- (IBAction)deleteBtnClick:(UIButton *)sender {
+    if (self.model.ID && ![self.model.ID isEqualToString:@""] && self.model.ID.length > 0) {
+        
+        [self sendRequestToDeleteSMS:[self.model.ID integerValue]];
+    }
+    
+    
+}
+
+#pragma mark - 弹出多选框
+- (IBAction)choosePushTypeClick:(UIButton *)sender {
+    WS(weakSelf);
+    MPChooseUserTypeView *view = [[MPChooseUserTypeView alloc] initWithFrame:CGRectMake(0, 0, KWSize.width, KWSize.height) type:OnlyVipUserShow WithBlock:^(NSString *userType, NSString *userNum) {
+        
+        weakSelf.pushUserLab.text = userType;
+        [weakSelf.pushUserLab setTextColor:[UIColor blackColor]];
+        
+        weakSelf.userNum = userNum;
+    }];
+    
+    [view show];
+}
+#pragma mark - 取消键盘 - 
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+//    [self.msgNumberLB resignFirstResponder];
+//    [self.msgTitleLB resignFirstResponder];
+//    [self.msgNeedsLB resignFirstResponder];
+    [self.detailTextF resignFirstResponder];
+    
+}
+- (BOOL)textFieldShouldReturn:(UITextField *)textField{
+    [textField resignFirstResponder];
+    return YES;
+}
+
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+@end

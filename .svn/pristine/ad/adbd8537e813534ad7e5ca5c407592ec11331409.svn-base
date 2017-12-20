@@ -1,0 +1,22 @@
+//
+//  DrawActivityManageVC.h
+//  BusinessManager
+//
+//  Created by smile apple on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "BaseController.h"
+
+@class avtivityListItem;
+
+@interface DrawActivityManageVC : BaseController
+@property (weak, nonatomic) IBOutlet UITableView *drawActivityTableView;
+@property (weak, nonatomic) IBOutlet UIButton *sortButton;// 排序
+@property (weak, nonatomic) IBOutlet UIButton *addActivityButton;//新增活动
+@property (nonatomic,assign)NSInteger FromVC;//从那边跳过来
+
+- (IBAction)addAvtivityAction:(id)sender;
+
+@property(nonatomic,copy)void(^callBack)(avtivityListItem *acItemModel);
+@end

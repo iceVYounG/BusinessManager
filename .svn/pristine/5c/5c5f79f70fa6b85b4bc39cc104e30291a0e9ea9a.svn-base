@@ -1,0 +1,44 @@
+//
+//  VMRechargeRecordVC.m
+//  BusinessManager
+//
+//  Created by KL on 16/8/15.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "VMRechargeRecordVC.h"
+#import "VMRechargeRecordView.h"
+
+@interface VMRechargeRecordVC ()
+
+@property (nonatomic, strong) NSMutableArray *dataArr;
+
+@end
+
+@implementation VMRechargeRecordVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self setUpViews];
+    
+}
+
+- (void)setUpViews {
+    VMRechargeRecordView *view = [[VMRechargeRecordView alloc] init];
+    [self.view addSubview:view];
+    [view mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.left.bottom.right.equalTo(self);
+    }];
+    
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+
+@end

@@ -1,0 +1,33 @@
+//
+//  AddMarketACtivityVC.h
+//  BusinessManager
+//
+//  Created by The Only on 16/7/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "BaseController.h"
+
+@interface AddMarketACtivityVC : BaseController
+@property (weak, nonatomic) IBOutlet UIView *prizeTypeView;//奖品类型View
+@property (weak, nonatomic) IBOutlet UILabel *prizeNamelable;//奖品名称
+//@property (weak, nonatomic) IBOutlet UITextField *prizeCount;//奖品数量
+//@property (weak, nonatomic) IBOutlet UITextField *prizeNumber;//中奖次数
+//@property (weak, nonatomic) IBOutlet UITextField *prizeChance;//中奖概率
+@property (weak, nonatomic) IBOutlet UIButton *prizeType;//奖品类型
+@property (weak, nonatomic) IBOutlet UIButton *savePrizeBtn;//保存奖品
+@property (weak, nonatomic) IBOutlet UIButton *addPrizeBtn;//继续添加奖品
+@property (strong, nonatomic) IBOutlet UIView *kindPrizeTypeView;// 实物奖品类型View
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *addPrizeTop;
+- (IBAction)choosePrizeTypeAction:(id)sender;
+
+- (IBAction)continueAddPrizeAction:(id)sender;
+- (IBAction)savePrizeAction:(id)sender;
+@property (weak, nonatomic) IBOutlet UIScrollView *myScrollerview;
+
+@property (weak, nonatomic) IBOutlet UIView *backGroundView;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *saveBtnTop;
+
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *myScrollerViewHeight;
+
+@end

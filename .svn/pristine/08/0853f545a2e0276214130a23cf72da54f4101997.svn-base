@@ -1,0 +1,28 @@
+//
+//  VerifyRecordModel.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/8/27.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "VerifyRecordModel.h"
+
+@implementation VerifyRecordModel
+
+- (instancetype)initWithDic:(NSDictionary *)dic{
+    self = [super init];
+    if (self) {
+        self.AMOUNT_PAYABLE = [dic objectForKey:@"AMOUNT_PAYABLE"];
+        self.BUSINESS_TYPE = [dic objectForKey:@"BUSINESS_TYPE"];
+        self.CARD_LEVEL = [dic objectForKey:@"CARD_LEVEL"];
+        self.CARD_NUM = [dic objectForKey:@"CARD_NUM"];
+        self.CREATE_TIME = [dic objectForKey:@"CREATE_TIME"];
+        self.DISCOUNT = [dic objectForKey:@"DISCOUNT"];
+        self.REALPAY_AMOUNT = [dic objectForKey:@"REALPAY_AMOUNT"];
+        self.USER_MOBILE = [dic objectForKey:@"USER_MOBILE"];
+    }
+    return self;
+}
+
+@end

@@ -1,0 +1,211 @@
+//
+//  WeiZhanModel.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanModel.h"
+@implementation WeiZhanModel
+
+NSString* DefaultStr(){
+
+    return @"[{\"code\":\"fwsj\",\"value\":\"\",\"key\":\"服务时间\",\"type\":\"1\"},{\"code\":\"fwdh\",\"value\":\"\",\"key\":\"服务电话\",\"type\":\"1\"},{\"code\":\"dpdz\",\"value\":\"\",\"key\":\"店铺地址\",\"type\":\"1\"},{\"code\":\"tsfw\",\"value\":\"\",\"key\":\"特色服务\",\"type\":\"1\"},{\"code\":\"tgfw\",\"value\":\"\",\"key\":\"提供服务\",\"type\":\"1\"},{\"code\":\"fwsj\",\"value\":\"\",\"key\":\"服务时间\",\"type\":\"1\"},{\"code\":\"fwdh\",\"value\":\"\",\"key\":\"服务电话\",\"type\":\"1\"},{\"code\":\"dpdz\",\"value\":\"\",\"key\":\"店铺地址\",\"type\":\"1\"},{\"code\":\"tsfw\",\"value\":\"\",\"key\":\"特色服务\",\"type\":\"1\"},{\"code\":\"tgfw\",\"value\":\"\",\"key\":\"提供服务\",\"type\":\"1\"}]";
+};
+
+@end
+
+@implementation PhotoImageModel
+
+
+@end
+
+
+@implementation HZImageModel
+
+- (NSMutableArray *)images{
+    if (!_images) {
+        _images = [NSMutableArray array];
+    }
+    return _images;
+}
+- (NSMutableArray *)names{
+    if (!_names) {
+        _names = [NSMutableArray array];
+    }
+    return _names;
+}
+@end
+
+@implementation HZIconViewFrame
+
+- (void)setModel:(HZImageModel *)model{
+    _model = model;
+    __block NSInteger count = 0;
+    [model.names enumerateObjectsUsingBlock:^(NSObject *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        count = idx + 1;
+    }];
+    self.cellHeight = (HZImageGap +HZImageH) * (count%2) + (HZImageH + HZImageGap) *(count/2);
+}
+
+@end
+@implementation MyWeiZhans
+
+
+- (id)init {
+    if (self = [super init]) {
+        
+        [MyWeiZhans mj_setupObjectClassInArray:^NSDictionary *{
+            
+             return @{@"data" : @"MyWeiZhanModel"};
+        }];
+    }
+    return self;
+}
+
+@end
+
+@implementation MyWeiZhanModel
+
++ (NSDictionary *)replacedKeyFromPropertyName{
+    return @{
+             @"wzId" : @"id"
+             };
+}
+
+@end
+
+@implementation SearPartData
+
+- (id)init {
+    if (self = [super init]) {
+        
+        [SearPartData mj_setupObjectClassInArray:^NSDictionary *{
+            
+            return @{@"data" : @"PartModel"};
+        }];
+    }
+    return self;
+}
++ (NSDictionary *)replacedKeyFromPropertyName{
+    return @{
+             @"temPlate" : @"template"
+             };
+}
+@end
+@implementation TemplateData
+
+@end
+
+@implementation PartModel
+
+@end
+
+
+@implementation TemplateModelData
+- (id)init {
+    if (self = [super init]) {
+        
+        [TemplateModelData mj_setupObjectClassInArray:^NSDictionary *{
+            
+            return @{@"date" : @"TemplateModel"};
+        }];
+    }
+    return self;
+}
+
+@end
+
+@implementation TemplateModel
+- (id)init {
+    if (self = [super init]) {
+        
+        [TemplateModel mj_setupObjectClassInArray:^NSDictionary *{
+            
+            return @{ @"images": @"ImagePathModel"};
+        }];
+    }
+    return self;
+}
+
++ (NSDictionary *)replacedKeyFromPropertyName{
+    return @{
+             @"tCode" : @"code"
+             };
+}
+
+@end
+
+@implementation ImagePathModel
+
+
+
+@end
+
+@implementation PramsArryModel
+
+- (id)init {
+    if (self = [super init]) {
+        
+        [PramsArryModel mj_setupObjectClassInArray:^NSDictionary *{
+            
+            return @{@"prams" : @"PartModel"};
+        }];
+    }
+    return self;
+}
+
+
+@end
+
+@implementation ImagePath
+
+
+@end
+
+@implementation ImageUpLoadBackModel
+
+
+@end
+
+@implementation ADImageModel
+
+
+@end
+
+@implementation ECProductModel
+
+- (instancetype)init{
+    if (self=[super init]) {
+        [ECProductModel mj_setupObjectClassInArray:^NSDictionary *{
+            
+            return @{@"data" : @"ECProductModel"};
+        }];
+    }
+    return self;
+}
+
++ (NSDictionary *)replacedKeyFromPropertyName{
+    return @{
+             @"productId" : @"id"
+             };
+}
+
+//- (void)setShopPrice:(NSString *)shopPrice{
+//    _shopPrice=shopPrice;
+//    if (shopPrice) {
+//        NSString *str=[NSString stringWithFormat:@"¥%@",shopPrice];
+//        NSMutableParagraphStyle *paragraphStyle=[[NSMutableParagraphStyle alloc]init];
+//        paragraphStyle.lineSpacing=8.0;
+//        NSMutableAttributedString *price=[[NSMutableAttributedString alloc]initWithString:str];
+//        NSDictionary *attr1=@{NSParagraphStyleAttributeName: paragraphStyle} ;
+//        NSDictionary *attr2=@{NSFontAttributeName: [UIFont systemFontOfSize:12]};
+//        [price setAttributes:attr1 range:NSMakeRange(0,2)];
+//        [price setAttributes:attr2 range:NSMakeRange(0,1)];
+//        self.changeShopPrice=price;
+//    }
+//}
+
+
+@end

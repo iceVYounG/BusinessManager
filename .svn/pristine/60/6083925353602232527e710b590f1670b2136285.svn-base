@@ -1,0 +1,17 @@
+//
+//  FoodDetailEditVC.h
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanBaseController.h"
+
+#define KCollectionCellW     (KScreenWidth-16*3)/3
+//KCollectionCellW * 7.5/12
+#define KCollectionCellH     (KScreenWidth-16*3)/3 * 22/13
+
+@interface FoodDetailEditVC : WeiZhanBaseController
+
+@end

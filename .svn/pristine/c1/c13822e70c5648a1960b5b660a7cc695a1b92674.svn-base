@@ -1,0 +1,31 @@
+//
+//  ADCollectionViewCell.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "ADCollectionViewCell.h"
+#import "JMPickCollectView.h"
+
+@implementation ADCollectionViewCell
+
+- (void)awakeFromNib {
+    // Initialization code
+    
+    
+}
+
+- (IBAction)imageSenderClick:(UIButton *)sender {
+    
+    if (self.delegate) {
+        [self.delegate jump2ImagePickerVCsender:sender];
+    }
+}
+- (IBAction)deleteAction:(UIButton *)sender {
+    if (self.delegate) {
+        [self.delegate deleteImageCell:sender];
+    }
+}
+@end

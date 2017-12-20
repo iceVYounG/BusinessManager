@@ -1,0 +1,68 @@
+//
+//  LoopViewCell.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/29.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "LoopViewCell.h"
+
+@implementation LoopViewCell
+
+- (void)awakeFromNib {
+    // Initialization code
+    
+    _textView.layer.borderWidth = .5f;
+    [self createPickerView];
+    
+}
+
+- (void)createPickerView{
+    PickPrameModel* model = [[PickPrameModel alloc] init];
+    
+    model.frame = CGRectMake(0, 200, KScreenWidth, 100);
+    model.numOfRow = 4;
+    model.margin = 4;
+    model.maxCount = 9;
+    _pickCollectionView = [JMPickCollectView creatWithPramModel:model block:^(NSMutableArray *photos, NSMutableArray *assets) {
+        
+        if (photos.count > 3) {
+            self.pickCollectionView.frame = CGRectMake(0, 200, KScreenWidth, (photos.count/4 + 1)*100);
+            [self.pickCollectionView reloadData];
+            
+            if (self.delegate) {
+                [self.delegate updateTableViewWithPhotos:(NSMutableArray* )photos indexPath:self.indexPath];
+            }
+
+        }
+    }];
+
+    _pickCollectionView.alwaysBounceVertical = NO;
+    [self addSubview:_pickCollectionView];
+}
+- (IBAction)deleteAction:(UIButton *)sender {
+    
+    if (self.delegate) {
+        [self.delegate deleteImageCell:sender cell:self];
+    }
+}
+
+
+- (IBAction)selectPhotoAction:(UIButton *)sender {
+    
+    [JMPickTool showPickVCWithCallBackBlock:^(UIImage *originImage, UIImage *mediaImage) {
+        
+        [self.imageSender setImage:mediaImage forState:UIControlStateNormal];
+      
+    }];
+
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

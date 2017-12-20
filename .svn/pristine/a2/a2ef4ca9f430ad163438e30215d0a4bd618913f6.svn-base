@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9532" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="KGk-i7-Jjw" customClass="GenealWeiZhanCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+            </tableViewCellContentView>
+            <point key="canvasLocation" x="-430" y="174"/>
+        </tableViewCell>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="EditingTitleCell_ident" id="lDH-zR-OCj" customClass="EditingTitleCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="lDH-zR-OCj" id="z7l-wP-VSU">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="微站名称" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0hN-7Q-Nhr">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
+                        <color key="backgroundColor" red="0.0" green="0.50196081400000003" blue="1" alpha="0.71560916385135132" colorSpace="calibratedRGB"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                        <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="0hN-7Q-Nhr" firstAttribute="top" secondItem="z7l-wP-VSU" secondAttribute="topMargin" constant="-8" id="S9e-t9-fK6"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="0hN-7Q-Nhr" secondAttribute="trailing" constant="-8" id="SeZ-Eh-n0X"/>
+                    <constraint firstItem="0hN-7Q-Nhr" firstAttribute="leading" secondItem="z7l-wP-VSU" secondAttribute="leadingMargin" constant="-8" id="nuZ-fH-TGA"/>
+                    <constraint firstAttribute="bottomMargin" secondItem="0hN-7Q-Nhr" secondAttribute="bottom" constant="-8" id="qTT-OY-uo1"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="weizhanName" destination="0hN-7Q-Nhr" id="11O-cj-6fU"/>
+            </connections>
+            <point key="canvasLocation" x="-430" y="262"/>
+        </tableViewCell>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="DetailInfoCell_ident" id="BSh-Od-bm4" customClass="DetailInfoCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="BSh-Od-bm4" id="c2x-nP-a5U">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="服务时间" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Urj-lR-CUC">
+                        <rect key="frame" x="8" y="0.0" width="93" height="43"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="93" id="UbQ-0E-GWX"/>
+                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="93" id="qgR-RN-3fo"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1234567890" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="N95-9u-y0Y">
+                        <rect key="frame" x="120" y="0.0" width="200" height="43"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="N95-9u-y0Y" firstAttribute="top" secondItem="c2x-nP-a5U" secondAttribute="topMargin" constant="-8" id="1LE-Wx-L0N"/>
+                    <constraint firstItem="N95-9u-y0Y" firstAttribute="leading" secondItem="Urj-lR-CUC" secondAttribute="trailing" constant="19" id="4EM-Gc-QU8"/>
+                    <constraint firstAttribute="bottomMargin" secondItem="N95-9u-y0Y" secondAttribute="bottom" constant="-8" id="7KE-pI-MxY"/>
+                    <constraint firstItem="Urj-lR-CUC" firstAttribute="top" secondItem="c2x-nP-a5U" secondAttribute="top" id="TDT-FC-CHf"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="N95-9u-y0Y" secondAttribute="trailing" constant="-8" id="m4g-F4-VHw"/>
+                    <constraint firstAttribute="bottom" secondItem="Urj-lR-CUC" secondAttribute="bottom" id="ptG-Wx-oWg"/>
+                    <constraint firstItem="Urj-lR-CUC" firstAttribute="leading" secondItem="c2x-nP-a5U" secondAttribute="leading" constant="8" id="w7h-cG-R8b"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="detailLabel" destination="N95-9u-y0Y" id="zXA-we-zH1"/>
+                <outlet property="titleLabel" destination="Urj-lR-CUC" id="UmF-fT-eET"/>
+            </connections>
+            <point key="canvasLocation" x="-430" y="366"/>
+        </tableViewCell>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="CallSenderCell_ident" id="3Fl-ZS-KJw" customClass="CallSenderCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="3Fl-ZS-KJw" id="HXu-ui-6nP">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="B5J-QL-xdY">
+                        <rect key="frame" x="43" y="12" width="235" height="20"/>
+                        <color key="backgroundColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                        <state key="normal" title="一键呼叫服务"/>
+                    </button>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="bottom" secondItem="B5J-QL-xdY" secondAttribute="bottom" constant="11" id="JRC-6i-HBi"/>
+                    <constraint firstAttribute="trailing" secondItem="B5J-QL-xdY" secondAttribute="trailing" constant="42" id="JjH-BP-0uJ"/>
+                    <constraint firstItem="B5J-QL-xdY" firstAttribute="leading" secondItem="HXu-ui-6nP" secondAttribute="leading" constant="43" id="WJ9-Xz-Gk4"/>
+                    <constraint firstItem="B5J-QL-xdY" firstAttribute="top" secondItem="HXu-ui-6nP" secondAttribute="top" constant="12" id="ws8-4Y-O5j"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="callSender" destination="B5J-QL-xdY" id="FVl-ao-nab"/>
+            </connections>
+            <point key="canvasLocation" x="-423" y="485"/>
+        </tableViewCell>
+    </objects>
+</document>

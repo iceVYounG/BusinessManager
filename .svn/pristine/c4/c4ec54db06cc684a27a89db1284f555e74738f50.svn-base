@@ -1,0 +1,62 @@
+//
+//  HZCaseDetailCollectionViewCell.m
+//  BusinessManager
+//
+//  Created by 牛志胜 on 16/9/2.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "HZCaseDetailCollectionViewCell.h"
+
+NSString * const HZCaseDetailCollectionViewCellID = @"HZCaseDetailCollectionViewCellID";
+
+
+@implementation HZCaseDetailCollectionViewCell
+
+- (void)awakeFromNib {
+    
+    _iconNameTextF.delegate =self;
+    _textView.delegate = self;
+    _textView = [[UIPlaceHolderTextView alloc]initWithFrame:CGRectMake(10,CGRectGetMaxY(_iconNameTextF.frame) +15 , KScreenWidth - 20, 121)];
+    _textView.placeholder = @"输入文字介绍 , 如果没有图片可不上传图片";
+    _textView.font = [UIFont systemFontOfSize:14];
+    _textView.textContainerInset = UIEdgeInsetsMake(3, 2, 0, 2);
+    _textView.layer.borderColor = [UIColor groupTableViewBackgroundColor].CGColor;
+    _textView.layer.cornerRadius = 6;
+    _textView.layer.masksToBounds = YES;
+    _textView.layer.borderWidth = 1;
+    [self.contentView addSubview:_textView];
+    
+    [_iconImageBtn addTarget:self action:@selector(chooseImage:) forControlEvents:UIControlEventTouchUpInside];
+    _iconImageBtn.tag = ChooseImageTAG;
+    [_deleteBtn addTarget:self action:@selector(delegateModel:) forControlEvents:UIControlEventTouchUpInside];
+    _deleteBtn.tag = DelegateTAG;
+    
+}
+- (void)setModel:(ModelSection *)model{
+    _model = model;
+    [_iconImageBtn sd_setBackgroundImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",ImagePre,model.model.imgPath]] forState:UIControlStateNormal placeholderImage:[UIImage imageNamed:@"uploadImage"]];
+    _iconNameTextF.text = model.model.name;
+    _textView.text = model.model.content;
+}
+
+- (void)chooseImage:(UIButton *)sender{
+    
+    if ([_delegate respondsToSelector:@selector(caseDetailCollectionViewCell:actionWithButton:)]) {
+        [_delegate caseDetailCollectionViewCell:self actionWithButton:sender];
+    }
+}
+
+- (void)delegateModel:(UIButton *)sender{
+    
+    if ([_delegate respondsToSelector:@selector(caseDetailCollectionViewCell:actionWithButton:)]) {
+        [_delegate caseDetailCollectionViewCell:self actionWithButton:sender];
+    }
+}
+- (void)textViewDidEndEditing:(UITextView *)textView{
+    _model.model.content = textView.text;
+}
+- (void)textFieldDidEndEditing:(UITextField *)textField{
+    _model.model.name = textField.text;
+}
+@end

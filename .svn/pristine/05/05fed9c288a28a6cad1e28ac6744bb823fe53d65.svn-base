@@ -1,0 +1,100 @@
+//
+//  ADViewCell.h
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/22.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "JMLoopView.h"
+#import "JMView.h"
+
+
+#define KADButtonTag        101
+#define KADImageTag         112
+#define KADTitleViewTag     103
+#define KADViewTag          104
+#define KADBannerTag        105
+
+#define KADPropertyTag      106
+
+#define KADImageCellH       70
+#define KADTitleViewCellH   130
+#define KADViewCellH        160
+#define KADButtonCellH      60
+#define KADPropertyCellH    300
+
+@protocol ADViewCellDelegate <NSObject>
+
+//- (void)
+
+@end
+
+@class TemplateModel;
+@interface ADViewCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet JMLoopView *loopView;
+@property (weak, nonatomic) IBOutlet UILabel *title;
+
+@property (nonatomic, strong) NSMutableArray *adArray;
+
+@property (weak, nonatomic) id<ADViewCellDelegate> delegate;
+
+@property (nonatomic, strong) JMView *jView;
+@property (nonatomic, strong) TemplateModel *model;
+
+- (void)setAdImageWithArray:(NSArray *)array;
+
+@end
+
+@interface ADTitleViewCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UIImageView *iconImage;
+@property (weak, nonatomic) IBOutlet UILabel *shopName;
+@property (weak, nonatomic) IBOutlet UILabel *phoneNumber;
+@property (nonatomic, strong) JMView *jView;
+@property (nonatomic, strong) TemplateModel *model;
+
+@end
+
+@class ADImageModel;
+@interface ADImageCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UIImageView *imageV;
+@property (nonatomic, strong) NSMutableArray *images;
+@property (nonatomic, strong) ADImageModel *model;
+@property (nonatomic, strong) JMView *jView;
+
+@end
+
+
+@interface PropertyCell : UITableViewCell <JMViewDelegate>
+@property (weak, nonatomic) IBOutlet UILabel *nameOfShop;
+@property (weak, nonatomic) IBOutlet UIImageView *bigImage;
+@property (weak, nonatomic) IBOutlet UILabel *nameOfPhone;
+@property (nonatomic, strong) JMView *jView;
+@property (nonatomic, strong) JMView *jView2;
+
+@property (nonatomic, strong) TemplateModel *model;
+@end
+
+@interface ADButtonCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UIButton *ideaBtn;
+@property (nonatomic, strong) JMView *jView;
+@property (nonatomic, strong) TemplateModel *model;
+
+@end
+
+@interface ADBannerCell : UITableViewCell 
+@property (weak, nonatomic) IBOutlet UIImageView *imageV;
+@property (nonatomic, strong) JMView *jView;
+@property (nonatomic, strong) TemplateModel *model;
+
+@end
+
+@interface ADCollectionCell : UICollectionViewCell
+@property (weak, nonatomic) IBOutlet UIButton *imageSender;
+@property (weak, nonatomic) IBOutlet UITextField *nameField;
+@property (weak, nonatomic) IBOutlet UITextField *priceField;
+@property (nonatomic, strong) JMView *jView;
+
+
+@end

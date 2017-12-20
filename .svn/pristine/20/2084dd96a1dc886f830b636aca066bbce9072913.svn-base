@@ -1,0 +1,782 @@
+//
+//  NewVipCardView.m
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/21.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//  SetNewVipLevelNameView 新增会员卡级别接口界面
+//  创建新会员卡页面 -请选择会员等级数据请求 -本页面
+#import "NewVipCardView.h"
+#import "AddVipLevelButton.h"
+#import "SetNewVipLevelNameView.h"
+#import "AppDelegate.h"
+#import "ChooseVipLevelView.h"
+#import "StringHelper.h"
+
+//textView  打折备注
+#define MAX_STARWORDS_LENGTH 40
+//textField 卡名称
+#define MAX_STARWORDS_LENGTH_TEXTFIELD 10
+#define VM_NewCard_placeHolder @"请输入会员卡折扣的备注信息"
+
+@interface NewVipCardView ()<ChooseVipLevelViewDelegate,SetNewVipLevelNameViewDelegate, UITextFieldDelegate>
+
+@end
+
+@implementation NewVipCardView
+
+- (id)initWithType:(VipCard)type {
+    self = [super init];
+    if (self) {
+        self.type = type;
+        [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(NewVipCard_textViewEditChanged:)
+                                                    name:UITextViewTextDidChangeNotification
+                                                  object:self.cardDiscountMsgTextV];
+        [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(NewVipCard_textFieldEditChanged:)
+                                                    name:UITextFieldTextDidChangeNotification
+                                                  object:self.cardNameTF];
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextViewTextDidChangeNotification object:self.cardDiscountMsgTextV];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextFieldTextDidChangeNotification object:self.cardNameTF];
+    NSLog(@"NewVipCardView --> dealloc...");
+}
+
+
+- (void)setType:(VipCard)type{
+    [self removeAllSubviews];
+    
+    UITapGestureRecognizer *choseCardTypeTapGR = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(clickCardType)];
+    choseCardTypeTapGR.numberOfTapsRequired = 1;
+    choseCardTypeTapGR.numberOfTouchesRequired = 1;
+    
+    UITapGestureRecognizer *choseCardLevelTapGR = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(clickToChoseVipLevel)];
+    choseCardLevelTapGR.numberOfTapsRequired = 1;
+    choseCardLevelTapGR.numberOfTouchesRequired = 1;
+    _type = type;
+    if (_type == VipCardCoupon) {
+        UIView *backgroundView = [[UIView alloc]init];
+        backgroundView.backgroundColor = [UIColor whiteColor];
+        backgroundView.layer.borderWidth = 1;
+        backgroundView.layer.borderColor = [UIColor colorWithHexString:@"dadada"].CGColor;
+        [self addSubview:backgroundView];
+        [backgroundView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.top.equalTo(self);
+            make.height.mas_equalTo(@323);
+        }];
+        
+        for (int i = 0; i < 5; i ++) {
+            UIView *lineView = [[UIView alloc]init];
+            lineView.backgroundColor = [UIColor colorWithHexString:@"e5e5e5"];
+            [backgroundView addSubview:lineView];
+            if (i == 4) {
+                [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+                    make.left.equalTo(backgroundView.mas_left).offset(15);
+                    make.height.mas_equalTo(@1);
+                    make.width.mas_equalTo(@199);
+                    make.top.equalTo(backgroundView.mas_top).offset(48 * (i + 1) + i);
+                }];
+            }else{
+                [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+                    make.left.equalTo(backgroundView.mas_left).offset(15);
+                    make.height.mas_equalTo(@1);
+                    make.right.equalTo(backgroundView);
+                    make.top.equalTo(backgroundView.mas_top).offset(48 * (i + 1) + i);
+                }];
+            }
+        }
+        
+        UIButton *saveButton = [[UIButton alloc]init];
+        saveButton.layer.cornerRadius = 3;
+        saveButton.backgroundColor = [UIColor colorWithHexString:@"01aaef"];
+        [saveButton setTitle:@"保存" forState:UIControlStateNormal];
+        [saveButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        saveButton.titleLabel.font = [UIFont systemFontOfSize:17];
+        //zyc
+        [saveButton addTarget:self action:@selector(saveButtonAction:) forControlEvents:(UIControlEventTouchUpInside)];
+        [self addSubview:saveButton];
+        [saveButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self).offset(15);
+            make.right.equalTo(self).offset(-15);
+            make.height.mas_equalTo(@44);
+            make.top.mas_equalTo(backgroundView.mas_bottom).offset(15);
+        }];
+        
+        UILabel *cardTypeLabel = [[UILabel alloc]init];
+        cardTypeLabel.text = @"优惠会员卡";
+        cardTypeLabel.textColor = [UIColor blackColor];
+        cardTypeLabel.font = [UIFont systemFontOfSize:16];
+        cardTypeLabel.textAlignment = NSTextAlignmentLeft;
+        cardTypeLabel.userInteractionEnabled = YES;
+        [cardTypeLabel addGestureRecognizer:choseCardTypeTapGR];
+        [backgroundView addSubview:cardTypeLabel];
+        [cardTypeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(backgroundView).offset(15);
+            make.top.equalTo(backgroundView);
+            make.height.mas_equalTo(@48);
+        }];
+        
+        UIImageView *arrowImageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"VipManager_DownArrow"]];
+        [backgroundView addSubview:arrowImageView];
+        [arrowImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_equalTo(CGSizeMake(18, 18));
+            make.right.equalTo(backgroundView).offset(-14);
+            make.centerY.equalTo(cardTypeLabel);
+        }];
+        //会员名称
+        self.cardNameTF = [[VipCardMessageTextField alloc]initWithPlaceholder:nil tailStr:nil];
+        self.cardNameTF.delegate = self;
+        self.cardNameTF.placeholder = @"请输入会员名称";
+        [backgroundView addSubview:self.cardNameTF];
+        [self.cardNameTF mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(cardTypeLabel.mas_bottom).offset(1);
+            make.left.equalTo(cardTypeLabel);
+            make.right.equalTo(self);
+            make.height.mas_equalTo(@48);
+        }];
+        //打折优惠
+        self.cardDiscountTF = [[VipCardMessageTextField alloc]initWithPlaceholder:nil tailStr:@"折"];
+        self.cardDiscountTF.placeholder = @"请输入会员可享受折扣";
+        self.cardDiscountTF.keyboardType = UIKeyboardTypeDecimalPad;
+        self.cardDiscountTF.delegate = self;
+        [backgroundView addSubview:self.cardDiscountTF];
+        [self.cardDiscountTF mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.cardNameTF.mas_bottom).offset(1);
+            make.left.equalTo(cardTypeLabel);
+            make.right.equalTo(self);
+            make.height.mas_equalTo(@48);
+        }];
+        //有效天数
+        self.cardUseDateTF = [[VipCardMessageTextField alloc]initWithPlaceholder:nil tailStr:@"天"];
+        self.cardUseDateTF.placeholder = @"请输入有效天数,输入\"0\"表示长期有效";
+        self.cardUseDateTF.keyboardType = UIKeyboardTypeNumberPad;
+        self.cardUseDateTF.delegate = self;
+        [backgroundView addSubview:self.cardUseDateTF];
+        [self.cardUseDateTF mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.cardDiscountTF.mas_bottom).offset(1);
+            make.left.equalTo(cardTypeLabel);
+            make.right.equalTo(self);
+            make.height.mas_equalTo(@48);
+        }];
+        
+        self.cardVipLevelLabel = [[UILabel alloc]init];
+//        self.cardVipLevelLabel.textColor = [UIColor colorWithHexString:@"000000"];
+        self.cardVipLevelLabel.text = @"请选择会员等级";
+        self.cardVipLevelLabel.textColor = [UIColor colorWithHexString:@"#cccccc"];
+        self.cardVipLevelLabel.textAlignment = NSTextAlignmentLeft;
+        self.cardVipLevelLabel.userInteractionEnabled = YES;
+        [self.cardVipLevelLabel addGestureRecognizer:choseCardLevelTapGR];
+        [backgroundView addSubview:self.cardVipLevelLabel];
+        [self.cardVipLevelLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.cardUseDateTF.mas_bottom).offset(1);
+            make.left.equalTo(cardTypeLabel);
+            make.width.mas_equalTo(@198);
+            make.height.mas_equalTo(@48);
+        }];
+        
+        UIImageView *downArrowImageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"VipManager_DownArrow"]];
+        [self.cardVipLevelLabel addSubview:downArrowImageView];
+        [downArrowImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_equalTo(CGSizeMake(18, 18));
+            make.centerY.equalTo(self.cardVipLevelLabel);
+            make.right.equalTo(self.cardVipLevelLabel.mas_right).offset(-15);
+        }];
+        //优惠卡 新增会员卡级别
+        AddVipLevelButton *addVipLevelButton = [[AddVipLevelButton alloc]init];
+        [addVipLevelButton addTarget:self action:@selector(clickAddVipLevelButton) forControlEvents:UIControlEventTouchUpInside];
+        [backgroundView addSubview:addVipLevelButton];
+        [addVipLevelButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.bottom.equalTo(self.cardVipLevelLabel);
+            make.right.equalTo(backgroundView).offset(-15);
+            make.left.equalTo(self.cardVipLevelLabel.mas_right).offset(12);
+            make.height.mas_equalTo(@40);
+        }];
+        //备注信息
+//        self.cardDiscountMsgTF = [[VipCardMessageTextField alloc]initWithPlaceholder:nil tailStr:nil];
+//        self.cardDiscountMsgTF.placeholder = @"请输入会员卡折扣的备注信息";
+//        [backgroundView addSubview:self.cardDiscountMsgTF];
+//        [self.cardDiscountMsgTF mas_makeConstraints:^(MASConstraintMaker *make) {
+//            make.top.equalTo(self.cardVipLevelLabel.mas_bottom).offset(1);
+//            make.left.equalTo(cardTypeLabel);
+//            make.right.equalTo(self);
+//            make.height.mas_equalTo(@48);
+//        }];
+        self.cardDiscountMsgTextV = [[UITextView alloc] init];
+        self.cardDiscountMsgTextV.delegate = self;
+        [self.cardDiscountMsgTextV setTextColor:[UIColor colorWithHexString:@"CCCCCC"]];
+        [self.cardDiscountMsgTextV setFont:[UIFont systemFontOfSize:17]];
+        self.cardDiscountMsgTextV.text = VM_NewCard_placeHolder;
+        [backgroundView addSubview:self.cardDiscountMsgTextV];
+        [self.cardDiscountMsgTextV mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.cardVipLevelLabel.mas_bottom).offset(1);
+            make.left.equalTo(cardTypeLabel);
+            make.right.equalTo(self);
+            make.height.mas_equalTo(@68);
+        }];
+        
+        
+    }else if(_type == VipCardSaving){
+        UIView *backgroundView = [[UIView alloc]init];
+        backgroundView.backgroundColor = [UIColor whiteColor];
+        backgroundView.layer.borderWidth = 1;
+        backgroundView.layer.borderColor = [UIColor colorWithHexString:@"dadada"].CGColor;
+        [self addSubview:backgroundView];
+        [backgroundView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.top.equalTo(self);
+            make.height.mas_equalTo(@372);
+        }];
+        
+        for (int i = 0; i < 6; i ++) {
+            UIView *lineView = [[UIView alloc]init];
+            lineView.backgroundColor = [UIColor colorWithHexString:@"e5e5e5"];
+            [backgroundView addSubview:lineView];
+            if (i == 5) {
+                [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+                    make.left.equalTo(backgroundView.mas_left).offset(15);
+                    make.height.mas_equalTo(@1);
+                    make.width.mas_equalTo(@199);
+                    make.top.equalTo(backgroundView.mas_top).offset(48 * (i + 1) + i);
+                }];
+            }else{
+                [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+                    make.left.equalTo(backgroundView.mas_left).offset(15);
+                    make.height.mas_equalTo(@1);
+                    make.right.equalTo(backgroundView);
+                    make.top.equalTo(backgroundView.mas_top).offset(48 * (i + 1) + i);
+                }];
+            }
+        }
+        // 储值 保存按钮
+        UIButton *saveButton = [[UIButton alloc]init];
+        saveButton.layer.cornerRadius = 3;
+        saveButton.backgroundColor = [UIColor colorWithHexString:@"01aaef"];
+        [saveButton setTitle:@"保存" forState:UIControlStateNormal];
+        [saveButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        saveButton.titleLabel.font = [UIFont systemFontOfSize:17];
+        //zyc
+        [saveButton addTarget:self action:@selector(saveButtonAction:) forControlEvents:(UIControlEventTouchUpInside)];
+        [self addSubview:saveButton];
+        [saveButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self).offset(15);
+            make.right.equalTo(self).offset(-15);
+            make.height.mas_equalTo(@44);
+            make.top.mas_equalTo(backgroundView.mas_bottom).offset(15);
+        }];
+        
+        UILabel *cardTypeLabel = [[UILabel alloc]init];
+        cardTypeLabel.text = @"储值会员卡";
+        cardTypeLabel.textColor = [UIColor blackColor];
+        cardTypeLabel.font = [UIFont systemFontOfSize:16];
+        cardTypeLabel.textAlignment = NSTextAlignmentLeft;
+        cardTypeLabel.userInteractionEnabled = YES;
+        [cardTypeLabel addGestureRecognizer:choseCardTypeTapGR];
+        [backgroundView addSubview:cardTypeLabel];
+        [cardTypeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(backgroundView).offset(15);
+            make.top.equalTo(backgroundView);
+            make.height.mas_equalTo(@48);
+        }];
+        
+        UIImageView *arrowImageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"VipManager_DownArrow"]];
+        [backgroundView addSubview:arrowImageView];
+        [arrowImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_equalTo(CGSizeMake(18, 18));
+            make.right.equalTo(backgroundView).offset(-14);
+            make.centerY.equalTo(cardTypeLabel);
+        }];
+        //储值  会员名称
+        self.cardNameTF = [[VipCardMessageTextField alloc]initWithPlaceholder:nil tailStr:nil];
+        self.cardNameTF.delegate = self;
+        self.cardNameTF.placeholder = @"请输入会员名称";
+        [backgroundView addSubview:self.cardNameTF];
+        [self.cardNameTF mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(cardTypeLabel.mas_bottom).offset(1);
+            make.left.equalTo(cardTypeLabel);
+            make.right.equalTo(self);
+            make.height.mas_equalTo(@48);
+        }];
+        
+        //储值 会员卡金额
+        self.cardMoneyTF = [[VipCardMessageTextField alloc]initWithPlaceholder:nil tailStr:@"元"];
+        self.cardMoneyTF.delegate = self;
+        self.cardMoneyTF.placeholder = @"请输入会员卡金额";
+        self.cardMoneyTF.keyboardType = UIKeyboardTypeDecimalPad;
+        [backgroundView addSubview:self.cardMoneyTF];
+        [self.cardMoneyTF mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.cardNameTF.mas_bottom).offset(1);
+            make.left.equalTo(cardTypeLabel);
+            make.right.equalTo(self);
+            make.height.mas_equalTo(@48);
+        }];
+        
+        //储值  折扣
+        self.cardDiscountTF = [[VipCardMessageTextField alloc]initWithPlaceholder:nil tailStr:@"折"];
+        self.cardDiscountTF.delegate = self;
+        self.cardDiscountTF.placeholder = @"请输入会员可享受折扣";
+        self.cardDiscountTF.keyboardType = UIKeyboardTypeDecimalPad;
+        [backgroundView addSubview:self.cardDiscountTF];
+        [self.cardDiscountTF mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.cardMoneyTF.mas_bottom).offset(1);
+            make.left.equalTo(cardTypeLabel);
+            make.right.equalTo(self);
+            make.height.mas_equalTo(@48);
+        }];
+        //储值 有效天数
+        self.cardUseDateTF = [[VipCardMessageTextField alloc]initWithPlaceholder:nil tailStr:@"天"];
+        self.cardUseDateTF.placeholder = @"请输入有效天数,输入\"0\"表示长期有效";
+        self.cardUseDateTF.keyboardType = UIKeyboardTypeNumberPad;
+        self.cardUseDateTF.delegate = self;
+        [backgroundView addSubview:self.cardUseDateTF];
+        [self.cardUseDateTF mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.cardDiscountTF.mas_bottom).offset(1);
+            make.left.equalTo(cardTypeLabel);
+            make.right.equalTo(self);
+            make.height.mas_equalTo(@48);
+        }];
+        
+        self.cardVipLevelLabel = [[UILabel alloc]init];
+//        self.cardVipLevelLabel.textColor = [UIColor colorWithHexString:@"000000"];
+        self.cardVipLevelLabel.text = @"请选择会员等级";
+        self.cardVipLevelLabel.textColor = [UIColor colorWithHexString:@"cccccc"];
+        self.cardVipLevelLabel.textAlignment = NSTextAlignmentLeft;
+        self.cardVipLevelLabel.userInteractionEnabled = YES;
+        [self.cardVipLevelLabel addGestureRecognizer:choseCardLevelTapGR];
+        [backgroundView addSubview:self.cardVipLevelLabel];
+        [self.cardVipLevelLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.cardUseDateTF.mas_bottom).offset(1);
+            make.left.equalTo(cardTypeLabel);
+            make.width.mas_equalTo(@198);
+            make.height.mas_equalTo(@48);
+        }];
+        
+        UIImageView *downArrowImageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"VipManager_DownArrow"]];
+        [self.cardVipLevelLabel addSubview:downArrowImageView];
+        [downArrowImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_equalTo(CGSizeMake(18, 18));
+            make.centerY.equalTo(self.cardVipLevelLabel);
+            make.right.equalTo(self.cardVipLevelLabel.mas_right).offset(-15);
+        }];
+        //储值 新增卡 会员卡级别
+        AddVipLevelButton *addVipLevelButton = [[AddVipLevelButton alloc]init];
+        [addVipLevelButton addTarget:self action:@selector(clickAddVipLevelButton) forControlEvents:UIControlEventTouchUpInside];
+        [backgroundView addSubview:addVipLevelButton];
+        [addVipLevelButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.bottom.equalTo(self.cardVipLevelLabel);
+            make.right.equalTo(backgroundView).offset(-15);
+            make.left.equalTo(self.cardVipLevelLabel.mas_right).offset(12);
+            make.height.mas_equalTo(@40);
+        }];
+        //储值  备注信息
+//        self.cardDiscountMsgTF = [[VipCardMessageTextField alloc]initWithPlaceholder:nil tailStr:nil];
+//        self.cardDiscountMsgTF.placeholder = @"请输入会员卡折扣的备注信息";
+//        [backgroundView addSubview:self.cardDiscountMsgTF];
+//        [self.cardDiscountMsgTF mas_makeConstraints:^(MASConstraintMaker *make) {
+//            make.top.equalTo(self.cardVipLevelLabel.mas_bottom).offset(1);
+//            make.left.equalTo(cardTypeLabel);
+//            make.right.equalTo(self);
+//            make.height.mas_equalTo(@48);
+//        }];
+        self.cardDiscountMsgTextV = [[UITextView alloc] init];
+        self.cardDiscountMsgTextV.delegate = self;
+        [self.cardDiscountMsgTextV setTextColor:[UIColor colorWithHexString:@"CCCCCC"]];
+        [self.cardDiscountMsgTextV setFont:[UIFont systemFontOfSize:17]];
+        self.cardDiscountMsgTextV.text = VM_NewCard_placeHolder;
+        [backgroundView addSubview:self.cardDiscountMsgTextV];
+        [self.cardDiscountMsgTextV mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.cardVipLevelLabel.mas_bottom).offset(1);
+            make.left.equalTo(cardTypeLabel).with.offset(-5);
+            make.right.equalTo(self);
+            make.height.mas_equalTo(@68);
+        }];
+        
+        
+    }else{
+        UIView *backgroundView = [[UIView alloc]init];
+        backgroundView.backgroundColor = [UIColor whiteColor];
+        backgroundView.layer.borderWidth = 1;
+        backgroundView.layer.borderColor = [UIColor colorWithHexString:@"dadada"].CGColor;
+        [backgroundView addGestureRecognizer:choseCardTypeTapGR];
+        [self addSubview:backgroundView];
+        [backgroundView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.top.equalTo(self);
+            make.height.mas_equalTo(@48);
+        }];
+        
+        UILabel *cardTypeLabel = [[UILabel alloc]init];
+        cardTypeLabel.text = @"请选择会员卡类型";
+        cardTypeLabel.textColor = [UIColor colorWithHexString:@"cccccc"];
+        cardTypeLabel.textAlignment = NSTextAlignmentLeft;
+        [backgroundView addSubview:cardTypeLabel];
+        [cardTypeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(backgroundView.mas_left).offset(15);
+            make.top.bottom.right.equalTo(backgroundView);
+        }];
+        
+        UIImageView *arrowImageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"VipManager_DownArrow"]];
+        [backgroundView addSubview:arrowImageView];
+        [arrowImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_equalTo(CGSizeMake(18, 18));
+            make.right.equalTo(backgroundView.mas_right).offset(-14);
+            make.centerY.equalTo(backgroundView.mas_centerY);
+        }];
+        
+        UIButton *saveButton = [[UIButton alloc]init];
+        saveButton.layer.cornerRadius = 3;
+        saveButton.backgroundColor = [UIColor colorWithHexString:@"01aaef"];
+        [saveButton setTitle:@"保存" forState:UIControlStateNormal];
+        [saveButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        saveButton.titleLabel.font = [UIFont systemFontOfSize:17];
+        [saveButton addTarget:self action:@selector(saveBtnClick) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:saveButton];
+        [saveButton mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self).offset(15);
+            make.right.equalTo(self).offset(-15);
+            make.height.mas_equalTo(@44);
+            make.top.mas_equalTo(backgroundView.mas_bottom).offset(15);
+        }];
+    }
+}
+
+- (void)clickCardType{
+    if ([self.delegate respondsToSelector:@selector(didClickChooseCardType:)]) {
+        if (_type == VipCardCoupon) {
+            [self.delegate didClickChooseCardType:@"优惠会员卡"];
+        }else if(_type == VipCardSaving) {
+            [self.delegate didClickChooseCardType:@"储值会员卡"];
+        }else{
+            [self.delegate didClickChooseCardType:@""];
+        }
+    }
+}
+
+#pragma mark - 点击请选择会员等级 btn 数据请求 -
+//创建新会员卡页面 -请选择会员等级数据请求 -
+- (void)clickToChoseVipLevel{
+    self.cardLevelNameArr = [NSMutableArray array];
+    self.cardLevelValueArr = [NSMutableArray array];
+
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    NSString *storeId = NoNullStr(AccountInfo.storeId, @"");
+    [params setObject:storeId forKey:@"storeId"];
+    
+//    [params setObject:@"900000000077" forKey:@"storeId"];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD showWithStatus:@"数据请求中..."];
+
+    [[MallNetworkEngine vipCardMGshare]requestNotEncodeWithDate:nil requestWithPath:API_VipCardManger_memberCardLevelList Params:params CompletionHandler:^(MKNetworkOperation *completedOperation) {
+        [SVProgressHUD dismiss];
+        NSDictionary *dic = [completedOperation responseDecodeToDic];
+        if (Succeed(dic)) {
+            NSLog(@"%@",dic);
+            NSArray *dataArr = dic[@"data"];
+            for (NSDictionary *tempDic in dataArr) {
+                [self.cardLevelNameArr addObject:tempDic[@"levelName"]];
+                [self.cardLevelValueArr addObject:tempDic[@"id" ]];
+            }
+            //展示会员选择tableview
+            ChooseVipLevelView *chooseVipLevelView = [[ChooseVipLevelView alloc]initWithVipLevelNameArray:self.cardLevelNameArr btnName:self.cardVipLevelLabel.text];//btnName 标记已选择
+            chooseVipLevelView.delegate = self;
+            AppDelegate *appdelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+            [appdelegate.window addSubview:chooseVipLevelView];
+            [chooseVipLevelView mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.right.left.bottom.top.equalTo(appdelegate.window);
+            }];
+            
+        }
+        
+    } ErrorHandler:^(MKNetworkOperation *completedOperation, NSError *error) {
+        NSLog(@"请求数据出错");
+        [SVProgressHUD showInfoWithStatus:@"数据请求失败"];
+    }];
+    
+    
+   
+}
+//zyc
+#pragma mark - 选择会员名称 -
+//ChooseVipLevelViewDelegate 代理方法
+//显示选择会员的名称
+- (void)didClickCardLevel:(NSString *)str{
+    self.cardVipLevelLabel.text = str;
+    self.cardVipLevelLabel.textColor = [UIColor colorWithHexString:@"000000"];
+    NSInteger index = [self.cardLevelNameArr indexOfObject:str];
+    self.cardLevelValue = [self.cardLevelValueArr objectAtIndex:index];
+}
+//判断填入信息是否为空
+- (BOOL)judgeInfoStr:(NSString *)infoStr{
+    infoStr = [self deleteSpaceWithStr:infoStr];
+    if ([infoStr isEqualToString:@""] || infoStr.length == 0) {
+        return YES;
+    }
+    return NO;
+}
+//去空格
+- (NSString *)deleteSpaceWithStr:(NSString *)str{
+    NSString *string = [str stringByReplacingOccurrencesOfString:@" " withString:@""];
+    return string;
+}
+#pragma mark - 点击保存按钮 -
+/*点击保存按钮 NewVipCardManagerViewController实现保存代理方法 进行数据请求 - (void)saveVIPCardBtn:(UIButton *)saveBtn setModel:(NewVipCardManagerVC_VipCard_Model *)model;*/
+
+- (void)saveButtonAction:(UIButton *)sender{
+    if ([self.cardNameTF.text isEmpty]) {
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD showInfoWithStatus:@"请输入会员卡名称"];
+        [self.cardNameTF becomeFirstResponder];
+        return;
+    }
+    if ([self.cardMoneyTF.text isEqualToString:@"0"] || [self.cardMoneyTF.text isEmpty]) {
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD showInfoWithStatus:@"请输入正确金额"];
+        [self.cardMoneyTF becomeFirstResponder];
+        return;
+    }
+    
+    if (self.cardMoneyTF.text.length > 1) {
+        if ([self.cardMoneyTF.text hasPrefix:@"0"]) {
+            [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+            [SVProgressHUD showInfoWithStatus:@"请输入正确金额"];
+            [self.cardMoneyTF becomeFirstResponder];
+            return;
+        }
+    }
+    if ([self.cardDiscountTF.text isEmpty]) {
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD showInfoWithStatus:@"请输入折扣"];
+        [self.cardDiscountTF becomeFirstResponder];
+        return;
+    }
+    if ([self.cardUseDateTF.text isEmpty]) {
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD showInfoWithStatus:@"请输入有效天数"];
+        [self.cardUseDateTF becomeFirstResponder];
+        return;
+    }
+    if ([self.cardVipLevelLabel.text isEqualToString:@"请选择会员等级"]) {
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD showInfoWithStatus:@"请选择会员等级"];
+        return;
+    }
+    double count = [self.cardMoneyTF.text doubleValue];
+    if (count > 100000.00) {
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD showInfoWithStatus:@"金额不得超过100000"];
+        return;
+    }
+    
+    NewVipCardManagerVC_VipCard_Model *model = [self getModelWithTextfieldInput];
+   //BOOL值为YES说明信息未全部填写
+    BOOL isOk = NO;
+    if (_type == VipCardSaving )
+    {
+        if ([self judgeInfoStr:model.cardName] == YES || [self judgeInfoStr:model.initialAmount] == YES|| [self judgeInfoStr:model.discount] == YES || [self judgeInfoStr:model.validityTime] == YES || [self judgeInfoStr:model.cardLevel] == YES || [model.cardLevel isEqualToString:@"请选择会员等级"]){
+            isOk = YES;
+            
+        }
+    }else if (_type == VipCardCoupon){
+        if ([self judgeInfoStr:model.cardName] == YES || [self judgeInfoStr:model.discount] == YES || [self judgeInfoStr:model.validityTime] == YES || [self judgeInfoStr:model.cardLevel] == YES || [model.cardLevel isEqualToString:@"请选择会员等级"]){
+            isOk = YES;
+        }
+    }
+    if (isOk == YES)
+    {
+        NSLog(@"将信息填写完整");
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+        [SVProgressHUD showInfoWithStatus:@"请将信息填写完整"];
+    }else{
+        
+    if ([self.delegate respondsToSelector:@selector(saveVIPCardBtn:setModel:)]) {
+        [self.delegate saveVIPCardBtn:sender setModel:model];
+    }
+    }
+}
+//将textfield信息代理传给vc
+- (NewVipCardManagerVC_VipCard_Model *)getModelWithTextfieldInput{
+    NewVipCardManagerVC_VipCard_Model *model = [[NewVipCardManagerVC_VipCard_Model alloc]init];
+    if (self.type == VipCardSaving) {
+        model.businessType = @"1";
+    }else if (self.type == VipCardCoupon)
+    {
+        model.businessType = @"2";
+    }
+    model.cardName = self.cardNameTF.text;
+    double count = [self.cardMoneyTF.text doubleValue];
+    double formatCount = count * 100;
+    model.initialAmount = [NSString stringWithFormat:@"%.2f", formatCount];
+    model.discount = self.cardDiscountTF.text;
+    model.validityTime = self.cardUseDateTF.text;
+    //会员等级
+    model.cardLevel = self.cardVipLevelLabel.text;
+    model.cardLevelValue = [NSString stringWithFormat:@"%@",self.cardLevelValue];
+    if ([self.cardDiscountMsgTextV.text isEqualToString:@"请输入会员卡折扣的备注信息"]) {
+        model.remarks = @"";
+    }else {
+        model.remarks = self.cardDiscountMsgTextV.text;
+    }
+    
+    return model;
+}
+#pragma mark - 新增会员卡级别 btn SetNewVipLevelNameView -
+//新增会员卡级别btn  数据请求进入页面SetNewVipLevelNameView
+- (void)clickAddVipLevelButton{
+    SetNewVipLevelNameView *setVipLevelNameView = [[SetNewVipLevelNameView alloc] init];
+    AppDelegate *appdelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+    [appdelegate.window addSubview:setVipLevelNameView];
+    [setVipLevelNameView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.left.bottom.top.equalTo(appdelegate.window);
+    }];
+   
+}
+
+#pragma mark - 保存按钮Action
+- (void)saveBtnClick {
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+    [SVProgressHUD showErrorWithStatus:@"请选择会员卡类型！"];
+}
+
+#pragma mark - UITextFieldDelegate
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    if ([string isEqualToString:@""]) {
+        return YES;
+    }
+    if ([textField isEqual:self.cardNameTF]) {
+        
+        if (textField.text.length > 10) {
+            return NO;
+        }else {
+            return YES;
+        }
+        
+    }else if ([textField isEqual:self.cardMoneyTF]) {
+        return [string VIPManger_isLegalInputWithText:textField.text inputString:string andLimitedLength:5];
+    }else if ([textField isEqual:self.cardDiscountTF]) {
+        return [string VIPManger_iSLegalDiscountInput:textField.text inputString:string andLimitedLength:1];
+    }else if ([textField isEqual:self.cardUseDateTF]) {
+        
+        if (textField.text.length > 2) {
+            return NO;
+        }
+        if ([self.cardUseDateTF.text hasPrefix:@"0"]) {
+            return NO;
+        }
+        if ([string isValidateNumber]) {
+            return YES;
+        }else {
+            return NO;
+        }
+    }
+    return YES;
+}
+
+
+#pragma mark - UITextViewDelegate
+
+- (void)textViewDidBeginEditing:(UITextView *)textView {
+    if ([textView isEqual:self.cardDiscountMsgTextV]) {
+        if ([self.cardDiscountMsgTextV.text isEqualToString:@"请输入会员卡折扣的备注信息"]) {
+            self.cardDiscountMsgTextV.text = @"";
+            [self.cardDiscountMsgTextV setTextColor:[UIColor blackColor]];
+        }
+    }
+}
+
+
+- (void)textViewDidEndEditing:(UITextView *)textView {
+    if ([textView isEqual:self.cardDiscountMsgTextV]) {
+        if ([self.cardDiscountMsgTextV.text isEqualToString:@""]) {
+            self.cardDiscountMsgTextV.text = @"请输入会员卡折扣的备注信息";
+            [self.cardDiscountMsgTextV setTextColor:[UIColor colorWithHexString:@"CCCCCC"]];
+        }
+    }
+}
+
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
+    if ([textView isEqual:self.cardDiscountMsgTextV]) {
+        if ([text isEqualToString:@"\n"]) {
+    //        [textView resignFirstResponder];
+            return NO;
+        }
+    }
+    return YES;
+}
+
+
+#pragma mark - Notification Method
+-(void)NewVipCard_textViewEditChanged:(NSNotification *)obj
+{
+    UITextView *textView = (UITextView *)obj.object;
+    if ([textView isEqual:self.cardDiscountMsgTextV]) {
+        NSString *toBeString = textView.text;
+        
+        //获取高亮部分
+        UITextRange *selectedRange = [textView markedTextRange];
+        UITextPosition *position = [textView positionFromPosition:selectedRange.start offset:0];
+        
+        // 没有高亮选择的字，则对已输入的文字进行字数统计和限制
+        if (!position)
+        {
+            if (toBeString.length > MAX_STARWORDS_LENGTH)
+            {
+                NSRange rangeIndex = [toBeString rangeOfComposedCharacterSequenceAtIndex:MAX_STARWORDS_LENGTH];
+                if (rangeIndex.length == 1)
+                {
+                    textView.text = [toBeString substringToIndex:MAX_STARWORDS_LENGTH];
+                }
+                else
+                {
+                    NSRange rangeRange = [toBeString rangeOfComposedCharacterSequencesForRange:NSMakeRange(0, MAX_STARWORDS_LENGTH)];
+                    textView.text = [toBeString substringWithRange:rangeRange];
+                }
+            }
+        }
+    }
+    
+}
+
+
+-(void)NewVipCard_textFieldEditChanged:(NSNotification *)obj
+{
+    UITextField *textField = (UITextField *)obj.object;
+    if ([textField isEqual:self.cardNameTF]) {
+        NSString *toBeString = textField.text;
+        
+        //获取高亮部分
+        UITextRange *selectedRange = [textField markedTextRange];
+        UITextPosition *position = [textField positionFromPosition:selectedRange.start offset:0];
+        
+        // 没有高亮选择的字，则对已输入的文字进行字数统计和限制
+        if (!position)
+        {
+            if (toBeString.length > MAX_STARWORDS_LENGTH_TEXTFIELD)
+            {
+                NSRange rangeIndex = [toBeString rangeOfComposedCharacterSequenceAtIndex:MAX_STARWORDS_LENGTH_TEXTFIELD];
+                if (rangeIndex.length == 1)
+                {
+                    textField.text = [toBeString substringToIndex:MAX_STARWORDS_LENGTH_TEXTFIELD];
+                }
+                else
+                {
+                    NSRange rangeRange = [toBeString rangeOfComposedCharacterSequencesForRange:NSMakeRange(0, MAX_STARWORDS_LENGTH_TEXTFIELD)];
+                    textField.text = [toBeString substringWithRange:rangeRange];
+                }
+            }
+        }
+    }
+    
+}
+
+@end

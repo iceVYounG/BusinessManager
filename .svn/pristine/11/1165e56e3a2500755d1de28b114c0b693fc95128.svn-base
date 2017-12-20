@@ -1,0 +1,18 @@
+//
+//  PrepaidSavingCardViewController.h
+//  BusinessManager
+//
+//  Created by Raven－z on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "BaseController.h"
+#import "VipCardModel.h"
+
+@interface PrepaidSavingCardViewController : BaseController
+
+//@property (nonatomic, strong) VipCardVipUserDetailModel *model;
+@property (nonatomic, strong) NSString *vipUserID;  //会员ID
+@property (nonatomic, strong) NSString *balance;    //账户鱼儿
+
+@end

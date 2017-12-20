@@ -1,0 +1,91 @@
+//
+//  ShenheJLVC.m
+//  BusinessManager
+//
+//  Created by 张心亮 on 16/8/23.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "ShenheJLVC.h"
+#import "ShenheCell.h"
+@interface ShenheJLVC ()<UITableViewDelegate,UITableViewDataSource>
+@property (weak, nonatomic) IBOutlet UITableView *myTableView;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *tableViewHeight;
+@property (strong,nonatomic) NSMutableArray *dataArr;
+@end
+
+@implementation ShenheJLVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.leftTitle=@"上传12580客户端审核记录";
+    _dataArr=[NSMutableArray array];
+    self.view.backgroundColor=[UIColor colorWithHexString:@"#f6f5fa"];
+    _tableViewHeight.constant=44*(_dataArr.count+2);
+    // Do any additional setup after loading the view from its nib.
+}
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return _dataArr.count+1;
+    
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    static NSString* indetifier=@"ShenheCell";
+    
+    ShenheCell *cell=[tableView dequeueReusableCellWithIdentifier:indetifier];
+    if (!cell) {
+        cell=[[NSBundle mainBundle]loadNibNamed:indetifier owner:self options:nil].firstObject;
+    }
+    cell.selectionStyle=0;
+    
+    if (indexPath.row==0) {
+        cell.staus.font=[UIFont boldSystemFontOfSize:14];
+        cell.staus.textColor=[UIColor blackColor];
+        
+        cell.yijian.font=[UIFont boldSystemFontOfSize:14];
+        cell.yijian.textColor=[UIColor blackColor];
+        
+        cell.deel.font=[UIFont boldSystemFontOfSize:14];
+        cell.deel.textColor=[UIColor blackColor];
+    
+    }
+    
+    return cell;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 44;
+
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 44;
+
+}
+-(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    UIView *view=[[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_SIZE.width, 44)];
+    view.backgroundColor=[UIColor colorWithHexString:@"#f6f5fa"];
+    UILabel *label=[[UILabel alloc]initWithFrame:CGRectMake(15, 10, SCREEN_SIZE.width, 24)];
+    label.textColor=[UIColor redColor];
+    label.text=@"审核记录按照时间倒序排序，最新的记录展示在最上面";
+    label.font=[UIFont systemFontOfSize:14];
+    [view addSubview:label];
+    return view;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

@@ -1,0 +1,81 @@
+//
+//  AddDrawCell.m
+//  BusinessManager
+//
+//  Created by The Only on 16/8/12.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "AddDrawCell.h"
+
+@interface AddDrawCell()<UITextFieldDelegate>
+
+@end
+@implementation AddDrawCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code zhebian
+    
+    self.prizeChance.delegate = self;
+    self.prizeNameTF.delegate = self;
+    self.prizeCount.delegate = self;
+    self.prizeNumber.delegate = self;
+    
+    
+}
+-(void)setModel:(RedBagModel *)model
+{
+    _model = model;
+    if (model.type == nil) {
+        
+        self.heightInfoPrestent.constant = 0;
+        self.prizeTypeView.hidden = YES;
+    }
+    else
+    {
+        self.heightInfoPrestent.constant = 238;
+        self.prizeTypeView.hidden = NO;
+    }
+    
+    [self.redBagBtn setTitle:model.btnTitle forState:UIControlStateNormal];
+    [self.redBagBtn setTitleColor:[UIColor colorWithHexString:@"000000"] forState:UIControlStateNormal];
+    
+    self.prizeNameTF.text = model.redNameStr;
+    self.prizeCount.text = model.redCountStr;
+    self.prizeNumber.text = model.winningCountStr;
+    self.prizeChance.text = model.winningChanceStr;
+}
+
+- (IBAction)chooseTypePresentAction:(id)sender
+{
+ 
+    if ([self.delegate respondsToSelector:@selector(choosePresentTypeOfAddDrawCell:)])
+    {
+        
+        [self.delegate choosePresentTypeOfAddDrawCell:self];
+    }
+}
+-(void)textFieldDidEndEditing:(UITextField *)textField
+{
+    if ([self.delegate respondsToSelector:@selector(addDrawCell:prizeNameTF:prizeCountTF:prizeNumberTF:prizeChance:)]) {
+        
+        [self.delegate addDrawCell:self prizeNameTF:self.prizeNameTF prizeCountTF:self.prizeCount prizeNumberTF:self.prizeNumber prizeChance:self.prizeChance];
+    }
+}
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+ 
+
+
+
+
+
+
+
+
+
+@end

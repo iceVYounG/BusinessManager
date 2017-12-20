@@ -1,0 +1,123 @@
+//
+//  QuestionListCell.m
+//  BusinessManager
+//
+//  Created by 朕 on 16/9/5.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "QuestionListCell.h"
+
+@implementation QuestionListCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    self.textView.layer.borderColor = [UIColor colorWithHexString:@"e5e5e5"].CGColor;
+    self.textView.layer.borderWidth = 0.5;
+    [self.textView.layer masksToBounds];
+    self.textView.layer.cornerRadius = 3;
+    self.textView.delegate = self;
+    
+    self.textFiledA.delegate = self;
+    self.textFiledB.delegate = self;
+    self.textFiledC.delegate = self;
+    self.textFiledD.delegate = self;
+    self.textFiledE.delegate = self;
+    self.textFiledF.delegate = self;
+    
+    
+}
+
+
+- (void)initCellContentWithIndex:(NSInteger)index
+{
+    NSArray *dataArr = [[NSUserDefaults standardUserDefaults]objectForKey:@"QuestionListArr"];
+    NSDictionary *dataDic = dataArr[index];
+//    NSString *title =  [[model.templateModelnameDate.date lastObject] title];
+
+//    if ([[dataDic objectForKey:@"text"]isEqualToString:@""]) {
+//        self.textView.text = [[model.templateModelnameDate.date lastObject] title];
+//        self.placeholderLabel.hidden = YES;
+//        self.textFiledA.text = [arr[0] title];
+//        self.textFiledB.text = [arr[1] title];
+//        self.textFiledC.text = [arr[2] title];
+//        self.textFiledD.text = [arr[3] title];
+//        self.textFiledE.text = [arr[4] title];
+//        self.textFiledF.text = [arr[5] title];
+//    }
+//    else
+//    {
+    if (![[dataDic objectForKey:@"text"]isEqualToString:@""]) {
+        self.placeholderLabel.hidden = YES;
+    }
+        self.textView.text = [dataDic objectForKey:@"text"];
+        self.textFiledA.text = [dataDic objectForKey:@"A"];
+        self.textFiledB.text = [dataDic objectForKey:@"B"];
+        self.textFiledC.text = [dataDic objectForKey:@"C"];
+        self.textFiledD.text = [dataDic objectForKey:@"D"];
+        self.textFiledE.text = [dataDic objectForKey:@"E"];
+        self.textFiledF.text = [dataDic objectForKey:@"F"];
+//    }
+    
+    
+
+}
+
+- (void)textViewDidBeginEditing:(UITextView *)textView
+{
+    self.placeholderLabel.hidden = YES;
+}
+
+
+
+- (void)textViewDidEndEditing:(UITextView *)textView
+{
+    if ([self.textView.text isEqualToString:@""]) {
+        self.placeholderLabel.hidden = NO;
+    }
+    else
+    {
+        NSMutableDictionary *dataDic = [NSMutableDictionary dictionary];
+        
+        NSLog(@"%ld",(long)self.deleteBtn.tag);
+        NSArray *oldArr = [[NSUserDefaults standardUserDefaults]objectForKey:@"QuestionListArr"];
+        [dataDic setDictionary:oldArr[self.deleteBtn.tag]];
+//        [dataDic removeObjectForKey:@"text"];
+        [dataDic setObject:textView.text forKey:@"text"];
+        NSMutableArray *newArr = [NSMutableArray arrayWithArray:oldArr];
+        [newArr replaceObjectAtIndex:self.deleteBtn.tag withObject:dataDic];
+        [[NSUserDefaults standardUserDefaults]setObject:newArr forKey:@"QuestionListArr"];
+        NSLog(@"%@",newArr);
+    }
+    
+}
+
+
+- (void)textFieldDidEndEditing:(UITextField *)textField
+{
+    if (![textField.text isEqualToString:@""]) {
+        NSArray *keyArr = @[@"A",@"B",@"C",@"D",@"E",@"F"];
+        
+        NSMutableDictionary *dataDic = [NSMutableDictionary dictionary];
+        NSLog(@"%ld",(long)self.deleteBtn.tag);
+        
+        NSArray *oldArr = [[NSUserDefaults standardUserDefaults]objectForKey:@"QuestionListArr"];
+        [dataDic setDictionary:oldArr[self.deleteBtn.tag]];
+//        [dataDic removeObjectForKey:@"text"];
+        [dataDic setValue:textField.text forKey:keyArr[textField.tag - 1]];
+        NSMutableArray *newArr = [NSMutableArray arrayWithArray:oldArr];
+        [newArr replaceObjectAtIndex:self.deleteBtn.tag withObject:dataDic];
+        [[NSUserDefaults standardUserDefaults]setObject:newArr forKey:@"QuestionListArr"];
+        NSLog(@"%@",newArr);
+
+    }
+    
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+@end

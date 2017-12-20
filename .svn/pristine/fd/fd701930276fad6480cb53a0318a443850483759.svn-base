@@ -1,0 +1,396 @@
+//
+//  WZ_TextViewPhotoVC.m
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/28.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WZ_TextViewPhotoVC.h"
+#import "JMPickCollectView.h"
+#import "TZImageManager.h"
+#import "WeiZhanModel.h"
+
+@interface WZ_TextViewPhotoVC () <UITextViewDelegate,NSXMLParserDelegate>
+{
+    BOOL _isImageUpload;
+}
+
+@property (nonatomic, strong) JMPickCollectView *collectionView;
+@property (nonatomic, strong) UILabel* placeholderLabel;
+@property (weak, nonatomic) IBOutlet UITextView *textView;
+
+@property (nonatomic, strong) NSMutableArray* seletedArray;
+@property (nonatomic, strong) NSMutableArray* imagePaths;
+
+@property (nonatomic, strong) UIButton* saveSender;
+@property (nonatomic, strong) NSMutableArray* lastImageArr;
+@end
+
+@implementation WZ_TextViewPhotoVC
+
+- (instancetype)initWithBlock:(WZTextBlock)block{
+    
+    if (self = [super init]) {
+        
+        self.block = block;
+    }
+    return self;
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self setUpSubView];
+    _lastImageArr=[NSMutableArray array];
+}
+
+- (void)setUpSubView{
+    
+    self.textView.delegate = self;
+    self.textView.returnKeyType = UIReturnKeyDone;
+    
+    CGFloat height = HeightForString(self.placeholder, 14.f, KScreenWidth - 20);
+    self.placeholderLabel.frame = CGRectMake(10, 5, KScreenWidth - 20, height + 5);
+    [self.textView addSubview:self.placeholderLabel];
+
+    self.placeholderLabel.text = self.placeholder;
+   
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textViewDidChange) name:UITextViewTextDidChangeNotification object:nil];
+    
+    [self.view addSubview:self.saveSender];
+
+    
+   
+    
+    
+    PickPrameModel* model = [[PickPrameModel alloc] init];
+    
+    model.frame = CGRectMake(0, 200, KScreenWidth, KScreenHeight - 200 - NavigationH - 55);
+    model.numOfRow = 4;
+    model.margin = 4;
+    model.maxCount = 9;
+
+    _collectionView = [JMPickCollectView creatWithPramModel:model block:^(NSMutableArray *photos, NSMutableArray *assets) {
+        
+        if (!_seletedArray) {_seletedArray = [NSMutableArray array];}
+        self.seletedArray = photos;
+        
+        [self upLoadImageMessage];
+    }];
+
+     
+    
+    
+    if (self.model) {
+        
+        NSMutableArray* tempArr = [NSMutableArray array];
+        TemplateModel* datas = [self.model.templateModelnameDate.date lastObject];
+        
+        if (datas.content.length > 0) {
+            self.placeholderLabel.hidden = YES;
+            self.textView.text = datas.content;
+
+        }
+        
+//        NSXMLParser* parser = [[NSXMLParser alloc] initWithData:[datas.content dataUsingEncoding:NSUTF8StringEncoding]];
+//        parser.delegate = self;
+//        
+//        BOOL isSuccess = [parser parse];
+//
+//        if (isSuccess) {
+//        
+//        }
+     
+
+        
+        
+        [datas.images enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            
+            ImagePathModel* model = (ImagePathModel*)obj;
+            
+            [tempArr addObject:model.imagePath];
+        }];
+        self.collectionView.selectedPhotos = tempArr;
+        self.lastImageArr = tempArr;
+    }
+//        else{
+//
+//        NSMutableArray* arr = [NSMutableArray array];
+//        self.collectionView.selectedPhotos = arr;
+//        
+//    }
+    [self.view addSubview:_collectionView];
+}
+
+#pragma mark - text view delegate
+- (void)textViewDidChange:(UITextView *)textView{
+   
+    self.placeholderLabel.hidden = YES;
+
+}
+
+- (void)textViewDidEndEditing:(UITextView *)textView{
+    
+    if (textView.text.length == 0) {
+        self.placeholderLabel.hidden = NO;
+    }
+    
+}
+
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text{
+    
+    if ([text isEqualToString:@"\n"]) {
+        [self.textView resignFirstResponder];
+        return NO;
+        // 默认的return（确认）会换行，返回 NO 则不会换行
+    }
+    
+    return YES;
+}
+#pragma mark - 观察textView内容的变化
+- (void)textViewDidChange{
+    
+    self.placeholderLabel.hidden = self.textView.text.length == 0 ? NO : YES;
+}
+#pragma mark - 点击空白，收起键盘
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)even{
+    [self.textView resignFirstResponder];
+}
+
+#pragma mark - XMLDelegate
+
+////第一个代理方法：
+//- (void) parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qualifiedName attributes:(NSDictionary *)attributeDict
+//{
+//    //判断是否是meeting
+//    if ([elementName isEqualToString:@"img"]) {
+//        //判断属性节点
+//        NSString *addr = [attributeDict objectForKey:@"src"];
+//        NSLog(@"___%@",addr);
+//        
+//        [self.imagePaths addObject:addr];
+//        
+//        NSMutableArray* tempArr = [NSMutableArray array];
+//        [tempArr addObjectsFromArray:self.imagePaths];
+//        self.collectionView.selectedPhotos = tempArr;
+//
+//        [self.collectionView reloadData];
+//    }
+//}
+//
+////第二个代理方法：
+//- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
+//{
+//    //获取文本节点中的数据，因为下面的方法要保存这里获取的数据，所以要定义一个全局变量(可修改的字符串)
+//    NSMutableString *element = [[NSMutableString alloc]init];
+//    //这里要赋值为空，目的是为了清空上一次的赋值
+//    [element setString:@""];
+//    [element appendString:string];//string是获取到的文本节点的值，只要是文本节点都会获取(包括换行)，然后到下个方法中进行判断区分
+//}
+//
+////第三个代理方法：
+//- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName
+//  namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
+//    
+//    NSString *str=[[NSString alloc] initWithString:elementName];
+//    
+//    if ([elementName isEqualToString:@"img"]) {
+//        NSLog(@"creator=%@",str);
+//    }
+//    if ([elementName isEqualToString:@"name"]) {
+//        NSLog(@"name=%@",str);
+//    }
+//    if ([elementName isEqualToString:@"age"]) {
+//        NSLog(@"age=%@",str);
+//    }
+//}
+
+
+#pragma mark - netWork
+- (void)upLoadImageMessage{//上传信息
+    
+    __block NSInteger requestIndex = 0;
+    
+    [SVProgressHUD showWithStatus:@"照片上传中..."];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeGradient];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    
+    [self.seletedArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        UIImage *image=(UIImage *)obj;
+//        NSData* imageData = UIImageJPEGRepresentation(UIImageScaleToSize(obj, CGSizeMake(720, 144)), 1.0);
+        NSData* imageData=[self transformImageToDataLimited:image];
+        NSMutableDictionary* params = [NSMutableDictionary dictionary];
+        [params setObject:NoNullStr([imageData base64EncodedString], @"") forKey:@"code"];
+        [params setObject:NoNullStr(AccountInfo.storeId, @"") forKey:@"storeId"];
+        [params setObject:@"png" forKey:@"suffix"];
+        
+        [[MallNetManager share] request:API_ImageUpload parameters:params success:^(NSURLSessionDataTask *task, id responseObject) {
+            
+            if (Succeed(responseObject)) {
+                
+                if ([responseObject objectForKey:@"data"]) {
+                    NSDictionary* data = [responseObject objectForKey:@"data"];
+                    
+                    if ([data objectForKey:@"imgPath"]) {
+                        
+                        [self.imagePaths addObject:[data objectForKey:@"imgPath"]];
+                    }
+                }
+            }
+            requestIndex++;
+            [self judgeFinish:requestIndex];
+        } failure:^(NSURLSessionDataTask *task, NSError *error) {
+            
+            requestIndex++;
+            [self judgeFinish:requestIndex];
+        }];
+    }];
+}
+
+//保存信息
+- (void)upLoadMessage{
+
+    PartModel* model;
+    if (!self.model) {
+        model = [[PartModel alloc] init];
+        
+        model.storeId = NoNullStr(AccountInfo.storeId, @"");
+        model.templateModelname = self.tempName;
+        model.templateModelnameCode = _nameCode;
+        model.id = self.model.id;
+        
+        TemplateModelData* data = [[TemplateModelData alloc] init];
+        TemplateModel* item = [[TemplateModel alloc]init];
+        item.content = self.textView.text;
+        //<img src="/storeimg/367661/1962/622/N/p_3676611962622.jpg" alt="" />
+        item.images = [self getImagePaths];// 这里的imagPath需添加在content里面
+        model.templateModelnameDate = data;
+        model.templateNo = self.Modelname;
+        
+    }else{
+        
+        TemplateModel* item = [[TemplateModel alloc]init];
+        item.content = self.textView.text;
+        item.images = [self getImagePaths];
+        self.model.templateModelnameDate.date =  @[item];
+        model = self.model;
+    }
+    
+    NSArray* arr = @[model];
+    
+    __weak typeof(self) wSelf = self;
+    [self saveTemplte:arr.mutableCopy succeed:^(id responseObject) {
+        
+        wSelf.block(model,self.model?NO:YES);
+        [wSelf.navigationController popViewControllerAnimated:YES];
+        
+        [self performSelector:@selector(delyAction) withObject:nil afterDelay:.3];
+        
+    } error:^(NSError *error) {
+        [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+        [SVProgressHUD showErrorWithStatus:@"保存失败!"];
+    }];
+
+}
+-(void)delyAction{
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0];
+    [SVProgressHUD showSuccessWithStatus:@"保存成功!"];
+}
+-(NSMutableArray* )getImagePaths{
+    
+    NSMutableArray* tempArr = [NSMutableArray array];
+    [self.collectionView.selectedPhotos enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        ImagePathModel* model = [[ImagePathModel alloc]init];
+        NSString* imageStr;
+        if ([(NSString*)obj contains:ImagePre]) {
+            imageStr = [(NSString*)obj substringFromIndex:ImagePre.length];
+        }
+        model.imagePath = imageStr;
+        [tempArr addObject:model];
+    }];
+    return tempArr;
+}
+
+
+
+
+
+-(void)judgeFinish:(NSInteger)index{
+    
+    if (index == self.seletedArray.count) {
+        [SVProgressHUD dismiss];
+        _isImageUpload = YES;
+        NSMutableArray* tempArr = [NSMutableArray array];
+//        [tempArr addObjectsFromArray:self.lastImageArr];
+        [tempArr addObjectsFromArray:self.collectionView.selectedPhotos];
+        [tempArr addObjectsFromArray:self.imagePaths];
+        self.collectionView.selectedPhotos = tempArr;
+    }
+}
+@synthesize collectionView = _collectionView,placeholderLabel = _placeholderLabel,saveSender = _saveSender,seletedArray = _seletedArray,imagePaths = _imagePaths;
+
+- (UIButton *)saveSender{
+    if (!_saveSender) {
+        _saveSender = [UIButton buttonWithType:UIButtonTypeCustom];
+        _saveSender.frame = CGRectMake(15, KScreenHeight - 55 - NavigationH, KScreenWidth - 15 * 2, 40);
+        [_saveSender setTitle:@"保存" forState:UIControlStateNormal];
+        
+        [_saveSender setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        _saveSender.backgroundColor = [UIColor blueColor];
+        _saveSender.clipsToBounds = YES;
+        _saveSender.layer.cornerRadius = 5.f;
+        [_saveSender addTarget:self action:@selector(upLoadMessage) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _saveSender;
+}
+
+- (UILabel *)placeholderLabel{
+    if (!_placeholderLabel) {
+        _placeholderLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 5, KScreenWidth - 20, 20)];
+        _placeholderLabel.numberOfLines = 0;
+        _placeholderLabel.font = [UIFont systemFontOfSize:14.f];
+        _placeholderLabel.textColor = [UIColor grayColor];
+    }
+    return _placeholderLabel;
+}
+//-(JMPickCollectView *)collectionView{
+//
+//    if (!_collectionView) {
+//        PickPrameModel* model = [[PickPrameModel alloc] init];
+//        
+//        model.frame = CGRectMake(0, 200, KScreenWidth, KScreenHeight - 200 - NavigationH - 55);
+//        model.numOfRow = 4;
+//        model.margin = 4;
+//        model.maxCount = 9;
+//        _collectionView = [JMPickCollectView creatWithPramModel:model block:^(NSMutableArray *photos, NSMutableArray *assets) {
+//        
+//            self.seletedArray = photos;
+//            
+//            [self upLoadImageMessage];
+//        }];
+//        
+//        [self.view addSubview:_collectionView];
+//    }   
+//    return _collectionView;
+//}
+
+- (NSMutableArray *)seletedArray{
+    
+    if (!_seletedArray) {
+        _seletedArray = [NSMutableArray array];
+    }
+    return _seletedArray;
+}
+
+- (NSMutableArray *)imagePaths{
+    if (!_imagePaths) {
+        _imagePaths = [NSMutableArray array];
+    }
+    return _imagePaths;
+}
+- (void)dealloc{
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+@end

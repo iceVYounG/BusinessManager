@@ -1,0 +1,66 @@
+//
+//  YuyueRecordVC.m
+//  BusinessManager
+//
+//  Created by 张心亮 on 16/8/23.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "YuyueRecordVC.h"
+#import "YuyueRecordCell.h"
+@interface YuyueRecordVC ()<UITableViewDelegate,UITableViewDataSource>
+@property (weak, nonatomic) IBOutlet UITableView *yuyueTableView;
+@property (weak, nonatomic) IBOutlet UIView *leftView;
+@property (weak, nonatomic) IBOutlet UIView *rightView;
+
+@end
+
+@implementation YuyueRecordVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.view.backgroundColor=[UIColor colorWithHexString:@"#f6f5fa"];
+    
+    // Do any additional setup after loading the view from its nib.
+}
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+
+    return 5;
+}
+
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    static NSString *identifier=@"YuyueRecordCell";
+    YuyueRecordCell *cell=[tableView dequeueReusableCellWithIdentifier:identifier];
+    if (!cell) {
+        cell=[[NSBundle mainBundle]loadNibNamed:identifier owner:self options:nil].firstObject;
+    }
+    cell.selectionStyle=0;
+    
+    
+    return cell;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 44;
+
+
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

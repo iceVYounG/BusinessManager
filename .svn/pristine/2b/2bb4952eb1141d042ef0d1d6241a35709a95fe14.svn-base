@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10117" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="YuyueBaoYangVC">
+            <connections>
+                <outlet property="view" destination="Mtx-tQ-49d" id="y0d-Fb-Kdl"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="Mtx-tQ-49d">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hS9-z7-1co">
+                    <rect key="frame" x="15" y="52" width="166" height="44"/>
+                    <constraints>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="tUb-Yo-Ei5"/>
+                        <constraint firstAttribute="height" constant="44" id="yxW-bZ-fSR"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <state key="normal" title="联系人姓名" backgroundImage="lansebeijing">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <variation key="default">
+                        <mask key="constraints">
+                            <exclude reference="tUb-Yo-Ei5"/>
+                        </mask>
+                    </variation>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Eh0-f4-4mj">
+                    <rect key="frame" x="194" y="52" width="166" height="44"/>
+                    <constraints>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="7g0-eC-w9Y"/>
+                        <constraint firstAttribute="height" constant="44" id="lhh-yt-td7"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <state key="normal" title="联系人手机号码" backgroundImage="lansebeijing">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <variation key="default">
+                        <mask key="constraints">
+                            <exclude reference="7g0-eC-w9Y"/>
+                        </mask>
+                    </variation>
+                </button>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="下列默认选中的五项是生成微站后用户必填项，点击&quot;+&quot;新增需要用户填写的栏目" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I7s-OW-pq9">
+                    <rect key="frame" x="15" y="10" width="345" height="32"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                    <color key="textColor" red="0.94509803920000002" green="0.35294117650000001" blue="0.2901960784" alpha="1" colorSpace="calibratedRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Y4U-7X-k8u">
+                    <rect key="frame" x="15" y="111" width="166" height="44"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="44" id="yAB-sj-fsE"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <state key="normal" title="需要保养的车型" backgroundImage="lansebeijing">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GsS-0N-tRg">
+                    <rect key="frame" x="194" y="111" width="166" height="44"/>
+                    <constraints>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="9bI-MY-1To"/>
+                        <constraint firstAttribute="height" constant="44" id="IuQ-GL-iqK"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <state key="normal" title="保养时间" backgroundImage="lansebeijing">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <variation key="default">
+                        <mask key="constraints">
+                            <exclude reference="9bI-MY-1To"/>
+                        </mask>
+                    </variation>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YOG-TU-hzi">
+                    <rect key="frame" x="15" y="170" width="166" height="44"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="44" id="CAF-sf-g3K"/>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="wLh-el-SJk"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                    <state key="normal" title="需要保养的时间" backgroundImage="lansebeijing">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <variation key="default">
+                        <mask key="constraints">
+                            <exclude reference="wLh-el-SJk"/>
+                        </mask>
+                    </variation>
+                </button>
+            </subviews>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstItem="hS9-z7-1co" firstAttribute="top" secondItem="I7s-OW-pq9" secondAttribute="bottom" constant="10" id="7I2-tU-7nb"/>
+                <constraint firstAttribute="trailing" secondItem="Eh0-f4-4mj" secondAttribute="trailing" constant="15" id="8XB-39-D8j"/>
+                <constraint firstItem="I7s-OW-pq9" firstAttribute="leading" secondItem="Mtx-tQ-49d" secondAttribute="leading" constant="15" id="CRU-xb-5F8"/>
+                <constraint firstItem="Eh0-f4-4mj" firstAttribute="width" secondItem="hS9-z7-1co" secondAttribute="width" id="Gbq-TY-sPj"/>
+                <constraint firstAttribute="trailing" secondItem="GsS-0N-tRg" secondAttribute="trailing" constant="15" id="T62-Hn-MXR"/>
+                <constraint firstItem="hS9-z7-1co" firstAttribute="leading" secondItem="Mtx-tQ-49d" secondAttribute="leading" constant="15" id="aWb-rz-49F"/>
+                <constraint firstItem="Y4U-7X-k8u" firstAttribute="leading" secondItem="Mtx-tQ-49d" secondAttribute="leading" constant="15" id="bHe-V3-nOd"/>
+                <constraint firstItem="GsS-0N-tRg" firstAttribute="width" secondItem="hS9-z7-1co" secondAttribute="width" id="dBH-Mn-4fe"/>
+                <constraint firstItem="I7s-OW-pq9" firstAttribute="top" secondItem="Mtx-tQ-49d" secondAttribute="top" constant="10" id="fKW-s9-jr2"/>
+                <constraint firstItem="YOG-TU-hzi" firstAttribute="top" secondItem="GsS-0N-tRg" secondAttribute="bottom" constant="15" id="g6G-V3-ZZy"/>
+                <constraint firstItem="Y4U-7X-k8u" firstAttribute="width" secondItem="hS9-z7-1co" secondAttribute="width" id="gNH-Sl-xxu"/>
+                <constraint firstItem="GsS-0N-tRg" firstAttribute="top" secondItem="Eh0-f4-4mj" secondAttribute="bottom" constant="15" id="gR8-nG-dGm"/>
+                <constraint firstItem="YOG-TU-hzi" firstAttribute="width" secondItem="hS9-z7-1co" secondAttribute="width" id="hD9-x2-Jiy"/>
+                <constraint firstItem="Y4U-7X-k8u" firstAttribute="top" secondItem="Eh0-f4-4mj" secondAttribute="bottom" constant="15" id="kog-yB-izW"/>
+                <constraint firstItem="YOG-TU-hzi" firstAttribute="leading" secondItem="Mtx-tQ-49d" secondAttribute="leading" constant="15" id="lBf-vI-TrU"/>
+                <constraint firstItem="GsS-0N-tRg" firstAttribute="top" secondItem="Y4U-7X-k8u" secondAttribute="bottom" constant="15" id="lRO-Ea-Fd9"/>
+                <constraint firstItem="Eh0-f4-4mj" firstAttribute="top" secondItem="I7s-OW-pq9" secondAttribute="bottom" constant="10" id="qYc-mk-hJt"/>
+                <constraint firstItem="Eh0-f4-4mj" firstAttribute="top" secondItem="hS9-z7-1co" secondAttribute="bottom" constant="10" id="t2R-SK-YkW"/>
+                <constraint firstItem="hS9-z7-1co" firstAttribute="width" secondItem="Mtx-tQ-49d" secondAttribute="width" multiplier="332/750" id="yXQ-wz-qlP"/>
+                <constraint firstAttribute="trailing" secondItem="I7s-OW-pq9" secondAttribute="trailing" constant="15" id="yeJ-ls-ukI"/>
+            </constraints>
+            <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
+            <variation key="default">
+                <mask key="constraints">
+                    <exclude reference="t2R-SK-YkW"/>
+                    <exclude reference="lRO-Ea-Fd9"/>
+                </mask>
+            </variation>
+            <point key="canvasLocation" x="28" y="275"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="lansebeijing" width="166" height="44"/>
+    </resources>
+</document>

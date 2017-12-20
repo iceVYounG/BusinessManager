@@ -1,0 +1,60 @@
+//
+//  HZCaseDetailFooterCell.m
+//  BusinessManager
+//
+//  Created by niuzs on 16/9/2.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "HZCaseDetailFooterCell.h"
+#import "JMView.h"
+NSString *const HZCaseDetailFooterCellID = @"HZCaseDetailFooterCellID";
+@implementation HZCaseDetailFooterCell
+
+- (void)awakeFromNib {
+
+    self.backgroundColor = [UIColor groupTableViewBackgroundColor];
+    __weak typeof(self) wSelf = self;
+    
+    UIView* backView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, KScreenWidth, 158)];
+    backView.backgroundColor = [UIColor clearColor];
+    
+    UIView* addBackView = [[UIView alloc]initWithFrame:CGRectMake(15, 15, KScreenWidth - 30, 68)];
+    addBackView.backgroundColor = HexColor(@"#e8e8e8");
+    
+    UIImageView* imagev= [[UIImageView alloc]initWithFrame:CGRectMake(addBackView.center.x -27, 12, 27, 27)];
+    
+    imagev.image = [UIImage imageNamed:@"addImage"];
+    UILabel* label = [[UILabel alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(imagev.frame)+3, KScreenWidth - 30, 22)];
+    label.text = @"点击新增";
+    label.textAlignment = 1;
+    label.textColor = HexColor(@"#BBBBBB");
+    [addBackView addSubview:imagev];
+    [addBackView addSubview:label];
+    
+    [backView addSubview:addBackView];
+    
+    UITapGestureRecognizer* tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(addAction)];
+    [addBackView addGestureRecognizer:tap];
+    
+    SaveView* saveView = [[SaveView alloc]initWithFrame:CGRectMake(0, 103, KScreenWidth, 90) tipHiden:YES block:^{
+        
+        if ([wSelf.delegate respondsToSelector:@selector(footerCellDidClickSaveBtn)]) {
+            [wSelf.delegate footerCellDidClickSaveBtn];
+        }
+    }];
+    
+    [backView addSubview:saveView];
+    
+    [self.contentView addSubview:backView];
+
+}
+
+- (void)addAction{
+    
+    if ([_delegate respondsToSelector:@selector(footerCellDidClickNewBtn)]) {
+        [_delegate footerCellDidClickNewBtn];
+    }
+
+}
+@end

@@ -1,0 +1,24 @@
+//
+//  BannerEditVC.h
+//  BusinessManager
+//
+//  Created by Niuyp on 16/7/20.
+//  Copyright © 2016年 cmcc. All rights reserved.
+//
+
+#import "WeiZhanBaseController.h"
+@class PartModel;
+
+typedef void(^bannerBlock)(PartModel* model,BOOL isNewData);
+@interface BannerEditVC : WeiZhanBaseController
+
+@property (nonatomic, strong) PartModel* model;
+
+@property (nonatomic, copy) bannerBlock block;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *HeightConstraint;
+
+
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil block:(bannerBlock)block;
+@property (nonatomic,assign) BOOL isBig;
+@property (nonatomic,assign)BOOL isDianShang;
+@end
